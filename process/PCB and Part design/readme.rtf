@@ -1,0 +1,11 @@
+{\rtf1\ansi\ansicpg1252\cocoartf949\cocoasubrtf540
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww9000\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f0\fs24 \cf0 you can find libraries out there for many standard footprints.  Check to make sure that a footprint doesn't already exist for the part you want.  For instance for SMD components common footprints include 0403 0602 etc.  These exist as resistors in the Sparkfun library, though not as capacitors.  To make a capacitor you can simply reuse their resistor footprint with a new symbol\
+\
+Sadly eagle's library management really seems lacking and I have not found a way to combine libraries or move a part out of a library so we have parts we've created, like the 0403 or 0602 capacitor which are 'stuck' in the Sparkfun library\
+\
+I see a problem in the future with opening an old design and not knowing which library version to use it with it as well.  I think you'd have to just keep trying libraries until it doesn't say you've altered the design.  This is why I want to try to keep gerber files around for the process as well in case we just want a copy of an old proven board and aren't making any changes to it so we don't muddy the proven design.}
