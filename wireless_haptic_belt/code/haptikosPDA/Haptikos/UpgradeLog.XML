@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="CSSP">
+</Property><Property Name="Solution File" Value="C:\Courses\WinMobile_terminal\Haptikos\CSSP.sln">
+</Property><Property Name="Date" Value="Saturday, July 11, 2009">
+</Property><Property Name="Time" Value="22:28 PM">
+</Property></Properties><Event ErrorLevel="0" Project="CSSP" Source="CSSP.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="CSSP" Source="CSSP.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="" Source="CSSP.sln" Description="Solution converted successfully">
+</Event><Event ErrorLevel="3" Project="" Source="CSSP.sln" Description="Converted">
+</Event><Event ErrorLevel="0" Project="CSSP" Source="Form1.resx" Description="File converted successfully">
+</Event><Event ErrorLevel="3" Project="CSSP" Source="Form1.resx" Description="Converted">
+</Event><Event ErrorLevel="0" Project="CSSP" Source="Properties\Resources.resx" Description="File converted successfully">
+</Event><Event ErrorLevel="3" Project="CSSP" Source="Properties\Resources.resx" Description="Converted">
+</Event><Event ErrorLevel="0" Project="CSSP" Source="SettingsForm.resx" Description="File converted successfully">
+</Event><Event ErrorLevel="3" Project="CSSP" Source="SettingsForm.resx" Description="Converted">
+</Event><Event ErrorLevel="0" Project="CSSP" Source="CSSP.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event></UpgradeLog>

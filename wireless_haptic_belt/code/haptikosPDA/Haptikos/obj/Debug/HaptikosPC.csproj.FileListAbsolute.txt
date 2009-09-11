@@ -1,0 +1,12 @@
+C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\bin\Debug\HaptikosPC.exe
+C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\bin\Debug\HaptikosPC.pdb
+C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\obj\Debug\ResolveAssemblyReference.cache
+C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\obj\Debug\Haptikos.DemoForm.resources
+C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\obj\Debug\Haptikos.MainForm.resources
+C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\obj\Debug\HaptikosPC.Properties.Resources.resources
+C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\obj\Debug\Haptikos.SettingsForm.resources
+C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\obj\Debug\Haptikos.TempSpatForm.resources
+C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\obj\Debug\HaptikosPC.csproj.GenerateResource.Cache
+C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\obj\Debug\HaptikosPC.exe
+C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\obj\Debug\HaptikosPC.pdb
+C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\bin\Debug\HapticDriver.DLL
