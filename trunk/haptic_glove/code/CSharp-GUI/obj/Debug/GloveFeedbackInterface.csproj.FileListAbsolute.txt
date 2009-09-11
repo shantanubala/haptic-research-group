@@ -1,0 +1,8 @@
+C:\Documents and Settings\Owner\My Documents\Visual Studio 2008\Projects\GloveFeedbackInterface\bin\Debug\GloveFeedbackInterface.exe
+C:\Documents and Settings\Owner\My Documents\Visual Studio 2008\Projects\GloveFeedbackInterface\bin\Debug\GloveFeedbackInterface.pdb
+C:\Documents and Settings\Owner\My Documents\Visual Studio 2008\Projects\GloveFeedbackInterface\obj\Debug\ResolveAssemblyReference.cache
+C:\Documents and Settings\Owner\My Documents\Visual Studio 2008\Projects\GloveFeedbackInterface\obj\Debug\GloveFeedbackInterface.Properties.Resources.resources
+C:\Documents and Settings\Owner\My Documents\Visual Studio 2008\Projects\GloveFeedbackInterface\obj\Debug\GloveFeedbackInterface.csproj.GenerateResource.Cache
+C:\Documents and Settings\Owner\My Documents\Visual Studio 2008\Projects\GloveFeedbackInterface\obj\Debug\GloveFeedbackInterface.exe
+C:\Documents and Settings\Owner\My Documents\Visual Studio 2008\Projects\GloveFeedbackInterface\obj\Debug\GloveFeedbackInterface.pdb
+C:\Documents and Settings\Owner\My Documents\Visual Studio 2008\Projects\GloveFeedbackInterface\obj\Debug\GloveFeedbackInterface.HandForm.resources
