@@ -1,0 +1,5 @@
+C:\Documents and Settings\Jacob Rosenthal\My Documents\Visual Studio 2008\Projects\HapticOutput\HapticOutput\bin\Debug\HapticOutput.dll
+C:\Documents and Settings\Jacob Rosenthal\My Documents\Visual Studio 2008\Projects\HapticOutput\HapticOutput\bin\Debug\HapticOutput.pdb
+C:\Documents and Settings\Jacob Rosenthal\My Documents\Visual Studio 2008\Projects\HapticOutput\HapticOutput\obj\Debug\ResolveAssemblyReference.cache
+C:\Documents and Settings\Jacob Rosenthal\My Documents\Visual Studio 2008\Projects\HapticOutput\HapticOutput\obj\Debug\HapticOutput.dll
+C:\Documents and Settings\Jacob Rosenthal\My Documents\Visual Studio 2008\Projects\HapticOutput\HapticOutput\obj\Debug\HapticOutput.pdb

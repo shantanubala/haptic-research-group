@@ -1,0 +1,51 @@
+
+c:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosP
+C\HaptikosPC>csc /target:library /out:HapticDriver.DLL HapticDriver.cs SerialPor
+tManager.cs
+Microsoft (R) Visual C# 2008 Compiler version 3.5.30729.1
+for Microsoft (R) .NET Framework version 3.5
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+HapticDriver.cs(267,30): warning CS0168: The variable 'ex' is declared but never
+        used
+HapticDriver.cs(293,30): warning CS0168: The variable 'ex' is declared but never
+        used
+HapticDriver.cs(322,30): warning CS0168: The variable 'ex' is declared but never
+        used
+HapticDriver.cs(52,22): warning CS0414: The field
+        'HapticDriver.HapticBelt.activated' is assigned but its value is never
+        used
+
+c:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosP
+C\HaptikosPC>dir
+ Volume in drive C is ACER
+ Volume Serial Number is 1C9E-F662
+
+ Directory of c:\Courses\haptic-research-group\wireless_haptic_belt\code\haptiko
+sPDA\HaptikosPC\HaptikosPC
+
+07/29/2009  04:18 PM    <DIR>          .
+07/29/2009  04:18 PM    <DIR>          ..
+07/29/2009  04:03 PM    <DIR>          bin
+07/23/2009  05:57 PM             2,655 DemoForm.cs
+07/23/2009  04:20 PM             9,818 DemoForm.Designer.cs
+07/23/2009  04:20 PM             6,300 DemoForm.resx
+07/21/2009  04:25 PM            39,359 HapticDriver.cs
+07/29/2009  04:18 PM            28,672 HapticDriver.DLL
+07/29/2009  04:05 PM             4,974 HaptikosPC.csproj
+07/23/2009  06:12 PM            24,769 MainForm.cs
+07/23/2009  06:04 PM            16,343 MainForm.Designer.cs
+07/23/2009  04:26 PM             6,473 MainForm.resx
+07/29/2009  04:03 PM    <DIR>          obj
+07/20/2009  12:58 AM               364 Program.cs
+07/29/2009  04:03 PM    <DIR>          Properties
+07/21/2009  04:19 PM            20,589 SerialPortManager.cs
+07/23/2009  05:54 PM             2,488 SettingsForm.cs
+07/20/2009  03:12 PM             4,684 SettingsForm.Designer.cs
+07/20/2009  03:12 PM             6,300 SettingsForm.resx
+07/23/2009  05:57 PM             1,158 TempSpatForm.cs
+07/23/2009  04:30 PM            16,453 TempSpatForm.Designer.cs
+07/23/2009  04:30 PM             6,300 TempSpatForm.resx
+07/20/2009  12:58 AM             7,358 WebFlickz_Icon.ico
+              18 File(s)        205,057 bytes
+               5 Dir(s)  16,715,497,472 bytes free
