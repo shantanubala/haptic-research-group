@@ -1,0 +1,57 @@
+http://en.wikipedia.org/wiki/Arduino
+http://arduino.cc/en/Main/ArduinoBoardDuemilanove
+
+boards with very small footprints:
+http://www.arduino.cc/en/Main/ArduinoBoardLilyPad
+http://www.arduino.cc/en/Main/ArduinoBoardProMini
+http://www.sparkfun.com/commerce/product_info.php?products_id=8957
+
+Basic Arduino specifications
+Microcontroller	ATmega168
+Operating Voltage	5V
+Input Voltage (recommended)	7-12V
+Input Voltage (limits)	6-20V
+Digital I/O Pins	14 (of which 6 provide PWM output)
+Analog Input Pins	6 - can be used as digital making 19?
+DC Current per I/O Pin	40 mA
+DC Current for 3.3V Pin	50 mA
+Flash Memory	16 KB (of which 2 KB used by bootloader)
+SRAM	1 KB
+EEPROM	512 bytes
+Clock Speed	16 MHz
+
+Also runs at 8Mhz at 3.3Volts in some configurations
+
+good memory document at
+http://www.arduino.cc/playground/Learning/Memory
+
+upgrade Atmega328 chips available for some board configurations, doubling sram and flash, should that be needed
+
+It has 14 digital input/output pins (of which 6 can be used as PWM outputs), 6 analog inputs, an on-board resonator
+
+(most?)analog pins can be reassigned as digital IO pins
+
+Consistent with our open source ethos
+
+pre programmed bootloader and included oscillator/resonator-no need for other hardware,external programmers
+
+are methods of bootloading wirelessly over both bluetooth and xbee
+
+open source hardware, additions made to the platform, add on boards and such, can be given away and sold
+
+open source support.  Lot of energy behind the project right now.  
+many pre existing libraries
+many forums
+
+non proprietary, cross platform ide, in fact you can use eclipse as an ide or just text files and command line compiling in linux
+Please see http://www.arduino.cc/playground/Main/DevelopmentTools for info on your platform.
+
+Hardware Serial chip on board
+pins 0 and 1 for rx/tx (also sent out via usb connection)
+
+Hardware i2c on board
+http://www.arduino.cc/playground/Learning/I2C	
+pins 4 and 5 for i2c
+
+can do software serial on any 2 pins, not sure of performance
+http://arduino.cc/en/Reference/SoftwareSerial
