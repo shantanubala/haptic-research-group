@@ -1,0 +1,31 @@
+
+
+
+TWCR = (1<<TWINT)|(1<<TWSTA)| (1<<TWEN) //send start
+
+while (!(TWCR & (1<<TWINT))) ; //Wait for TWINT Flag set. This indicates that the START condition has been transmitted
+
+if ((TWSR & 0xF8) != START) //Check value of TWI Status Register. Mask prescaler bits. If status different from START go to ERROR
+ERROR();
+
+TWDR = SLA_W;
+TWCR = (1<<TWINT) | (1<<TWEN); //Load SLA_W into TWDR Register. Clear TWINT bit in TWCR to start transmission of address
+
+while (!(TWCR & (1<<TWINT))) ;  //Wait for TWINT Flag set. This indicates that the SLA+W has been transmitted, and ACK/NACK has been received.
+
+if ((TWSR & 0xF8) != MT_SLA_ACK) //Check value of TWI Status Register. Mask prescaler bits. If cpi r16, MT_SLA_ACK 
+status different from MT_SLA_ACK go to ERROR
+ERROR(); 
+
+
+TWDR = DATA; 
+TWCR = (1<<TWINT) | (1<<TWEN);  //Load DATA into TWDR Register. Clear TWINT bit in TWCR to (1<<TWEN)start transmission of data
+
+while (!(TWCR & (1<<TWINT))) ; //Wait for TWINT Flag set. This indicates that the DATA has been transmitted, and ACK/NACK has been received.
+
+if ((TWSR & 0xF8) != MT_DATA_ACK) //Check value of TWI Status Register. Mask prescaler bits. If status different from  MT_DATA_ACK go to ERROR
+ERROR(); 
+
+TWCR = (1<<TWINT)|(1<<TWEN)| (1<<TWSTO); //Transmit STOP condition 
+Transmit
+

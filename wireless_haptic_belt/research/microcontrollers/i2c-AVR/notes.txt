@@ -1,0 +1,31 @@
+
+
+PRR Power Reduction must be written 0 to enable bit7 for twi
+7.8.3
+
+page 149
+16.9
+twbr-bit rate generator
+twdr -data register
+twar-address register	
+twcr-control register has twie interrupt enable
+twint-twi interrupt flag
+twsr status register
+figure 16.10 helpful
+sample code on page 133
+start
+
+by the way you can have multiple masters
+if master loses arbitration it lets go and goes into slave to see if its being addressed
+(losing arbitration is determined by sampling the sda line i believe to see if its what you are sending)
+
+
+cpu clock freq of slave must be at least 10 times higher than  the scl freqency
+only master need set scl freqency= cpu clock freq/16+2TWBR*prescaler
+
+NOTE TWBR SHOULD BE 10 OR HIGHER IF IN MASTER MODE
+
+TWIE TO INTERRUPT ENABLE IN TWCR WITH GLOBAL INTERUPT ENABLE	in sreg
+
+after interrupt twsr contains current state of twi bus
+
