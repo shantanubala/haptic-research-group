@@ -1,0 +1,13 @@
+1. Open StringGrid/CustomStringGrid.bdsproj with Borland C++ 2006.
+2. Go to Project>Build Configurations.
+3. Select the available project and select Edit.
+4. Highlight Release Build and click Activate.
+5. Exit out of those windows back to the main window.
+6. Right click on CustomStringGrid.bpl in the project manager.
+7. Select install from the right click menu.
+8. Select File>Close All.
+9. Open WMM2005GUI/WMM.bdsproj with Borland C++ 2006.
+10. Repeat steps 2-5.
+11. Open the WMMForm1.cpp file for editing.
+12. Change lines 13-15 to point to the indicated files on your machine.
+13. Select Run>Run.
