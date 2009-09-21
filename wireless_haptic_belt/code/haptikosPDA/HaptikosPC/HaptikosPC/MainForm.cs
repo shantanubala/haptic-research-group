@@ -107,9 +107,9 @@ namespace Haptikos
         // This function invokes the main thread's UpdateText function
         // in a loop while waiting for a request to close the application.
         protected void UpdateTxtLog() {
-            if (wirelessBelt.getMsgBufferType() == "Incoming") {
+            if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.INCOMING){
                 try {
-                    string line = wirelessBelt.getMsgBuffer();
+                    string line = wirelessBelt.getDataRecvBuffer();
                     if (line.CompareTo("quit$$$") == 0) {
                         disconnectRequested = true;
                     }
@@ -158,9 +158,10 @@ namespace Haptikos
                 MessageBox.Show("No " + queryType.ToString() + " values returned");//ERROR
             }
             else if (queryType == dataTypes.MTR) {
-                for (int i = 1; i < stringArray.Length; i++) {
-                    if (stringArray[i] != null) {
-                        comboBoxName.Items.Add(stringArray[i]);
+                Int16 motor_count = Int16.Parse(stringArray[0]);
+                if (motor_count != 0) {
+                for (int i = 1; i <= motor_count; i++) {
+                      comboBoxName.Items.Add(i);
                     }
                 }
             }
@@ -272,17 +273,17 @@ namespace Haptikos
                 wirelessBelt.OpenPorts();
 
                 // Check for success
-                if (wirelessBelt.getStatusBufferType() == "Normal")
+                if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.NORMAL)
                     labelStatusMsg.Text = "Input port opened.";
-                else if (wirelessBelt.getStatusBufferType() == "Error")
+                else if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.ERROR)
                     labelStatusMsg.Text = "Error: " + wirelessBelt.getStatusBuffer();
 
                 // Try Output port
                 if (inboundPort != outboundPort) {
                     // Check for success
-                    if (wirelessBelt.getStatusBufferType() == "Normal")
+                    if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.NORMAL)
                         labelStatusMsg.Text = "Output ports opened.";
-                    else if (wirelessBelt.getStatusBufferType() == "Error")
+                    else if (wirelessBelt.getDataRecvType()== (byte)HapticDriver.MessageType.ERROR)
                         labelStatusMsg.Text = "Error: " + wirelessBelt.getStatusBuffer();
                 }
                 else {
@@ -292,7 +293,7 @@ namespace Haptikos
                 //this.numThreads++;
                 //mainCtrlThread = new Thread(new ThreadStart(MainControlThread));
                 //mainCtrlThread.Start();
-
+                
                 labelStatusMsg.Text = "Listener handle started.";
 
                 btnSend.Enabled = true;
@@ -309,8 +310,7 @@ namespace Haptikos
                 mnuDemo.Enabled = true;
                 btnActivate.Enabled = true;
                 btnQuery.Enabled = true;
-                btnStop.Enabled = true;
-
+                btnStop.Enabled = true;                
             }
             catch (Exception ex) {
                 MessageBox.Show(ex.Message);
@@ -342,7 +342,7 @@ namespace Haptikos
 
             try {
                 String[] response = wirelessBelt.Query_All();
-                String[] motor = wirelessBelt.getMotors();
+                String[] motor = { wirelessBelt.getMotors().ToString() };
                 String[] rhythm = wirelessBelt.getRhythm(false);
                 String[] magnitude = wirelessBelt.getMagnitude();
 
@@ -367,7 +367,7 @@ namespace Haptikos
 
         private void btnStop_Click(object sender, EventArgs e) {
             try {
-                String[] response = wirelessBelt.Stop(comboBoxMotor.SelectedItem.ToString());
+                String[] response = wirelessBelt.Stop((byte)comboBoxMotor.SelectedIndex); //.SelectedItem.ToString());
                 labelStatusMsg.Text = "Stop motor " + comboBoxMotor.SelectedItem.ToString() + ".  " + response[0];
             }
             catch (Exception ex) {
@@ -448,18 +448,18 @@ namespace Haptikos
                 //demoThread.Start();
                 //do { // creates 1 thread for each iteration
 
-                int i_current = 1;
-                int i_previous = 1;
+                int i_current = 0;
+                int i_previous = 0;
 
                 if (demoType == demoTypes.SCAN) {
                     for (int index = 1; index <= (motor_total * demoCycles); index++) {
                         i_previous = i_current;
-                        i_current = (index % motor_total) + 1;
+                        i_current = (index % motor_total);
 
                         response = wirelessBelt.Vibrate_Motor(i_current.ToString(),
                             demoRhy, magnitude_table[demoMag], demoCycles);
                         // Delayed stop
-                        response = wirelessBelt.Stop(i_previous.ToString());
+                        response = wirelessBelt.Stop((byte)i_previous);
                         //System.Threading.Thread.Sleep(50);
                     }
                 }
@@ -469,14 +469,14 @@ namespace Haptikos
                             response = wirelessBelt.Vibrate_Motor(i.ToString(),
                                 demoRhy, magnitude_table[demoMag], demoCycles);
                             if (i > 1)// Delayed stop
-                                response = wirelessBelt.Stop(i_previous.ToString());
+                                response = wirelessBelt.Stop((byte)i_previous);
                             i_previous = i;
                         }
                         for (int r = i_previous; r > 0; r--) {
                             response = wirelessBelt.Vibrate_Motor(r.ToString(),
                                 demoRhy, magnitude_table[demoMag], demoCycles);
                             if (r < i_previous)// Delayed stop
-                                response = wirelessBelt.Stop(i_previous.ToString());
+                                response = wirelessBelt.Stop((byte)i_previous);
                             i_previous = r;
                             //System.Threading.Thread.Sleep(50);
                         }
@@ -495,8 +495,8 @@ namespace Haptikos
 
                         if (i_current > 1) {
                             // Delayed stop
-                            response = wirelessBelt.Stop(i_previous.ToString());
-                            response = wirelessBelt.Stop((i_previous - 1).ToString());
+                            response = wirelessBelt.Stop((byte)i_previous);
+                            response = wirelessBelt.Stop((byte)(i_previous - 1));
                         }
                         //System.Threading.Thread.Sleep(50);
                     }
