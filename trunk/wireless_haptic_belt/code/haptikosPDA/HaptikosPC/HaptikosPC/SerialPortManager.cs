@@ -28,7 +28,7 @@ using System.Windows.Forms;
 //   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //*****************************************************************************************
 /*
- * SerialCommManager.cs Version 2.0.0.0, Jul 15, 2009
+ * SerialCommManager.cs Version 2.0.0.1, Jul 15, 2009
  * Modified Class file from above to be more portable.
  * 
  * Nathan J. Edwards (nathan.edwards@asu.edu)
@@ -38,19 +38,14 @@ namespace HapticDriver
 {
     // "internal" protection so that elements are accesible only through HapticDriver
     // class.  HapticDriver functions as interface for each Serial Port.  
-    // XXXXXXXSerialPortManager class must be public to allow for some pass-through access.
     internal class SerialPortManager
     {
         #region Manager Enums
         /// <summary>
         /// enumeration to hold our transmission types
         /// </summary>
-        internal enum TransmissionType { Text, Hex }
+        internal enum DataType { Text, Hex }
 
-        /// <summary>
-        /// enumeration to hold our message types
-        /// </summary>
-        internal enum MessageType { Incoming, Outgoing, Normal, Warning, Error };
         #endregion
 
         #region Manager Variables
@@ -66,21 +61,22 @@ namespace HapticDriver
         private string _dataBits = string.Empty;
         private string _portName = string.Empty;
         private string _readTimeout = string.Empty;
+
+        internal bool EchoBack = false;
+        internal DataType CurrentDataType;
+
+        // Message passing items. 
         private bool _append_msg = false;
-        internal bool _data_ready = false;
-        private bool _echoBack = false;
-        private int _defaultBufferSize = 2048;
-
-        private TransmissionType _transType;
-
-        // Message passing buffer. 
-        // _stringBuffer[0] is MessageType
-        // _stringBuffer[1] is the complete message
-        private String[] _msgInBuffer = new String[2];
-        private String[] _statusBuffer = new String[2];
+        //internal bool _data_recv_ready = false;
+        //private bool _data_recv_event = false;
+        private MutexLock serialMutex;
+        private MutexLock dataBufferMutex;
+        private MutexLock statusBufferMutex;
+        private Buffer _dataRecvBuffer;
+        private Buffer _statusBuffer;
 
         //global manager variables
-        private SerialPort comPort = new SerialPort(); //FIXME change back to private
+        private SerialPort comPort;
         #endregion
 
         #region Manager Constructors
@@ -92,14 +88,21 @@ namespace HapticDriver
         /// <param name="sBits">Desired StopBits</param>
         /// <param name="dBits">Desired DataBits</param>
         /// <param name="name">Desired PortName</param>
-        internal SerialPortManager(string portName, string baud, string dBits, string sBits, string par, string timeout, String[] strbuf) {
+        internal SerialPortManager(string portName, string baud, string dBits, string sBits, string par, string timeout, Buffer databuf) {
+            comPort = new SerialPort();
+            serialMutex = new MutexLock();
+            dataBufferMutex = new MutexLock();
+            statusBufferMutex = new MutexLock();
             _baudRate = baud;
             _parity = par;
             _stopBits = sBits;
             _dataBits = dBits;
             _portName = portName;
             _readTimeout = timeout;
-            _msgInBuffer = strbuf;
+            CurrentDataType = DataType.Text;
+            _dataRecvBuffer = databuf;
+            _statusBuffer = new Buffer(statusBufferMutex);
+
             //now add an event handler
             comPort.DataReceived += new SerialDataReceivedEventHandler(comPort_DataReceived);
         }
@@ -108,14 +111,19 @@ namespace HapticDriver
         /// Constructor without string buffer specified
         /// </summary>
         internal SerialPortManager(string portName, string baud, string dBits, string sBits, string par, string timeout) {
+            comPort = new SerialPort();
+            serialMutex = new MutexLock();
+            dataBufferMutex = new MutexLock();
+            statusBufferMutex = new MutexLock();
             _baudRate = baud;
             _parity = par;
             _stopBits = sBits;
             _dataBits = dBits;
             _portName = portName;
             _readTimeout = timeout;
-            _msgInBuffer[0] = string.Empty;
-            _msgInBuffer[1] = string.Empty;
+            CurrentDataType = DataType.Text;
+            _dataRecvBuffer = new Buffer(dataBufferMutex);
+            _statusBuffer = new Buffer(statusBufferMutex);
             //now add an event handler
             comPort.DataReceived += new SerialDataReceivedEventHandler(comPort_DataReceived);
         }
@@ -124,16 +132,20 @@ namespace HapticDriver
         /// Comstructor to set the properties of our
         /// serial port communicator to nothing
         /// </summary>
-        internal SerialPortManager() //DataRecievedHandler handler)
-        {
+        internal SerialPortManager() {  //DataRecievedHandler handler)
+            comPort = new SerialPort();
+            serialMutex = new MutexLock();
+            dataBufferMutex = new MutexLock();
+            statusBufferMutex = new MutexLock();
             _baudRate = "9600"; //string.Empty;
             _parity = "None";  //string.Empty;
             _stopBits = "1"; // string.Empty;
             _dataBits = "8"; // string.Empty;
             _portName = "COM1";
             _readTimeout = "1000";
-            _msgInBuffer[0] = string.Empty;
-            _msgInBuffer[1] = string.Empty;
+            CurrentDataType = DataType.Text;
+            _dataRecvBuffer = new Buffer(dataBufferMutex);
+            _statusBuffer = new Buffer(statusBufferMutex);
             //this.DataRecievedFxn = handler;
 
             //add event handler
@@ -142,158 +154,57 @@ namespace HapticDriver
         #endregion
 
         #region Manager Properties
-        internal bool IsOpen {
-            get { return _portOpened; }
+        internal bool IsOpen() {
+            return _portOpened;
         }
 
         /// <summary>
-        /// Property to hold the BaudRate
-        /// of our manager class
+        /// method that returns data received buffer byte array
         /// </summary>
-        internal string BaudRate {
-            get { return _baudRate; }
-            set { _baudRate = value; }
+        internal byte[] DataRecvBuffer() {
+            return _dataRecvBuffer.GetBuffer();
         }
 
         /// <summary>
-        /// property to hold the Parity
-        /// of our manager class
+        /// method that returns data received buffer type
         /// </summary>
-        internal string Parity {
-            get { return _parity; }
-            set { _parity = value; }
+        internal byte DataRecvBufferType() {
+            return _dataRecvBuffer.GetBufferType();
+        }
+        /// <summary>
+        /// method that returns status buffer byte array
+        /// </summary>
+        internal byte[] StatusBuffer() {
+            return _statusBuffer.GetBuffer();
         }
 
         /// <summary>
-        /// property to hold the StopBits
-        /// of our manager class
+        /// method that returns status buffer type
         /// </summary>
-        internal string StopBits {
-            get { return _stopBits; }
-            set { _stopBits = value; }
-        }
-
-        /// <summary>
-        /// property to hold the DataBits
-        /// of our manager class
-        /// </summary>
-        internal string DataBits {
-            get { return _dataBits; }
-            set { _dataBits = value; }
-        }
-
-        /// <summary>
-        /// property to hold the PortName
-        /// of our manager class
-        /// </summary>
-        internal string PortName {
-            get { return _portName; }
-            set { _portName = value; }
-        }
-
-        /// <summary>
-        /// property to hold the PortName
-        /// of our manager class
-        /// </summary>
-        internal string ReadTimeout {
-            get { return _readTimeout; }
-            set { _readTimeout = value; }
-        }
-
-        /// <summary>
-        /// property to hold our TransmissionType
-        /// of our manager class
-        /// </summary>
-        internal TransmissionType CurrentTransmissionType {
-            get { return _transType; }
-            set { _transType = value; }
-        }
-
-        /// <summary>
-        /// property to hold our Terminal Settings Echo Back
-        /// of our manager class
-        /// </summary>
-        internal bool EchoBack {
-            get { return _echoBack; }
-            set { _echoBack = value; }
-        }
-
-        /// <summary>
-        /// property to hold our string buffer
-        /// value
-        /// </summary>
-        internal String MsgInBuffer {
-            get { return _msgInBuffer[1]; }
-            set { _msgInBuffer[1] = value; }
-        }
-
-        /// <summary>
-        /// property to hold the type of string passed
-        /// value
-        /// </summary>
-        internal String MsgInBufferType {
-            get { return _msgInBuffer[0]; }
-            set { _msgInBuffer[0] = value; }
-        }
-        /// <summary>
-        /// property to hold our string buffer
-        /// value
-        /// </summary>
-        internal String StatusBuffer {
-            get { return _statusBuffer[1]; }
-            set { _statusBuffer[1] = value; }
-        }
-
-        /// <summary>
-        /// property to hold the type of string passed
-        /// value
-        /// </summary>
-        internal String StatusBufferType {
-            get { return _statusBuffer[0]; }
-            set { _statusBuffer[0] = value; }
+        internal byte StatusBufferType() {
+            return _statusBuffer.GetBufferType();
         }
         #endregion
 
 
         #region WriteData
         internal void WriteData(string msg) {
-            //*** CurrentTransmissionType == TransmissionType.Text ***//
-
+            //*** _transType == TransmissionType.Text ***//
             try {
                 //first make sure the port is open, if its not open then open it
-                if (!(comPort.IsOpen == true)) comPort.Open();
+                if (comPort.IsOpen == false) comPort.Open();
 
                 //send the message to the port
                 comPort.Write(msg);
-
-                //display the message
-                ReturnData(MessageType.Outgoing, msg);
+                ReturnData(MessageType.OUTGOING, (byte)status_msg.SUCCESS);
             }
             catch (FormatException ex) {
-                //display error message
-                ReturnData(MessageType.Error, ex.Message);
+                ReturnData(MessageType.ERROR, Encoding.ASCII.GetBytes(ex.Message));
+                //ReturnData(MessageType.Error, (byte)status_msg.EXCEPTION);
             }
         }
         internal void WriteData(byte[] msg) {
-            //*** CurrentTransmissionType == TransmissionType.Hex ***//
-
-            //****** DEBUG *******/
-            ////comPort.WriteBufferSize = 1; //assuming Bytes FIXME
-            //byte mode = 0;
-            //byte motor = 0x1;
-            //byte rhythm = 0x7; //rhy H =7
-            //byte magnitude = 0x0; //mag A = 0
-            //byte rhythm_length = 0x6;
-
-            ////byte[] buffer = { mode, motor, rhythm, magnitude, rhythm_length };
-            //// Use the Headers from Firmware to compile TODO
-            //// Check struct
-            //// Send write vs writeLn
-            //// FLUSH buffer?
-            //byte[] test_byte = { 0x00, 0x00 };
-            //test_byte[0] = (byte)((mode << 4) | (motor & 0xf));
-            //test_byte[1] = (byte)(((rhythm & 0x7) << 5) | ((magnitude & 0x3) << 3) | (rhythm_length & 0x7));
-            //******** END OF DEBUG *********//
+            //*** _transType == TransmissionType.Hex ***//
 
             try {
                 //first make sure the port is open
@@ -302,96 +213,14 @@ namespace HapticDriver
 
                 //send the message to the port  
                 comPort.Write(msg, 0, msg.Length);
-                //comPort.Write(test_byte, 0, test_byte.Length);
 
-                //convert back to hex and display
-                //ReturnData(MessageType.Outgoing, ByteToHex(test_byte));
-                ReturnData(MessageType.Outgoing, ByteToHex(msg));
+                //record message
+                ReturnData(MessageType.OUTGOING, msg);
             }
             catch (FormatException ex) {
-                //display error message
-                ReturnData(MessageType.Error, ex.Message);
+                ReturnData(MessageType.ERROR, Encoding.ASCII.GetBytes(ex.Message));
+                //ReturnData(MessageType.Error, (byte)status_msg.EXCEPTION);
             }
-        }
-        #endregion
-
-        #region HexToByte
-        /// <summary>
-        /// method to convert hex string into a byte array
-        /// </summary>
-        /// <param name="msg">string to convert</param>
-        /// <returns>a byte array</returns>
-        private byte[] HexToByte(string msg) {
-            //remove any spaces from the string
-            msg = msg.Replace(" ", "");
-
-            //create a byte array the length divided by 2 (Hex is 2 characters in length)
-            byte[] comBuffer = new byte[msg.Length / 2];
-            //loop through the length of the provided string
-            for (int i = 0; i < msg.Length; i += 2)
-                //convert each set of 2 characters to a byte and add to the array
-                comBuffer[i / 2] = (byte)Convert.ToByte(msg.Substring(i, 2), 16);
-
-            //return the array
-            return comBuffer;
-        }
-        #endregion
-
-        #region ByteToHex
-        /// <summary>
-        /// method to convert a byte array into a hex string
-        /// </summary>
-        /// <param name="comByte">byte array to convert</param>
-        /// <returns>a hex string</returns>
-        private string ByteToHex(byte[] comByte) {
-            //create a new StringBuilder object
-            StringBuilder builder = new StringBuilder(comByte.Length * 3);
-
-            //loop through each byte in the array
-            foreach (byte data in comByte)
-                //convert the byte to a string and add to the stringbuilder
-                builder.Append(Convert.ToString(data, 16).PadLeft(2, '0').PadRight(3, ' '));
-
-            //return the converted value
-            return builder.ToString().ToUpper();
-        }
-        #endregion
-
-        #region ReturnData
-        /// <summary>
-        /// method to display the data to & from the port
-        /// on the screen
-        /// </summary>
-        /// <param name="type">MessageType of the message</param>
-        /// <param name="msg">Message to display</param>
-        //[STAThread]
-        private void ReturnData(MessageType type, string msg) {
-            if (type == MessageType.Incoming) {
-                if (!_append_msg) {  // TODO empty garbage ReturnData
-                    _msgInBuffer[0] = string.Empty;
-                    _msgInBuffer[1] = string.Empty;
-                }
-                _msgInBuffer[0] = type.ToString();
-                _msgInBuffer[1] += msg;  //FIXME this does not capture "\0" into string.  Need to store data.
-            }
-            else {
-                if (!_append_msg) {  // TODO empty garbage ReturnData
-                    _statusBuffer[0] = string.Empty;
-                    _statusBuffer[1] = string.Empty;
-                }
-                _statusBuffer[0] = type.ToString();
-                //FIXME this does not capture "\0" into string.  
-                //Need to store data and let HapticBelt class convert to ASCII if desired.
-                _statusBuffer[1] += msg; 
-            }
-
-            //}));
-
-            //// Execute the parent class's data recieved function pointer
-            //if (DataReceivedFxn != null)
-            //{
-            //    DataReceivedFxn();
-            //}
         }
         #endregion
 
@@ -402,11 +231,11 @@ namespace HapticDriver
                 if (comPort.IsOpen == true) comPort.Close();
 
                 //set the properties of our SerialPort Object
-                comPort.BaudRate = int.Parse(_baudRate);    //BaudRate
-                comPort.DataBits = int.Parse(_dataBits);    //DataBits
-                comPort.StopBits = (StopBits)Enum.Parse(typeof(StopBits), _stopBits, true);    //StopBits
-                comPort.Parity = (Parity)Enum.Parse(typeof(Parity), _parity, true);    //Parity
-                comPort.PortName = _portName;   //PortName
+                comPort.BaudRate = int.Parse(_baudRate);
+                comPort.DataBits = int.Parse(_dataBits);
+                comPort.StopBits = (StopBits)Enum.Parse(typeof(StopBits), _stopBits, true);
+                comPort.Parity = (Parity)Enum.Parse(typeof(Parity), _parity, true);
+                comPort.PortName = _portName;
                 //comPort.ReadTimeout = int.Parse(_readTimeout); ;
 
                 //now open the port
@@ -414,12 +243,12 @@ namespace HapticDriver
                 _portOpened = true;
 
                 //display message
-                ReturnData(MessageType.Normal, "Port opened at " + DateTime.Now + "\n");
-                //return true
+                ReturnData(MessageType.NORMAL, (byte)status_msg.COMPRTOPEN);
                 return true;
             }
             catch (Exception ex) {
-                ReturnData(MessageType.Error, ex.Message);
+                ReturnData(MessageType.ERROR, Encoding.ASCII.GetBytes(ex.Message));
+                //ReturnData(MessageType.Error, (byte)status_msg.EXCEPTION);
                 return false;
             }
         }
@@ -434,40 +263,71 @@ namespace HapticDriver
                     _portOpened = false;
 
                     //display message
-                    ReturnData(MessageType.Normal, "Port closed at " + DateTime.Now + "\n");
+                    ReturnData(MessageType.NORMAL, (byte)status_msg.COMPRTCLS);
                 }
                 else
-                    ReturnData(MessageType.Warning, "Port already closed, " + DateTime.Now + "\n");
+                    ReturnData(MessageType.WARNING, (byte)status_msg.COMPRTCLSPREV);
 
                 // Help with garbage
                 this.DataReceivedFxn = null;
 
-                //return true
                 return true;
             }
             catch (Exception ex) {
-                ReturnData(MessageType.Error, ex.Message);
+                ReturnData(MessageType.ERROR, Encoding.ASCII.GetBytes(ex.Message));
+                //ReturnData(MessageType.Error, (byte)status_msg.EXCEPTION);
                 return false;
             }
         }
         #endregion
 
+        #region ReturnData
+        /// <summary>
+        /// method to store data. Parent class must convert to ASCII if desired.
+        /// 
+        /// </summary>
+        /// <param name="type">MessageType of the message</param>
+        /// <param name="msg">Message to display</param>
+        //[STAThread]
+        private void ReturnData(MessageType type, byte[] msg) {
+            if (type == MessageType.INCOMING) {
+                if (_append_msg)
+                    _dataRecvBuffer.AppendBuffer((byte)type, msg);
+                else // empty garbage ReturnData 
+                    _dataRecvBuffer.SetBuffer((byte)type, msg);
+            }
+            else {
+                //store data and let parent class convert to ASCII if desired.
+                if (_append_msg)
+                    _statusBuffer.AppendBuffer((byte)type, msg);
+                else // empty garbage ReturnData
+                    _statusBuffer.SetBuffer((byte)type, msg);
+            }
+        }
+        // Wrapper method to handle a single byte message
+        private void ReturnData(MessageType type, byte msgByte) {
+            byte[] msg = { msgByte };
+            ReturnData(type, msg);
+        }
+
+        #endregion
+
         #region comPort_DataReceived
         /// <summary>
-        /// method that will be called when theres data waiting in the buffer
+        /// Event driven method that will be called when there is data waiting in the buffer
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         internal void comPort_DataReceived(object sender, SerialDataReceivedEventArgs e) {
-            char[] charBuf;
-            string msg = "";
-            int bytes = 0;
             byte[] comBuffer;
+            int byte_count;
 
-            //if (!_append_msg) {  // empty garbage TODO
-            //    _stringBuffer[0] = string.Empty;
-            //    _stringBuffer[1] = string.Empty;
-            //}
+            // Mutual exclusion on this method so that it does not get interrupted
+            // by another thread or DataReceived Event
+            serialMutex.GetLock();
+
+            //retrieve number of bytes in the buffer
+            byte_count = comPort.BytesToRead;
 
             // Wait for other data to arrive in buffer before read
             // Default baud rate is 9600 = 1 bit per 0.105 miliseconds
@@ -479,63 +339,25 @@ namespace HapticDriver
             // Transmission in QueryAll()
             System.Threading.Thread.Sleep(400);
 
-            //determine the mode the user selected (binary/string)
-            switch (CurrentTransmissionType) {
-                //user chose string
-                case TransmissionType.Text:
-                    //retrieve number of bytes in the buffer
-                    bytes = comPort.BytesToRead;
-                    //create a char array to hold the awaiting data
-                    charBuf = new char[bytes]; // set to 80 for std terminal size
+            //create a byte array to hold the awaiting data
+            comBuffer = new byte[byte_count];
+            //read the data and store it
+            comPort.Read(comBuffer, 0, byte_count);
 
-                    //read data waiting in the buffer
-                    comPort.Read(charBuf, 0, bytes); // reads avail data in buffer
+            // set flag to appends msg if there is still data in receive buffer
+            // keep it interrupt driven rather than a busy_wait loop.
+            if (comPort.BytesToRead > 0)
+                _append_msg = true;
 
-                    // set flag to appends msg if there is still data in receive buffer
-                    // keep it interrupt driven rather than a busy_wait loop.
-                    if (comPort.BytesToRead > 0)
-                        _append_msg = true;
+            //display the data to the user
+            ReturnData(MessageType.INCOMING, comBuffer);//ByteToHex(comBuffer));
 
-                    //display the data to the user
-                    msg = new string(charBuf); // Create new string passing charBuf into the constructor
-                    ReturnData(MessageType.Incoming, msg);
+            //if (this._echoBack == true) this.WriteData(ByteToHex(comBuffer)+"\r\n");
 
-                    //if (this._echoBack == true) this.WriteData(msg + "\r\n");
-                    break;
-
-                //user chose binary
-                case TransmissionType.Hex:
-                    //retrieve number of bytes in the buffer
-                    bytes = comPort.BytesToRead;
-                    //create a byte array to hold the awaiting data
-                    comBuffer = new byte[bytes];
-                    //read the data and store it
-                    comPort.Read(comBuffer, 0, bytes);
-
-                    // set flag to appends msg if there is still data in receive buffer
-                    // keep it interrupt driven rather than a busy_wait loop.
-                    if (comPort.BytesToRead > 0)
-                        _append_msg = true;
-
-                    //display the data to the user
-                    ReturnData(MessageType.Incoming, ByteToHex(comBuffer));
-
-                    //if (this._echoBack == true) this.WriteData(ByteToHex(comBuffer)+"\r\n");
-                    break;
-
-                default:
-                    string str = comPort.ReadExisting(); // Reads avail data in output stream & input buffer
-
-                    //display the data to the user
-                    ReturnData(MessageType.Incoming, str);
-
-                    //if (this._echoBack == true) this.WriteData(str + "\r\n");
-                    break;
-            }
             // Finish routine if there is no data remaining in the input buffer.
             if (comPort.BytesToRead == 0) {
                 _append_msg = false;
-                _data_ready = true;
+                serialMutex.Unlock(); // release mutex
 
                 // Execute the parent class's data recieved function pointer
                 if (DataReceivedFxn != null) {

@@ -49,8 +49,10 @@ namespace HapticDriver
         //this is the array of results which will be returned to the calling function
         private string[] qry_resp;
 
-        // Boolean if any motors are activated (helps indicate current location in the debug menu)
-        private bool activated = false; //TODO
+        // enum for current firmware mode
+        private acmd_mode_t acmd_mode = acmd_mode_t.ACM_LRN;
+        private error_t belt_error = error_t.EMAX;
+        private mode_t glbl_mode = mode_t.M_LEARN;
 
 
         #region Manager Constructors
@@ -71,50 +73,6 @@ namespace HapticDriver
             qry_resp = new string[TOTAL_RESPONSE_COUNT + 1];
         }
         #endregion
-
-        public void OpenPorts() {
-            if (port_setup) {
-                // this.DataRecievedFxn is already Method = {Void MethodName()} from parent class
-                if (DataReceivedFxn != null) {
-                    // serialIn.DataRecievedFxn becomes Method = {Void Invoke()}
-                    serialIn.DataReceivedFxn += new SerialPortManager.DataRecievedHandler(DataReceivedFxn);
-                }
-                serialIn.OpenPort();
-                if (_portInName != _portOutName)
-                    serialOut.OpenPort();
-                else
-                    serialOut = serialIn;
-            }
-        }
-
-        public void ClosePorts() {
-            if (serialIn != null && serialOut != null) {
-                serialIn.ClosePort();
-                serialOut.ClosePort();
-            }
-        }
-
-        public void WriteData(string dataString) {
-            if (port_setup && serialOut.IsOpen)
-                serialOut.WriteData(dataString);
-        }
-
-        public string getMsgBufferType() {
-            return serialIn.MsgInBufferType;
-        }
-
-        public string getStatusBufferType() {
-            return serialOut.StatusBufferType;
-        }
-
-        public string getMsgBuffer() {
-            return serialIn.MsgInBuffer;
-        }
-
-        public string getStatusBuffer() {
-            return serialOut.StatusBuffer;
-        }
-
 
         //*** string[] Initialize_Serial_Port(string portno, string baud_string, string parity_string, string stopbits_string, string databits_string)
         //        Returns: 
@@ -137,12 +95,11 @@ namespace HapticDriver
                 // Set default Port Manager parameters
                 serialIn = new SerialPortManager(portInName, baud, dBits, sBits, par, timeout);
                 serialIn.EchoBack = true;
-                serialIn.CurrentTransmissionType = SerialPortManager.TransmissionType.Text;
 
                 if (portInName != portOutName) {
                     serialOut = new SerialPortManager(portOutName, baud, dBits, sBits, par, timeout);
-                    serialOut.CurrentTransmissionType = SerialPortManager.TransmissionType.Text;
                 }
+                else    serialOut = serialIn;
 
                 //// this.DataRecievedFxn is already Method = {Void MethodName()} from parent class
                 //if (DataReceivedFxn != null) {
@@ -157,15 +114,69 @@ namespace HapticDriver
             return port_setup;
         }
 
+        public void OpenPorts() {
+            if (port_setup) {
+                // this.DataRecievedFxn is already Method = {Void MethodName()} from parent class
+                if (DataReceivedFxn != null) {
+                    // serialIn.DataRecievedFxn becomes Method = {Void Invoke()}
+                    serialIn.DataReceivedFxn += new SerialPortManager.DataRecievedHandler(DataReceivedFxn);
+                }
+                serialIn.OpenPort();
+                if (_portInName != _portOutName)
+                    serialOut.OpenPort();
+            }
+        }
+
+        public void ClosePorts() {
+            if (serialIn != null && serialOut != null) {
+                serialIn.ClosePort();
+                serialOut.ClosePort();
+            }
+        }
+
+        public void WriteData(string dataString) {
+            if (port_setup && serialOut.IsOpen())
+                serialOut.WriteData(dataString);
+        }
+
+        public void WriteData(byte[] data) {
+            if (port_setup && serialOut.IsOpen())
+                serialOut.WriteData(data);
+        }
+
+        public byte getDataRecvType() {
+            return serialIn.DataRecvBufferType();
+        }
+
+        public string getDataRecvBuffer() {
+            return ByteToAscii(serialIn.DataRecvBuffer());
+        }
+
+        public byte getStatusType() {
+            return serialOut.StatusBufferType();
+        }
+        public string getStatusBuffer() {
+            return ByteToAscii(serialOut.StatusBuffer());
+        }
+
+        public string getStatusBufferStr() {
+            string byteString = "";
+            byte[] status = serialOut.StatusBuffer();
+            for (int i = 0; i < status.Length; i++) {
+                byteString += Constants.status_msg_names[status[i]] + "::";
+            }
+            return byteString;
+        }
+
         /* Temporary overload to handle the prototyped method that uses strings */
         public string[] Vibrate_Motor(string motor_number, string rhythm_string, string magnitude_string, int rhythm_cycles) {
 
-               byte motor = NumberStrToByte(motor_number);
-            byte rhythm = AlphaStrToByte(rhythm_string);
-            byte magnitude = AlphaStrToByte(magnitude_string);
+            byte motor = MotorStrToByte(motor_number);
+            byte rhythm = VibStrToByte(rhythm_string);
+            byte magnitude = VibStrToByte(magnitude_string);
             byte rhythm_length = (byte)(rhythm_cycles);
 
-            String[] response = Vibrate_Motor(motor,rhythm,magnitude,rhythm_length);
+            String[] response = Vibrate_Motor(motor, rhythm, magnitude, rhythm_length);
             return response;
         }
 
@@ -184,92 +195,64 @@ namespace HapticDriver
         //            string magnitude = magnitude to vibrate motor in ("1" to "4")
         //            string rhythm_cycles = cycles to repeate the rhythm ("0" to "15")       
         public string[] Vibrate_Motor(byte motor, byte rhythm, byte magnitude, byte rhythm_cycles) {
+            byte[] command_byte = { 0x00, 0x00 };
             string[] return_values = new string[2];
             return_values[1] = "";
 
-            if (serialOut.IsOpen) {
-                byte mode = 0;
-                //byte motor = 0x1;
+            if (!serialOut.IsOpen()) {
+                return_values[0] = "Serial port not open";
+            }
+            else {
+                //byte mode = 0;
+                //byte motor = 0x0; // this is the first valid motor
                 //byte rhythm = 0x7; //rhy H =7
                 //byte magnitude = 0x0; //mag A = 0
                 //byte rhythm_length = 0x6;
+                // This equates to hex 01 36
 
-                //byte[] buffer = { mode, motor, rhythm, magnitude, rhythm_length };
-                // Use the Headers from Firmware to compile TODO
-                // Check struct
-                // Send write vs writeLn
-                // FLUSH buffer?
-                byte[] command_byte = { 0x00, 0x00}; // 0x0a equals "\n" newline.
-                command_byte[0] = (byte)((mode << 4) | (motor & 0xf));
-                command_byte[1] = (byte)(((rhythm & 0x7) << 5) | ((magnitude & 0x3) << 3) | (rhythm_cycles & 0x7));
-
-                //TODO Temporary fix to activate motors through debug menu
-                //string first_byte = "" + (mode * 16) + motor;
+                //active_command_t command = new active_command_t();
+                //command.mode = (byte)(mode << 4);
+                //command.motor = (byte)(motor & 0xf);
+                //command.v.rhythm = (byte)((rhythm & 0x7) << 5);
+                //command.v.magnitude = (byte)((magnitude & 0x3) << 3);
+                //command.v.duration = (byte)(rhythm_cycles & 0x7);
 
                 try {
-                    
-                    //if (!activated) {
-                    //TODO Temporary fix to activate motors through debug menu
-                    //first_byte = "\r\r\r3" + IntStrToAlpha(motor_number) + rhythm_string
-                    //    + magnitude_string + rhythm_cycles.ToString() + "\r\r\n0";
-                    
-                    // back to direct command line entry
-                    activated = true;
-                    //}
-                    //else {
-                    //    first_byte = IntStrToAlpha(motor_number) + rhythm_string + magnitude_string + rhythm_cycles.ToString() + "\r";
-                    //}
-
-                    // Reset data ready flag
-                    serialIn._data_ready = false;
-
-                    serialOut.WriteData("BGN\n");
-                    //busy wait for haptic belt status
-                    while (serialIn._data_ready == false) {
-                        ;
-                    } // FIXME .NET SerialPort.Read() results in \r\n 
-                      // BUT I CAN ONLY SEE "\n" WHEN DIRECTLY LISTENING TO PORT???
-                    if (serialIn.MsgInBuffer.Equals("STS 0\r\n") || serialIn.MsgInBuffer.Equals("53 54 53 20 30 0D 0A ")) {
-                        serialOut.CurrentTransmissionType = SerialPortManager.TransmissionType.Hex; //TODO debug
+                    change_acmd_mode(acmd_mode_t.ACM_VIB);
+                    if (acmd_mode == acmd_mode_t.ACM_VIB) {
+                        // Use the Headers from Firmware to compile TODO
+                        byte mode = (byte)acmd_mode_t.ACM_VIB;
+                        command_byte[0] = (byte)((mode << 4) | (motor & 0xf));
+                        command_byte[1] = (byte)(((rhythm & 0x7) << 5)
+                            | ((magnitude & 0x3) << 3)
+                            | (rhythm_cycles & 0x7));
+                        
                         serialOut.WriteData(command_byte); // send debug menu activation
 
-                        //return to learning mode, should be ASCII "00"
-                        byte[] returnState = { 0x30, 0x30 };
-                        serialOut.WriteData(returnState);
+                        checkBeltStatus(50); //FIXME not sure of req'd time delay
+                        if (belt_error == error_t.ESUCCESS)
+                            return_values[0] = "";//Successful if this point is reached w/o error
                     }
                     else {
-                        return_values[0] = "Haptic Belt Error Code " + serialIn.MsgInBuffer;
+                        return_values[0] = "Haptic Belt Error Code: "
+                            + (int)belt_error + ": " + Constants.error_t_names[(int)belt_error];
                     }
-
-                    if (rhythm_cycles == (byte)(0x0)) {
-                        //serialOut.WriteData("\r\n0"); // back to direct command line entry
-
-                        serialOut.CurrentTransmissionType = SerialPortManager.TransmissionType.Text;
-                        //serialOut.WriteData("00\n");
-
-                        activated = false;
-                    }
-                    //************** END OF TEMPORARY FIX *********************//
-                    //serialOut.CurrentTransmissionType = SerialPortManager.TransmissionType.Hex;
-                    //serialOut.WriteData(first_byte); // send first_byte
-                    //serialOut.WriteData(second_byte); // send second_byte
-
-                    ////Successful if this point is reached w/o error
-                    //serialOut.CurrentTransmissionType = SerialPortManager.TransmissionType.Text;
-                    //return_values[0] = "";
                 }
                 catch {
                     return_values[0] = "Error sending command over wireless";
                 }
             }
-            else
-                return_values[0] = "Serial port not open";
-
             return return_values;
         }
 
+        //FIXME not sure we want to return all rhythms
+        // should have get Rhythm that accepts Int for the rhythm requested.  Returns Structure object for 
+        // an individual rhythm (use firmware header).  Should have C++ wrapper class that has several accessor functions
+        // Do we want Rhy mutable? Easiest
+        // Compile DLL into MATLAB???
+        //
         //This function queries the belt using the private Query_All() function and returns a specific rhythm value
-        public string[] getRhythm(Boolean binary) {
+        public string[] getRhythm(bool binary) {
             string[] return_values = new string[RHY_MAX_NO + 1];
             return_values[0] = "NONE DEFINED";
             int rhyCount = 0;
@@ -310,7 +293,7 @@ namespace HapticDriver
                 }
             }
             catch (Exception ex) {
-
+                MessageBox.Show(ex.Message);
             }
             return_values[0] = rhyCount.ToString(); // count of defined magnitudes
 
@@ -325,27 +308,28 @@ namespace HapticDriver
 
             try { //Convert.ToInt16 can cause exception
                 for (int index = 1; index < qry_resp.Length; index++) {
-                    string[] split = qry_resp[index].Split(' ');
+                    if (qry_resp[index] != null) {
+                        string[] split = qry_resp[index].Split(' ');
 
-                    //put the values from the response into the return array
-                    if (split[1].Equals("MAG")) {
-                        //Populate Return Values --> Equals "Rhy,period,dutyCycle"
-                        return_values[magCount + 1] = split[2] + "," + split[3] + "," + split[4];
-                        magCount++; // count of defined magnitudes
+                        //put the values from the response into the return array
+                        if (split[1].Equals("MAG")) {
+                            //Populate Return Values --> Equals "Rhy,period,dutyCycle"
+                            return_values[magCount + 1] = split[2] + "," + split[3] + "," + split[4];
+                            magCount++; // count of defined magnitudes
+                        }
                     }
                 }
             } //[System.NullReferenceException] = {"Object reference not set to an instance of an object."}
             catch (Exception ex) {
-
+                MessageBox.Show(ex.Message);
             }
             return_values[0] = magCount.ToString(); // count of defined magnitudes
             return return_values;
         }
 
         //This function queries the belt using the private Query_All() function and returns a specific magnitude value
-        public string[] getMotors() {
-            string[] return_values = new string[MTR_MAX_NO + 1];
-            return_values[0] = "NONE DEFINED";
+        public byte getMotors() {
+            byte return_values = 0;
 
             try { //Convert.ToInt16 can cause exception
                 for (int index = 1; index < qry_resp.Length; index++) {
@@ -354,18 +338,15 @@ namespace HapticDriver
 
                         //put the values from the response into the return array
                         if (split[1].Equals("MTR")) {
-                            //Populate Return Values up to max of split[2]'s value
-                            return_values[0] = split[2]; // count of motors
-                            for (int i = 1; i <= Convert.ToInt16(split[2]); i++) {
-                                return_values[i] = i.ToString();
-                            }
-
+                            char motor_count = split[2][0]; // gets char at string[0]
+                            return_values = HexToByte(motor_count); // count of motors
+                            break; // exit loop
                         }
                     }
                 }
             } //[System.NullReferenceException] = {"Object reference not set to an instance of an object."}
             catch (Exception ex) {
-
+                MessageBox.Show(ex.Message);
             }
             return return_values;
         }
@@ -415,61 +396,60 @@ namespace HapticDriver
         //            NONE
         public string[] Query_All() {
 
-            //this function needs to query all motors
-            string instruction = "QRY ALL\r";
-
-            // Reset data ready flag
-            serialIn._data_ready = false;
-
             //Send the QRY command if ports are setup
-            if (serialOut.IsOpen) {
+            if (!serialOut.IsOpen()) {
+                qry_resp[0] = "Serial port not open";
+            }
+            else {
                 try {
-                    serialOut.WriteData(instruction);
+                    change_acmd_mode(acmd_mode_t.ACM_LRN);
+                    if (acmd_mode == acmd_mode_t.ACM_LRN)
+                        serialOut.WriteData("QRY ALL\r");
                 }
                 catch {
                     qry_resp[0] = "Error sending command over wireless";
                     return qry_resp;
                 }
             }
+            //Wait for system to respond.  Sometimes there is delay between Belt's echo back and data stream
+            checkBeltStatus(250);
+
             //read responses from Serial_Port and place RSP lines into string array
-            if (serialIn.IsOpen) {
-                try {
-                    string[] buffer;
+            if (belt_error == error_t.ESUCCESS) {
+                string[] buffer;
+                
+                //Removes the '\r\n' characters        
+                char[] delimiters = new char[] { '\r', '\n' };
+                //buffer = Regex.Split(serialIn.MsgInBuffer, "\r\n"); //CANNOT USE REGEX in CF 2.0
+                buffer = ByteToAscii(serialIn.DataRecvBuffer()).Split(delimiters);
+                int rsp_index = 1;
 
-                    //Wait for system to respond.  Sometimes there is delay between Belt's echo back and data stream
-                    while (serialIn._data_ready == false) {
-                        System.Threading.Thread.Sleep(0); //1500 // Wait for other processes
-                    }
-
-                    //Removes the '\r\n' characters        
-                    char[] delimiters = new char[] { '\r', '\n' };
-                    //buffer = Regex.Split(serialIn.MsgInBuffer, "\r\n"); //CANNOT USE REGEX in CF 2.0
-                    buffer = serialIn.MsgInBuffer.Split(delimiters);
-                    int rsp_index = 1;
-
-                    // Formats check into string array so each RSP line is an element and removes "\r"
-                    for (int i = 0; i < buffer.Length; i++) {
-                        //Ignore non RSP lines
-                        //TODO Ignores STS and DBG lines, maybe we want a STS array and DBG array?
-                        if (buffer[i].Length >= 3) {
-                            if (buffer[i].Substring(0, 3).Equals("RSP")) {
-                                qry_resp[rsp_index] = buffer[i];
-                                rsp_index++;
-                            }
+                // Formats check into string array so each RSP line is an element and removes "\r"
+                for (int i = 0; i < buffer.Length; i++) {
+                    //Ignore non RSP lines
+                    if (buffer[i].Length >= 3) {
+                        if (buffer[i].Substring(0, 3).Equals("RSP")) {
+                            qry_resp[rsp_index] = buffer[i];
+                            rsp_index++;
+                        }
+                        else if (buffer[i].Substring(0, 3).Equals("STS")) {
+                            byte[] errors = IntStrToByte(buffer[i].Split(' ')[1]); // gets first error code
+                            belt_error = (error_t)errors[0]; // gets 1st error code byte
+                        }
+                        else if (buffer[i].Substring(0, 3).Equals("DBG")) {
+                            //string[] split = buffer[i].Split(' ');
+                            //sys_error = (error_t)split[1][0]; // get char at index 0
                         }
                     }
-                    rsp_index--; // decrement from last increment to give count of elements
-                    qry_resp[0] = rsp_index.ToString(); //count of elements
                 }
-                catch (Exception e) {
-                    qry_resp[0] = e.ToString();
-                    //return_values[0, 0] = "Error receiving query over wireless";
-                    return qry_resp;
-                }
+                rsp_index--; // decrement from last increment to give count of elements
+                qry_resp[0] = rsp_index.ToString(); //count of elements
             }
-            //else
-            //    ; // TODO pass some error about ports not open
-
+            //Check error status
+            if (belt_error != error_t.ESUCCESS) {
+                qry_resp[0] = "Haptic Belt Error Code: "
+                            + (int)belt_error + ": " + Constants.error_t_names[(int)belt_error];
+            }
             return qry_resp;
         }
 
@@ -497,7 +477,7 @@ namespace HapticDriver
         public string[] Learn_Rhythm(string id, string pattern_string) {
             string[] return_values = new string[2];
 
-            if (serialOut.IsOpen) {
+            if (serialOut.IsOpen()) {
                 //convert the string into an array of integers
                 int[] pattern = new int[pattern_string.Length];
                 int i = 0;
@@ -553,9 +533,18 @@ namespace HapticDriver
 
                     //send this output to the belt
                     try {
+                        if (acmd_mode != acmd_mode_t.ACM_LRN) {
+                            acmd_mode = acmd_mode_t.ACM_LRN;
+
+                            //return to learning mode, should be ASCII "00"
+                            byte[] returnState = { 0x30, 0x30 };
+                            serialOut.WriteData(returnState);
+                        }
+
                         serialOut.WriteData(instruction);
                         //check for STATUS <error number> [<info>]
-                        if (Check_Belt() != 0) {
+                        checkBeltStatus(50);
+                        if (belt_error != 0) {
                             return_values[0] = "No response from belt or belt error";
                             return_values[1] = "";
                         }
@@ -601,7 +590,7 @@ namespace HapticDriver
         public string[] Learn_Magnitude(string id, string period, string duty_cycle) {
             string[] return_values = new string[2];
 
-            if (serialOut.IsOpen) {
+            if (serialOut.IsOpen()) {
                 if (String.Compare(id, "A") < 0 || String.Compare(id, "D") > 0) {
                     //invalid magnitude ID
                     return_values[0] = "Invalid magnitude ID provided as argument to function";
@@ -612,9 +601,18 @@ namespace HapticDriver
 
                     //send this output to the belt
                     try {
+                        if (acmd_mode != acmd_mode_t.ACM_LRN) {
+                            acmd_mode = acmd_mode_t.ACM_LRN;
+
+                            //return to learning mode, should be ASCII "00"
+                            byte[] returnState = { 0x30, 0x30 };
+                            serialOut.WriteData(returnState);
+                        }
+
                         serialOut.WriteData(instruction);
                         //check for STATUS <error number> [<info>]
-                        if (Check_Belt() != 0) {
+                        checkBeltStatus(50); 
+                        if (belt_error != 0) {
                             return_values[0] = "No response from belt or belt error";
                             return_values[1] = "";
                         }
@@ -637,81 +635,86 @@ namespace HapticDriver
             return return_values;
         }
 
-        public string[] Back() {
-            string[] return_values = new string[2];
-            return_values[1] = "";
-
-            if (serialOut.IsOpen) {
-                //send BACK command through Serial_Port
-                try {
-                    serialOut.CurrentTransmissionType = SerialPortManager.TransmissionType.Hex;
-                    serialOut.WriteData("48"); //first_byte
-                    serialOut.WriteData("0"); //second_byte
-
-                    /*FIXME , do we ge a response here? check for STATUS <error number> [<info>]
-                    if (Check_Belt() != 0)
-                        return_values[0] = "No response from belt or belt error";
-                    else
-                        return_values[0] = "";
-                     */
-                    serialOut.CurrentTransmissionType = SerialPortManager.TransmissionType.Text;
-                }
-                catch {
-                    return_values[0] = "Error sending command over wireless";
-                }
-            }
-            else
-                return_values[0] = "Serial port not open";
-
-            return return_values;
-        }
-
-        /* 
-         * this function is used to issue a general START command to the belt
+        /*
+         * Method switches the global mode
          */
-        //Belt Command: 
-        //    START
-        //Belt Returns:
-        //    a response in the form
-        //        STATUS <error num> [<info>]
-        //
-        //    string[] Start()
-        //        Returns: 
-        //            string array of length 2
-        //                where 
-        //                    string[0] = error response
-        //                    string[1] = NULL
-        //        Parameters: 
-        //            NONE
-        public string[] Start() {
-            string[] return_values = new string[2];
+        private void change_glbl_mode(mode_t mode) {
+            error_t error = error_t.EMAX;
 
-            if (serialOut.IsOpen) {
-                string instruction = "BGN\r\n";
-                //send START command through Serial_Port
-                try {
-                    serialOut.WriteData(instruction);
-                    //check for STATUS <error number> [<info>]
-                    if (Check_Belt() != 0) {
-                        return_values[0] = "No response from belt or belt error";
-                        return_values[1] = "";
-                    }
-                    else {
-                        return_values[0] = "";
-                        return_values[1] = "";
-                    }
-                }
-                catch {
-                    return_values[0] = "Error sending command over wireless";
-                    return_values[1] = "";
-                }
+            if (glbl_mode == mode) {
+                error = error_t.ESUCCESS; // already in requested mode
             }
-            else {
-                return_values[0] = "Serial port not open";
-                return_values[1] = "";
+            else if (glbl_mode == mode_t.M_LEARN) {
+                //switch to activate command mode
+                serialIn.CurrentDataType = SerialPortManager.DataType.Text;
+                serialOut.WriteData("BGN\n");
+                checkBeltStatus(50);
+
+                if (belt_error == error_t.ESUCCESS)
+                    glbl_mode = mode_t.M_ACTIVE;
             }
-            return return_values;
+            else { //if (glbl_mode == mode_t.M_ACTIVE)
+                // back to learning mode
+                serialIn.CurrentDataType = SerialPortManager.DataType.Text;
+                byte[] returnState = { 0x30, 0x30 }; //should be Hex 0x30 0x00
+                serialOut.WriteData(returnState);
+                checkBeltStatus(50);
+
+                if (belt_error == error_t.ESUCCESS)
+                    glbl_mode = mode_t.M_LEARN;
+            }
         }
+
+        /*
+         * This method is used to change the mode of the application
+         * as the firmware mode is changed.  The application and the 
+         * firmware modes must stay synchronized.
+         */
+        private void change_acmd_mode(acmd_mode_t mode) {
+            if (acmd_mode == mode) {
+                belt_error = error_t.ESUCCESS; // already in requested mode
+            }
+            else if (mode == acmd_mode_t.ACM_LRN) {
+                //return to learning mode
+                change_glbl_mode(mode_t.M_LEARN);
+                acmd_mode = mode;
+                serialIn.CurrentDataType = SerialPortManager.DataType.Text;
+            }
+            else { //(mode == acmd_mode_t.ACM_VIB || acmd_mode_t.ACM_SPT || acmd_mode_t.ACM_GCL)
+                change_glbl_mode(mode_t.M_ACTIVE);
+                acmd_mode = mode;
+                serialIn.CurrentDataType = SerialPortManager.DataType.Hex;
+            }
+        }
+
+        //public string[] Back() {
+        //    string[] return_values = new string[2];
+        //    return_values[1] = "";
+
+        //    if (serialOut.IsOpen) {
+        //        //send BACK command through Serial_Port
+        //        try {
+        //            serialOut.CurrentTransmissionType = SerialPortManager.TransmissionType.Hex;
+        //            serialOut.WriteData("48"); //first_byte
+        //            serialOut.WriteData("0"); //second_byte
+
+        //            /*FIXME , do we ge a response here? check for STATUS <error number> [<info>]
+        //            if (Check_Belt() != 0)
+        //                return_values[0] = "No response from belt or belt error";
+        //            else
+        //                return_values[0] = "";
+        //             */
+        //            serialOut.CurrentTransmissionType = SerialPortManager.TransmissionType.Text;
+        //        }
+        //        catch {
+        //            return_values[0] = "Error sending command over wireless";
+        //        }
+        //    }
+        //    else
+        //        return_values[0] = "Serial port not open";
+
+        //    return return_values;
+        //}
 
         /*
          * This function is used to issue a general STOP command to the belt
@@ -724,12 +727,12 @@ namespace HapticDriver
         //                    string[1] = NULL
         //        Parameters: 
         //            NONE
-        public string[] Stop(string motor_number) {
+        public string[] Stop(byte motor_number) {
             string[] return_values = new String[2];
 
-            if (serialOut.IsOpen) {
+            if (serialOut.IsOpen()) {
                 // sending rhythm_cycles = 0 stops motor
-                Vibrate_Motor(motor_number, "A", "A", 0);
+                Vibrate_Motor(motor_number, 0x0, 0x0, 0x0);
                 return_values[0] = "";
                 return_values[1] = "";
             }
@@ -745,15 +748,12 @@ namespace HapticDriver
         public string[] StopAll() {
             string[] return_values = new String[2];
 
-            if (serialOut.IsOpen) {
-                string[] motors = this.getMotors();
-                for (int i = 1; i < motors.Length; i++) {
-                    if (motors[i] != null) {
-                        // sending rhythm_cycles = 0 stops motor
-                        Vibrate_Motor(motors[i], "A", "A", 0);
-                        return_values[0] = "";
-                        return_values[1] = "";
-                    }
+            if (serialOut.IsOpen() && this.getMotors() != 0) {
+                for (byte i = 0; i < this.getMotors(); i++) {
+                    // sending rhythm_cycles = 0 stops motor
+                    Vibrate_Motor(i, 0x0, 0x0, 0x0);
+                    return_values[0] = "";
+                    return_values[1] = "";
                 }
             }
             else {
@@ -771,24 +771,30 @@ namespace HapticDriver
         //            integer which is the error number (0 if success)
         //        Parameters:
         //            NONE
-        private int Check_Belt() {
-            string temp;
+        private void checkBeltStatus(int timeout) {
+            error_t error = error_t.EMAX;
 
-            try {
-                temp = serialIn.MsgInBuffer;
-            }
-            catch {
-                return -9;
-            }
+            // wait for other processes with specified timeout
+            // this should be reasonable wait for haptic belt to return status
+            System.Threading.Thread.Sleep(timeout);
 
-            string[] split = temp.Split(' ');
+            // FIXME .NET SerialPort.Read() results in \r\n 
+            // BUT I CAN ONLY SEE "\n" WHEN DIRECTLY LISTENING TO PORT???
+            //if (serialIn.MsgInBuffer.Equals("STS 0\r\n") || serialIn.MsgInBuffer.Equals("53 54 53 20 30 0D 0A "))
 
-            if (!String.Equals(split[0], "STS")) {
-                return -9;
+            if (acmd_mode == acmd_mode_t.ACM_LRN) {
+                char[] delimiters = new char[] { '\r', '\n', ' ' };
+                string[] split = ByteToAscii(serialIn.DataRecvBuffer()).Split(delimiters);
+                if (String.Equals(split[0], "STS")) {
+                    byte[] errors = IntStrToByte(split[1]); // gets first error code
+                    error = (error_t)(errors[0]);
+                }
             }
-            else {
-                return Convert.ToInt32(split[1]);
+            else if (acmd_mode == acmd_mode_t.ACM_VIB && serialIn.DataRecvBuffer()[0] == 0x00) {
+                error = error_t.ESUCCESS;
             }
+            else { ; }//do nothing
+            belt_error = error;
         }
 
         /*
@@ -803,13 +809,8 @@ namespace HapticDriver
         //            hex character (0 to F)
         private string HexToBinary(string hexvalue) {
             string binaryval = "";
-            // NOT USED DUE TO .NET FUNCTION -> trying to make code portable
-            //if (hexvalue.Length <= 16)
-            //    binaryval = Convert.ToString(Convert.ToInt32(hexvalue, 16), 2);
-            //else
-            //    binaryval = Convert.ToString(Convert.ToInt64(hexvalue, 16), 2);
-
             char[] c = hexvalue.ToCharArray();
+
             for (int i = 0; i < hexvalue.Length; i++) {
                 switch (c[i]) {
                     case '0':
@@ -868,11 +869,114 @@ namespace HapticDriver
             }
             return binaryval;
         }
+        /*
+        * This function converts char representation of hex values to byte value
+        */
+        //        Returns:
+        //            byte value
+        //        Parameters:
+        //            hex character (0 to F)
+        private byte HexToByte(char hexValue) {
+            byte byteValue = 0;
+            switch (hexValue) {
+                case '0':
+                    byteValue = 0;
+                    break;
+                case '1':
+                    byteValue = 1;
+                    break;
+                case '2':
+                    byteValue = 2;
+                    break;
+                case '3':
+                    byteValue = 3;
+                    break;
+                case '4':
+                    byteValue = 4;
+                    break;
+                case '5':
+                    byteValue = 5;
+                    break;
+                case '6':
+                    byteValue = 6;
+                    break;
+                case '7':
+                    byteValue = 7;
+                    break;
+                case '8':
+                    byteValue = 8;
+                    break;
+                case '9':
+                    byteValue = 9;
+                    break;
+                case 'A':
+                    byteValue = 10;
+                    break;
+                case 'B':
+                    byteValue = 11;
+                    break;
+                case 'C':
+                    byteValue = 12;
+                    break;
+                case 'D':
+                    byteValue = 13;
+                    break;
+                case 'E':
+                    byteValue = 14;
+                    break;
+                case 'F':
+                    byteValue = 15;
+                    break;
+                default:
+                    byteValue = 0;
+                    break;
+            }
+            return byteValue;
+        }
+
+        internal static char[] hexDigits = {
+        '0', '1', '2', '3', '4', '5', '6', '7',
+        '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+
+        internal static string BytesToHexStr(byte[] bytes) {
+            char[] chars = new char[bytes.Length * 2];
+            for (int i = 0; i < bytes.Length; i++) {
+                int b = bytes[i];
+                chars[i * 2] = hexDigits[b >> 4];
+                chars[i * 2 + 1] = hexDigits[b & 0xF];
+            }
+            return new string(chars);
+        }
+
+
 
         /*
-         * This function converts an int value to the alpha character starting with 1=A
+         * This function converts an string representation of an int value to 
+         * a byte value up to the max unsigned 8 bit value (255).  Given these
+         * limitations, this function converts only the first 3 characters
          */
-        private byte NumberStrToByte(string strInteger) {
+        private byte[] IntStrToByte(string intString) {
+            byte[] byteValue = { 0, 0, 0, 0, 0, 0, 0, 0 }; // 4bytes = 32bits
+
+            int i = 0;
+            for (byte b = 0; b < byteValue.Length; b++) {
+                if ((i + 1) < intString.Length) {
+                    byteValue[b] = (byte)(HexToByte(intString[i]) << 4 | HexToByte(intString[i + 1]));
+                    i += 2;
+                }
+                else if (i < intString.Length) {
+                    byteValue[b] = (byte)(HexToByte(intString[i]));
+                    i++;
+                }
+            }
+            return byteValue;
+        }
+
+        /*
+         * This function converts an string representation of an int value to 
+         * the motor number offset
+         */
+        private byte MotorStrToByte(string strInteger) {
             byte byteValue = 0;
             switch (strInteger) {
                 case "1":
@@ -931,9 +1035,10 @@ namespace HapticDriver
         }
 
         /*
-         * This function converts an alpha character to an integer starting with A=1
+         * This function converts an alpha character of the vibration pattern 
+         * to an byte value used for the firmware starting with A=0
          */
-        private byte AlphaStrToByte(string alphaStr) {
+        private byte VibStrToByte(string alphaStr) {
             byte byteValue = 8;
             switch (alphaStr) {
                 case "A":
@@ -1003,5 +1108,60 @@ namespace HapticDriver
             }
             return strValue;
         }
+
+        #region HexToByte
+        /// <summary>
+        /// method to convert hex string into a byte array
+        /// </summary>
+        /// <param name="msg">string to convert</param>
+        /// <returns>a byte array</returns>
+        private byte[] HexToByte(string msg) {
+            //remove any spaces from the string
+            msg = msg.Replace(" ", "");
+
+            //create a byte array the length divided by 2 (Hex is 2 characters in length)
+            byte[] comBuffer = new byte[msg.Length / 2];
+            //loop through the length of the provided string
+            for (int i = 0; i < msg.Length; i += 2)
+                //convert each set of 2 characters to a byte and add to the array
+                comBuffer[i / 2] = (byte)Convert.ToByte(msg.Substring(i, 2), 16);
+
+            //return the array
+            return comBuffer;
+        }
+        #endregion
+
+        #region ByteToHex
+        /// <summary>
+        /// method to convert a byte array into a hex string
+        /// </summary>
+        /// <param name="comByte">byte array to convert</param>
+        /// <returns>a hex string</returns>
+        private string ByteToHex(byte[] comByte) {
+            //create a new StringBuilder object
+            StringBuilder builder = new StringBuilder(comByte.Length * 3);
+
+            //loop through each byte in the array
+            foreach (byte data in comByte)
+                //convert the byte to a string and add to the stringbuilder
+                builder.Append(Convert.ToString(data, 16).PadLeft(2, '0').PadRight(3, ' '));
+
+            //return the converted value
+            return builder.ToString().ToUpper();
+        }
+        #endregion
+
+        #region ByteToAscii
+        /// <summary>
+        /// method to convert a byte array into a ASCII string
+        /// </summary>
+        /// <param name="comByte">byte array to convert</param>
+        /// <returns>a hex string</returns>
+        private string ByteToAscii(byte[] comByte) {
+
+            //return the converted value
+            return Encoding.ASCII.GetString(comByte);
+        }
+        #endregion
     }
 }
