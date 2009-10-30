@@ -341,11 +341,11 @@ namespace Haptikos
         private void btnQuery_Click(object sender, EventArgs e) {
 
             try {
-                String[] response1 = wirelessBelt.Query_Version();
-                String[] response2 = wirelessBelt.Query_Motor();
-                String[] response3 = wirelessBelt.Query_SpatioTemporal(); // Error 22 (dec) 16(hex)
-                String[] response4 = wirelessBelt.Query_Rhythm();  // Error EMAX
-                String[] response5 = wirelessBelt.Query_Magnitude();
+                String[] response1 = wirelessBelt.Query_Version(); //DEBUG
+                String[] response2 = wirelessBelt.Query_Motor(); //DEBUG
+                String[] response3 = wirelessBelt.Query_SpatioTemporal(); //DEBUG
+                String[] response4 = wirelessBelt.Query_Rhythm();  // Error EMAX on second and subsequent runs
+                String[] response5 = wirelessBelt.Query_Magnitude(); //DEBUG
                 String[] response = wirelessBelt.Query_All();
                 String[] motor =  { wirelessBelt.getMotors().ToString() }; // brackets reqd for string array
                 String[] rhythm = wirelessBelt.getRhythm(false);
@@ -396,10 +396,15 @@ namespace Haptikos
         }
         private void btnActivate_Click(object sender, EventArgs e) {
             try {
-
+                // Temporary method using strings
                 String[] response = wirelessBelt.Vibrate_Motor(comboBoxMotor.SelectedItem.ToString(),
                     comboBoxRhy.SelectedItem.ToString(), magnitude_table[comboBoxMag.SelectedIndex],
                     (comboBoxCycles.SelectedIndex + 1));
+
+                //// New method but need to fix comboBoxMag cast to byte.
+                //String[] response = wirelessBelt.Vibrate_Motor((byte)comboBoxMotor.SelectedItem,
+                //    (byte)comboBoxRhy.SelectedItem, (byte)comboBoxMag.SelectedIndex,
+                //    (byte)(comboBoxCycles.SelectedIndex + 1));
 
                 labelStatusMsg.Text = "Activating motor " + comboBoxMotor.SelectedItem.ToString() + ".  " + response[0];
 
@@ -464,25 +469,34 @@ namespace Haptikos
                         i_previous = i_current;
                         i_current = (index % motor_total);
 
+                        // Temporary method using strings
                         response = wirelessBelt.Vibrate_Motor(i_current.ToString(),
                             demoRhy, magnitude_table[demoMag], demoCycles);
+                        
                         // Delayed stop
                         response = wirelessBelt.Stop((byte)i_previous);
                         //System.Threading.Thread.Sleep(50);
                     }
                 }
+                    // Multiple activations of this can put the belt in an unknown state
+                    // May need to re-QUERY ALL to reset the state.
                 else if (demoType == demoTypes.SWEEP) {
                     for (int index = 1; index <= (motor_total * demoCycles); index++) {
                         for (int i = 1; i <= motor_total; i++) {
+                            
+                            // Temporary method using strings
                             response = wirelessBelt.Vibrate_Motor(i.ToString(),
                                 demoRhy, magnitude_table[demoMag], demoCycles);
+                            
                             if (i > 1)// Delayed stop
                                 response = wirelessBelt.Stop((byte)i_previous);
                             i_previous = i;
                         }
                         for (int r = i_previous; r > 0; r--) {
+                            // Temporary method using strings
                             response = wirelessBelt.Vibrate_Motor(r.ToString(),
                                 demoRhy, magnitude_table[demoMag], demoCycles);
+                            
                             if (r < i_previous)// Delayed stop
                                 response = wirelessBelt.Stop((byte)i_previous);
                             i_previous = r;
@@ -490,19 +504,23 @@ namespace Haptikos
                         }
                     }
                 }
+                    // HEARTBEATS DOES NOT WORK
                 else if (demoType == demoTypes.HEARTBEATS) {
                     for (int index = 1; index <= (motor_total * demoCycles); index += 2) {
                         i_previous = i_current;
                         i_current = (index % motor_total) + 1;
-
+                        
+                        // Temporary method using strings
                         response = wirelessBelt.Vibrate_Motor(i_current.ToString(),
                             demoRhy, magnitude_table[demoMag], demoCycles);
-
+                        
+                        // Temporary method using strings
                         response = wirelessBelt.Vibrate_Motor((i_current + 1).ToString(),
                             demoRhy, magnitude_table[demoMag], demoCycles);
 
                         if (i_current > 1) {
                             // Delayed stop
+                            // Temporary method using strings
                             response = wirelessBelt.Stop((byte)i_previous);
                             response = wirelessBelt.Stop((byte)(i_previous - 1));
                         }

@@ -93,7 +93,7 @@ namespace HapticDriver
             string byteString = "";
             byte[] status = serialOut.StatusBuffer();
             for (int i = 0; i < status.Length; i++) {
-                byteString +=  "++"+ Constants.status_msg_names[status[i]];
+                byteString += "++" + Constants.status_msg_names[status[i]];
             }
             return byteString;
         }
@@ -262,7 +262,7 @@ namespace HapticDriver
                         }
                     }
                 }
-            } 
+            }
             catch (Exception ex) {
                 MessageBox.Show(ex.Message);
             }
@@ -325,7 +325,7 @@ namespace HapticDriver
                     change_acmd_mode(acmd_mode_t.ACM_LRN);
                     if (acmd_mode == acmd_mode_t.ACM_LRN)
                         // Send command with wait time for belt to respond back.
-                        serialOut.WriteData(typeMsg, timeout); 
+                        serialOut.WriteData(typeMsg, timeout);
                 }
                 catch {
                     qry_resp[0] = "Error sending command over wireless";
@@ -368,7 +368,7 @@ namespace HapticDriver
             //Check error status
             if (belt_error != error_t.ESUCCESS) {
                 qry_resp[0] = "Haptic Belt Error Code: "
-                            + belt_error.ToString() + ": "; //+ Constants.error_t_names[(int)belt_error];
+                            + (int)belt_error + ": " + Constants.error_t_names[(int)belt_error];
             }
             return qry_resp;
         }
@@ -537,7 +537,7 @@ namespace HapticDriver
                 string[] split = ByteToAscii(serialIn.DataRecvBuffer()).Split(delimiters);
                 for (int i = 0; i < split.Length; i++) {
                     if (String.Equals(split[i], "STS")) {
-                        byte[] errors = IntStrToByte(split[i+1]); // gets first error code
+                        byte[] errors = IntegerStrToByte(split[i + 1]); // gets first error code
                         error = (error_t)(errors[0]);
                     }
                 }

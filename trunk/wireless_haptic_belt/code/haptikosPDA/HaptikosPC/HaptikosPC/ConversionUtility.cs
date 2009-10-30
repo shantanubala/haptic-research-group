@@ -164,19 +164,23 @@ namespace HapticDriver
          * a byte value up to the max unsigned 8 bit value (255).  Given these
          * limitations, this function converts only the first 3 characters
          */
-        private byte[] IntStrToByte(string intString) {
-            byte[] byteValue = { 0, 0, 0, 0, 0, 0, 0, 0 }; // 4bytes = 32bits
+        private byte[] IntegerStrToByte(string intString) {
+            byte[] byteValue = { 0, 0, 0, 0 }; // 4bytes = 32bits
 
             int i = 0;
-            for (byte b = 0; b < byteValue.Length; b++) {
-                if ((i + 1) < intString.Length) {
-                    // Does not work for error code string "16"
-                    byteValue[b] = (byte)(HexToByte(intString[i]) << 4 | HexToByte(intString[i + 1]));
-                    i += 2;
-                }
-                else if (i < intString.Length) {
-                    byteValue[b] = (byte)(HexToByte(intString[i]));
-                    i++;
+            int count = 0;
+            int charIndex = intString.Length - 1;
+            if (intString != "0") {
+                while (charIndex >= 0) {
+                    byte temp = (byte)(HexToByte(intString[charIndex]));
+                    if (charIndex == intString.Length - 1) // right most char
+                        byteValue[i] = temp;
+                    else
+                        byteValue[i] = (byte)(byteValue[i] + (temp * (10 ^ i)));
+                    charIndex--;
+                    count++;
+                    if (count % 3 == 0) // Advance to the next byte in array
+                        i++;
                 }
             }
             return byteValue;
