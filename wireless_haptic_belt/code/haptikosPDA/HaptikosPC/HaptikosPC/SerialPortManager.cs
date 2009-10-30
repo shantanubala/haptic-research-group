@@ -103,8 +103,6 @@ namespace HapticDriver
             _dataRecvBuffer = databuf;
             _statusBuffer = new Buffer(statusBufferMutex);
 
-            //now add an event handler
-            comPort.DataReceived += new SerialDataReceivedEventHandler(comPort_DataReceived);
         }
 
         /// <summary>
@@ -124,8 +122,6 @@ namespace HapticDriver
             CurrentDataType = DataType.Text;
             _dataRecvBuffer = new Buffer(dataBufferMutex);
             _statusBuffer = new Buffer(statusBufferMutex);
-            //now add an event handler
-            comPort.DataReceived += new SerialDataReceivedEventHandler(comPort_DataReceived);
         }
 
         /// <summary>
@@ -147,9 +143,6 @@ namespace HapticDriver
             _dataRecvBuffer = new Buffer(dataBufferMutex);
             _statusBuffer = new Buffer(statusBufferMutex);
             //this.DataRecievedFxn = handler;
-
-            //add event handler
-            comPort.DataReceived += new SerialDataReceivedEventHandler(comPort_DataReceived);
         }
         #endregion
 
@@ -188,7 +181,7 @@ namespace HapticDriver
 
 
         #region WriteData
-        internal void WriteData(string msg) {
+        internal void WriteData(string msg, int responseTimeout) {
             //*** _transType == TransmissionType.Text ***//
             try {
                 //first make sure the port is open, if its not open then open it
@@ -197,13 +190,16 @@ namespace HapticDriver
                 //send the message to the port
                 comPort.Write(msg);
                 ReturnData(MessageType.OUTGOING, (byte)status_msg.SUCCESS);
+
+                //get response from belt
+                comPort_DataReceived(responseTimeout);
             }
             catch (FormatException ex) {
                 ReturnData(MessageType.ERROR, Encoding.ASCII.GetBytes(ex.Message));
                 //ReturnData(MessageType.Error, (byte)status_msg.EXCEPTION);
             }
         }
-        internal void WriteData(byte[] msg) {
+        internal void WriteData(byte[] msg, int responseTimeout) {
             //*** _transType == TransmissionType.Hex ***//
 
             try {
@@ -216,6 +212,9 @@ namespace HapticDriver
 
                 //record message
                 ReturnData(MessageType.OUTGOING, msg);
+
+                //get response from belt
+                comPort_DataReceived(responseTimeout);
             }
             catch (FormatException ex) {
                 ReturnData(MessageType.ERROR, Encoding.ASCII.GetBytes(ex.Message));
@@ -309,25 +308,17 @@ namespace HapticDriver
             byte[] msg = { msgByte };
             ReturnData(type, msg);
         }
-
         #endregion
 
         #region comPort_DataReceived
         /// <summary>
-        /// Event driven method that will be called when there is data waiting in the buffer
+        /// method that will be called when there is data waiting in the buffer
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        internal void comPort_DataReceived(object sender, SerialDataReceivedEventArgs e) {
+        internal void comPort_DataReceived(int timeout) {//object sender, SerialDataReceivedEventArgs e) {
             byte[] comBuffer;
             int byte_count;
-
-            // Mutual exclusion on this method so that it does not get interrupted
-            // by another thread or DataReceived Event
-            serialMutex.GetLock();
-
-            //retrieve number of bytes in the buffer
-            byte_count = comPort.BytesToRead;
 
             // Wait for other data to arrive in buffer before read
             // Default baud rate is 9600 = 1 bit per 0.105 miliseconds
@@ -337,27 +328,39 @@ namespace HapticDriver
             // than 250 new ASCII characters to arrive in buffer.  Current
             // HapticBelt firmware has 238 ASCII characters for Max Data 
             // Transmission in QueryAll()
-            System.Threading.Thread.Sleep(400);
+            //System.Threading.Thread.Sleep(400);
+            System.Threading.Thread.Sleep(timeout);
 
-            //create a byte array to hold the awaiting data
-            comBuffer = new byte[byte_count];
-            //read the data and store it
-            comPort.Read(comBuffer, 0, byte_count);
+            // Mutual exclusion on this method so that it does not get interrupted
+            // by another thread or Event
+            serialMutex.GetLock();
+
+            //retrieve number of bytes in the buffer
+            byte_count = comPort.BytesToRead;
+
+            if (byte_count > 0) {
+                //create a byte array to hold the awaiting data
+                comBuffer = new byte[byte_count];
+                //read the data and store it
+                comPort.Read(comBuffer, 0, byte_count);
+
+                //store the data in a buffer available to the Driver
+                ReturnData(MessageType.INCOMING, comBuffer);//ByteToHex(comBuffer));
+            }
+            serialMutex.Unlock(); // release mutex
 
             // set flag to appends msg if there is still data in receive buffer
             // keep it interrupt driven rather than a busy_wait loop.
-            if (comPort.BytesToRead > 0)
+            if (comPort.BytesToRead > 0) {
                 _append_msg = true;
-
-            //display the data to the user
-            ReturnData(MessageType.INCOMING, comBuffer);//ByteToHex(comBuffer));
+                comPort_DataReceived(10); // Recursive call
+            }
 
             //if (this._echoBack == true) this.WriteData(ByteToHex(comBuffer)+"\r\n");
 
             // Finish routine if there is no data remaining in the input buffer.
             if (comPort.BytesToRead == 0) {
                 _append_msg = false;
-                serialMutex.Unlock(); // release mutex
 
                 // Execute the parent class's data recieved function pointer
                 if (DataReceivedFxn != null) {
