@@ -341,8 +341,13 @@ namespace Haptikos
         private void btnQuery_Click(object sender, EventArgs e) {
 
             try {
+                String[] response1 = wirelessBelt.Query_Version();
+                String[] response2 = wirelessBelt.Query_Motor();
+                String[] response3 = wirelessBelt.Query_SpatioTemporal(); // Error 22 (dec) 16(hex)
+                String[] response4 = wirelessBelt.Query_Rhythm();  // Error EMAX
+                String[] response5 = wirelessBelt.Query_Magnitude();
                 String[] response = wirelessBelt.Query_All();
-                String[] motor = { wirelessBelt.getMotors().ToString() };
+                String[] motor =  { wirelessBelt.getMotors().ToString() }; // brackets reqd for string array
                 String[] rhythm = wirelessBelt.getRhythm(false);
                 String[] magnitude = wirelessBelt.getMagnitude();
 
@@ -359,10 +364,13 @@ namespace Haptikos
                 comboBoxMag.SelectedIndex = 0;
                 comboBoxCycles.SelectedIndex = 0;
 
-            }
-            catch {
-            }
+                // Update status message
+                labelStatusMsg.Text = wirelessBelt.getStatusBufferStr();
 
+            }
+            catch (Exception ex) {
+                labelStatusMsg.Text = wirelessBelt.getStatusBufferStr() + " " + ex.Message;
+            }
         }
 
         private void btnStop_Click(object sender, EventArgs e) {

@@ -52,7 +52,7 @@
     <Compile Include="Buffer.cs" />
     <Compile Include="MutexLock.cs" />
     <Compile Include="Magnitude.cs" />
-    <Compile Include="Query.cs" />
+    <Compile Include="ConvertUtil.cs" />
     <Compile Include="DemoForm.cs">
       <SubType>Form</SubType>
     </Compile>
