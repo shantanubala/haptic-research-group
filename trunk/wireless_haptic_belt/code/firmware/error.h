@@ -8,6 +8,12 @@
 #ifndef ERROR_H
 #define ERROR_H
 
+/* doing this the correct way with extern "C" makes the Funnel not run
+#ifdef __cplusplus
+extern "C" {
+#endif
+*/
+
 // error number definitions--must match the string table in error.c
 // in error descriptions, L = learning mode, O = operational mode,
 // P = controlling PC, M = main belt controller, V = vibrator controller
@@ -35,5 +41,11 @@ typedef enum {
 
 // return a human-readable error string for the given error number
 const char* errstr( error_t num );
+
+/*
+#ifdef __cplusplus
+} // extern "C"
+#endif
+*/
 
 #endif

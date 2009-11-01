@@ -36,7 +36,7 @@ typedef struct {
 	active_command_t acmd;
 
 	// mapping of motor numbers to TWI addresses
-	struct { uint8_t addr:7, err:1; } mtrs[ MAX_MOTORS ];
+	struct { uint8_t addr:7, err:1; } mtrs[ MAX_MOTORS+1 ];
 
 	// current belt mode
 	mode_t mode;
