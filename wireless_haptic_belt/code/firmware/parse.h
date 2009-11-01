@@ -8,6 +8,12 @@
 #ifndef PARSE_H
 #define PARSE_H
 
+/* doing this the correct way with extern "C" makes the Funnel not run
+#ifdef __cplusplus
+extern "C" {
+#endif
+*/
+
 #include<avr/pgmspace.h>
 
 #include"rhythm.h"
@@ -42,5 +48,11 @@ error_t parse_magnitude( int argc, const char *const *argv, magnitude_t *into );
 
 // main parser for learning mode commands; modifies line argument in place
 error_t parse( const parse_step_t *table, char *line );
+
+/*
+#ifdef __cplusplus
+} // extern "C"
+#endif
+*/
 
 #endif

@@ -9,6 +9,7 @@
 #include <EEPROM.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 //#include <avr/eeprom.h>	// arduino apparently breaks this
 
 #include "error.h"
@@ -21,6 +22,8 @@
 #include "menu.h"
 
 // because arduino is broken...
+// if the headers are wrapped with extern "C" to make it so these don't need
+// to be #included, then the funnel simply doesn't run any more
 #include "error.c"
 #include "parse.c"
 
@@ -29,6 +32,9 @@
 
 // how long to wait for vibrator modules to stabilize
 #define TINY_WAIT 1000
+
+// support slave addresses between 0 and this number, exclusive
+#define MAX_TWI_ADDR 128
 
 // offsets into the EEPROM of the magnitudes and rhythms
 #define EE_MAG ((magnitude_t*)0)
@@ -72,7 +78,7 @@ static inline void eeprom_write( void* into, void* from, size_t len )
 		EEPROM.write( (size_t)into+i, *((uint8_t*)from+i) );
 }
 
-// zero a chunk the EEPROM
+// zero a chunk of the EEPROM
 static inline void eeprom_zero( void* start, void* end )
 {
 	while( start < end ) {
@@ -161,13 +167,13 @@ error_t send_command_all( void )
 }
 
 // detect which motors are present on the bus
-void detect_motors( void )
+uint8_t detect_motors( void )
 {
 	uint8_t i, j = 0;
 
 	// send a command on every address
 	// if the command is ACKed, then a motor is present
-	for( i=1; i<128 && j<MAX_MOTORS; ++i ) {
+	for( i=1; i<MAX_TWI_ADDR && j<MAX_MOTORS; ++i ) {
 		wire_err_t ret;
 
 		Wire.beginTransmission(i);
@@ -181,62 +187,69 @@ void detect_motors( void )
 			++j;
 		}
 	}
+	for( i=j; i<=MAX_MOTORS; ++i )
+		glbl.mtrs[i].addr = 0;
 
 	// print a debug message that shows addresses of all detected motors
+#ifdef DEBUG
 	DBG( j, DEC ); DBGC( " motors:" );
-	for( int i=0; i<j; ++i ) {
+	for( int i=0; glbl.mtrs[i].addr; ++i ) {
 		DBGC( " " );
 		DBGC( glbl.mtrs[i].addr, HEX );
 	}
 	DBGCN("");
+#endif
+
+	return j;
 }
 
 // generate an ASCII representation of a rhythm
 error_t rtos( char *into, uint8_t which )
 {
-		rhythm_t rhy;
-		uint8_t i;
+	rhythm_t rhy;
+	uint8_t i;
 
-		// retrieve the specified rhythm from EEPROM
-		eeprom_read( &rhy, EE_RHY+which, sizeof(rhy) );
-		if( !rhy.bits || rhy.bits>MAX_RBITS )
-			return ENOR;
+	// retrieve the specified rhythm from EEPROM
+	eeprom_read( &rhy, EE_RHY+which, sizeof(rhy) );
+	if( !rhy.bits || rhy.bits>MAX_RBITS )
+		return ENOR;
 
-		strcpy( into, "RHY " );
-		into += 4;
-		*into++ = itol( which );
-		*into++ = ' ';
-		for( i=0; i<sizeof(rhy.pattern); ++i, into+=2 )
-			itoh( into, rhy.pattern[i] );
-		*into++ = ' ';
-		utoa( rhy.bits, into, 10 );
+	strcpy( into, "RHY " );
+	into += 4;
+	*into++ = itol( which );
+	*into++ = ' ';
+	for( i=0; i<sizeof(rhy.pattern); ++i, into+=2 )
+		itoh( into, rhy.pattern[i] );
+	*into++ = ' ';
+	utoa( rhy.bits, into, 10 );
 
-		return ESUCCESS;
+	return ESUCCESS;
 }
 
 // generate an ASCII representation of a magnitude
 error_t mtos( char *into, uint8_t which )
 {
-		magnitude_t mag;
+	magnitude_t mag;
 
-		// retrieve the specified magnitude from EEPROM
-		eeprom_read( &mag, EE_MAG+which, sizeof(mag) );
-		if( !mag.period ) return ENOM;
+	// retrieve the specified magnitude from EEPROM
+	eeprom_read( &mag, EE_MAG+which, sizeof(mag) );
+	if( !mag.period ) return ENOM;
 
-		strcpy( into, "MAG " );
-		into += 4;
-		*into++ = itol( which );
-		*into++ = ' ';
-		utoa( mag.period, into, 10 );
-		into += strlen( into );
-		*into++ = ' ';
-		utoa( mag.duty, into, 10 );
+	strcpy( into, "MAG " );
+	into += 4;
+	*into++ = itol( which );
+	*into++ = ' ';
+	utoa( mag.period, into, 10 );
+	into += strlen( into );
+	*into++ = ' ';
+	utoa( mag.duty, into, 10 );
 
-		return ESUCCESS;
+	return ESUCCESS;
 }
 
-// load all rhythms and magnitudes from EEPROM and relay them to all motors
-void teach_motors( void )
+// load all rhythms and magnitudes from EEPROM and relay them to a specific
+// motor, or to all motors if motor is specified as -1
+void teach_motor( uint8_t motor )
 {
 	uint8_t i;
 
@@ -245,16 +258,22 @@ void teach_motors( void )
 	for( i=0; i<MAX_RHYTHM; ++i ) {
 		if( rtos(glbl.cmd+4, i) != ESUCCESS )
 			continue;
-		DBG( glbl.cmd );
-		send_command_all();
+		DBGN( glbl.cmd );
+		if( motor == -1 )
+			send_command_all();
+		else
+			send_command( motor );
 	}
 
 	DBGN( "teaching magnitudes" );
 	for( i=0; i<MAX_MAGNITUDE; ++i ) {
 		if( mtos(glbl.cmd+4, i) != ESUCCESS )
 			continue;
-		DBG( glbl.cmd );
-		send_command_all();
+		DBGN( glbl.cmd );
+		if( motor == -1 )
+			send_command_all();
+		else
+			send_command( motor );
 	}
 }
 
@@ -408,13 +427,21 @@ error_t query_spatio( int argc, const char *const *argv )
 
 error_t query_motors( int argc, const char *const *argv )
 {
-	uint8_t i;
+	uint8_t num_motors, old_num;
 
 	if( argc ) return EARG;
 
+	// redetect motors, so that modules can be hot-added or -removed
+	// do it here instead of automatically with a periodic TWI poll,
+	// because the high-level app will have to change its behavior to
+	// accommodate the hardware change
+	for( old_num=0; glbl.mtrs[old_num].addr; ++old_num );
+	num_motors = detect_motors();
+	if( num_motors != old_num )
+		teach_motor(-1);
+
 	strcpy( glbl.cmd, "RSP MTR " );
-	for( i=0; glbl.mtrs[i].addr; ++i );
-	utoa( i, glbl.cmd+8, 10 );
+	utoa( num_motors, glbl.cmd+8, 10 );
 
 	Serial.println( glbl.cmd );
 
@@ -491,11 +518,47 @@ static const parse_step_t pt_top[] PROGMEM = {
 	{ "", NULL, NULL }
 };
 
+// try very hard to make a particular motor vibrate even if the hardware
+// is flaky (unreliable I2C or power connections)
+static error_t reliable_activate( void )
+{
+	// try to send the activate command
+	error_t status = send_command( glbl.acmd.motor );
+	DBG( "status " );
+	DBGCN( (int)status );
+
+	// if the motor doesn't know about the rhythm/magnitude, but we think
+	// it should, then the motor probably just lost power temporarily
+	//
+	// but checking to see whether the rhythm/magnitude is defined
+	// requires reading EEPROM, so just assume that it is defined and
+	// refresh the motor--this is faster in the expected case (the motor
+	// lost power), and the user knows which rhythms/magnitudes are
+	// defined and so can easily avoid trying to activate undefined ones
+	switch( status ) {
+	case ENOR:
+	case ENOM:
+	case ENOS:
+		// resend the learn commands to the motor
+		DBG( "refreshing motor " );
+		DBGCN( glbl.acmd.motor, DEC );
+		glbl.mode = M_LEARN;
+		teach_motor( glbl.acmd.motor );
+		glbl.mode = M_ACTIVE;
+
+		// and retry the activate command
+		return send_command( glbl.acmd.motor );
+	default:
+		// some "real" failure, not just an unrecognized rhythm/etc.
+		// on the motor, so no sense in retrying the command
+		return status;
+	}
+}
+
 error_t parse_active( void )
 {
-	// FIXME
 	switch( glbl.acmd.mode ) {
-	case ACM_VIB:	return send_command( glbl.acmd.motor );
+	case ACM_VIB:	return reliable_activate();
 	case ACM_SPT:	return EMISSING;
 	case ACM_GCL:	return send_command(-1);
 	case ACM_LRN:	glbl.mode = M_LEARN;
@@ -652,7 +715,7 @@ error_t menu_act( void )
 		// send the command
 		save = glbl.mode;
 		glbl.mode = M_ACTIVE;
-		print_flash( errstr(send_command(glbl.acmd.motor)) );
+		print_flash( errstr(reliable_activate()) );
 		glbl.mode = save;
 	}
 
@@ -765,19 +828,20 @@ void handle_menu( void )
 
 void setup( void )
 {
-        unsigned long start;
-        
+	unsigned long start;
+
 	Wire.begin();
 	Serial.begin( 9600 );
 
 	memset( &glbl, 0, sizeof(glbl) );
 
-        //need to wait for vibrator microprocessor to stabalize for detection function
-        for( start=millis(); millis()-start < TINY_WAIT; )
-        
+	// wait for vibrator microprocessor to stabilize for detection function
+	for( start=millis(); millis()-start < TINY_WAIT; )
+		;
+
 	detect_motors();	// determine which motors are present on bus
 
-	teach_motors();	// relay rhythms and magnitudes to attached motors
+	teach_motor(-1);	// relay rhythms/magnitudes to attached motors
 
 	// initialize the menu to the top level
 	memcpy_P( &glbl.menustep, menu_top, sizeof(glbl.menustep) );
