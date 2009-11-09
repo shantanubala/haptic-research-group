@@ -1,0 +1,123 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Text;
+using System.Windows.Forms;
+using System.IO.Ports;
+using HapticDriver;
+namespace Haptikos
+{
+    public partial class PatternProgForm : Form
+    {
+        HapticBelt wirelessBelt;
+
+        public PatternProgForm(HapticBelt belt) {
+            InitializeComponent();
+
+            wirelessBelt = belt;
+
+            //comboBoxMagSel.Items.Add(" ");
+            comboBoxMagSel.SelectedIndex = 0;
+            comboBoxRhySel.SelectedIndex = 0;
+
+            txtLogProg.Enabled = true;
+
+            // Display current belt information
+            try {
+                int response = wirelessBelt.Query_All();
+                if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.INCOMING) {
+                    string line = wirelessBelt.getDataRecvBuffer();
+                    UpdateTxtLog(line);
+                }
+            }
+            catch (Exception ex) {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        // This function invokes the main thread's UpdateText function
+        // in a loop while waiting for a request to close the application.
+        protected void UpdateTxtLog(string line) {
+            txtLogProg.Text += line + "\r\n-----------\r\n";
+            txtLogProg.Select(txtLogProg.TextLength, 0);
+            txtLogProg.ScrollToCaret();
+        }
+
+        private void comboBoxRhySel_SelectedIndexChanged(object sender, EventArgs e) {
+            string rhy_id = comboBoxRhySel.SelectedItem.ToString();
+            textBoxRhyPattern.Text = wirelessBelt.getRhythmPattern(rhy_id, false);
+            textBoxRhyTime.Text = wirelessBelt.getRhythmTime(rhy_id);
+        }
+
+        private void comboBoxMagSel_SelectedIndexChanged(object sender, EventArgs e) {
+            string mag_id = comboBoxMagSel.SelectedItem.ToString();
+            textBoxMagPercent.Text = wirelessBelt.getMagnitude(mag_id, false);
+        }
+
+        private void btnQryAll_Click(object sender, EventArgs e) {
+            try {
+                int response = wirelessBelt.Query_All();
+                if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.INCOMING) {
+                    string line = wirelessBelt.getDataRecvBuffer();
+                    UpdateTxtLog(line);
+                }
+                comboBoxMagSel_SelectedIndexChanged(sender, e);
+                comboBoxRhySel_SelectedIndexChanged(sender, e);
+            }
+            catch (Exception ex) {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void btnQryRhy_Click(object sender, EventArgs e) {
+            try {
+                int response = wirelessBelt.Query_Rhythm();
+                if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.INCOMING) {
+                    string line = wirelessBelt.getDataRecvBuffer();
+                    UpdateTxtLog(line);
+                }
+                comboBoxRhySel_SelectedIndexChanged(sender, e);
+            }
+            catch (Exception ex) {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void btnQryMag_Click(object sender, EventArgs e) {
+            try {
+                int response = wirelessBelt.Query_Magnitude();
+                if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.INCOMING) {
+                    string line = wirelessBelt.getDataRecvBuffer();
+                    UpdateTxtLog(line);
+                }
+                comboBoxMagSel_SelectedIndexChanged(sender, e);
+            }
+            catch (Exception ex) {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void btnProgMag_Click(object sender, EventArgs e) {
+            string mag_id = comboBoxMagSel.SelectedItem.ToString();
+            int percentage = Int16.Parse(textBoxMagPercent.Text.Trim());
+
+            int return_code = wirelessBelt.Learn_Magnitude(mag_id, percentage);
+
+            UpdateTxtLog(wirelessBelt.getErrorMsg(return_code));
+        }
+
+        private void btnProgRhy_Click(object sender, EventArgs e) {
+            string rhy_id = comboBoxRhySel.SelectedItem.ToString();
+
+            // validation of the 16 hex chars entered is handled by driver
+            string pattern_str = textBoxRhyPattern.Text.Trim().ToUpper();
+            int rhy_time = Int16.Parse(textBoxRhyTime.Text.Trim());
+
+            int return_code = wirelessBelt.Learn_Rhythm(rhy_id, pattern_str, rhy_time, false);
+
+            UpdateTxtLog(wirelessBelt.getErrorMsg(return_code));
+        }
+    }
+}

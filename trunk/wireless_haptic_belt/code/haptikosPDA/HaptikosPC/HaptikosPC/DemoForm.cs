@@ -45,7 +45,7 @@ namespace Haptikos
         }
 
         public int GetSelectedCycles() {
-            return (int)(comboBoxCycles3.SelectedIndex + 1);
+            return (int)(comboBoxCycles3.SelectedIndex);
         }
 
         public MainForm.demoTypes GetDemoType() {

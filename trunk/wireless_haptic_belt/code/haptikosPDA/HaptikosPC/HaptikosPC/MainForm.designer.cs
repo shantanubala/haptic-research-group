@@ -30,11 +30,18 @@ namespace Haptikos
             this.mainMenu1 = new System.Windows.Forms.MainMenu(this.components);
             this.mnuClose = new System.Windows.Forms.MenuItem();
             this.menuItem2 = new System.Windows.Forms.MenuItem();
-            this.mnuSettings = new System.Windows.Forms.MenuItem();
-            this.mnuConnect = new System.Windows.Forms.MenuItem();
-            this.mnuDisconnect = new System.Windows.Forms.MenuItem();
-            this.mnuDemo = new System.Windows.Forms.MenuItem();
+            this.menuSettings = new System.Windows.Forms.MenuItem();
+            this.menuConnect = new System.Windows.Forms.MenuItem();
+            this.menuSetupRhyMag = new System.Windows.Forms.MenuItem();
+            this.menuDisconnect = new System.Windows.Forms.MenuItem();
+            this.menuDemo = new System.Windows.Forms.MenuItem();
             this.mnuTempSpat = new System.Windows.Forms.MenuItem();
+            this.menuItem1 = new System.Windows.Forms.MenuItem();
+            this.menuQryVer = new System.Windows.Forms.MenuItem();
+            this.menuQryMtr = new System.Windows.Forms.MenuItem();
+            this.menuQryRhy = new System.Windows.Forms.MenuItem();
+            this.menuQryMag = new System.Windows.Forms.MenuItem();
+            this.menuQryTempSpat = new System.Windows.Forms.MenuItem();
             this.txtMess = new System.Windows.Forms.TextBox();
             this.btnSend = new System.Windows.Forms.Button();
             this.txtLog = new System.Windows.Forms.TextBox();
@@ -61,7 +68,8 @@ namespace Haptikos
             // 
             this.mainMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.mnuClose,
-            this.menuItem2});
+            this.menuItem2,
+            this.menuItem1});
             // 
             // mnuClose
             // 
@@ -73,46 +81,100 @@ namespace Haptikos
             // 
             this.menuItem2.Index = 1;
             this.menuItem2.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.mnuSettings,
-            this.mnuConnect,
-            this.mnuDisconnect,
-            this.mnuDemo,
+            this.menuSettings,
+            this.menuConnect,
+            this.menuSetupRhyMag,
+            this.menuDisconnect,
+            this.menuDemo,
             this.mnuTempSpat});
             this.menuItem2.Text = "Menu";
             // 
-            // mnuSettings
+            // menuSettings
             // 
-            this.mnuSettings.Index = 0;
-            this.mnuSettings.Text = "Settings";
-            this.mnuSettings.Click += new System.EventHandler(this.mnuSettings_Click);
+            this.menuSettings.Index = 0;
+            this.menuSettings.Text = "Settings";
+            this.menuSettings.Click += new System.EventHandler(this.mnuSettings_Click);
             // 
-            // mnuConnect
+            // menuConnect
             // 
-            this.mnuConnect.Enabled = false;
-            this.mnuConnect.Index = 1;
-            this.mnuConnect.Text = "Connect";
-            this.mnuConnect.Click += new System.EventHandler(this.mnuConnect_Click);
+            this.menuConnect.Enabled = false;
+            this.menuConnect.Index = 1;
+            this.menuConnect.Text = "Connect";
+            this.menuConnect.Click += new System.EventHandler(this.mnuConnect_Click);
             // 
-            // mnuDisconnect
+            // menuSetupRhyMag
             // 
-            this.mnuDisconnect.Enabled = false;
-            this.mnuDisconnect.Index = 2;
-            this.mnuDisconnect.Text = "Disconnect";
-            this.mnuDisconnect.Click += new System.EventHandler(this.mnuDisconnect_Click);
+            this.menuSetupRhyMag.Enabled = false;
+            this.menuSetupRhyMag.Index = 2;
+            this.menuSetupRhyMag.Text = "Setup Rhythm + Mag";
+            this.menuSetupRhyMag.Click += new System.EventHandler(this.mnuSetupRhyMag_Click);
             // 
-            // mnuDemo
+            // menuDisconnect
             // 
-            this.mnuDemo.Enabled = false;
-            this.mnuDemo.Index = 3;
-            this.mnuDemo.Text = "Demo";
-            this.mnuDemo.Click += new System.EventHandler(this.mnuDemo_Click);
+            this.menuDisconnect.Enabled = false;
+            this.menuDisconnect.Index = 3;
+            this.menuDisconnect.Text = "Disconnect";
+            this.menuDisconnect.Click += new System.EventHandler(this.mnuDisconnect_Click);
+            // 
+            // menuDemo
+            // 
+            this.menuDemo.Enabled = false;
+            this.menuDemo.Index = 4;
+            this.menuDemo.Text = "Demo";
+            this.menuDemo.Click += new System.EventHandler(this.mnuDemo_Click);
             // 
             // mnuTempSpat
             // 
             this.mnuTempSpat.Enabled = false;
-            this.mnuTempSpat.Index = 4;
+            this.mnuTempSpat.Index = 5;
             this.mnuTempSpat.Text = "Temp-Spatial";
             this.mnuTempSpat.Click += new System.EventHandler(this.mnuTempSpat_Click);
+            // 
+            // menuItem1
+            // 
+            this.menuItem1.Index = 2;
+            this.menuItem1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuQryVer,
+            this.menuQryMtr,
+            this.menuQryRhy,
+            this.menuQryMag,
+            this.menuQryTempSpat});
+            this.menuItem1.Text = "System Tests";
+            // 
+            // menuQryVer
+            // 
+            this.menuQryVer.Enabled = false;
+            this.menuQryVer.Index = 0;
+            this.menuQryVer.Text = "Query Version";
+            this.menuQryVer.Click += new System.EventHandler(this.menuItemQryVer_Click);
+            // 
+            // menuQryMtr
+            // 
+            this.menuQryMtr.Enabled = false;
+            this.menuQryMtr.Index = 1;
+            this.menuQryMtr.Text = "Query Motors";
+            this.menuQryMtr.Click += new System.EventHandler(this.menuItemQryMtr_Click);
+            // 
+            // menuQryRhy
+            // 
+            this.menuQryRhy.Enabled = false;
+            this.menuQryRhy.Index = 2;
+            this.menuQryRhy.Text = "Query Rhythm";
+            this.menuQryRhy.Click += new System.EventHandler(this.menuItemQryRhy_Click);
+            // 
+            // menuQryMag
+            // 
+            this.menuQryMag.Enabled = false;
+            this.menuQryMag.Index = 3;
+            this.menuQryMag.Text = "Query Magnitude";
+            this.menuQryMag.Click += new System.EventHandler(this.menuItemQryMag_Click);
+            // 
+            // menuQryTempSpat
+            // 
+            this.menuQryTempSpat.Enabled = false;
+            this.menuQryTempSpat.Index = 4;
+            this.menuQryTempSpat.Text = "Query Temp-Spat";
+            this.menuQryTempSpat.Click += new System.EventHandler(this.menuItemQryTempSpat_Click);
             // 
             // txtMess
             // 
@@ -128,7 +190,7 @@ namespace Haptikos
             this.btnSend.Enabled = false;
             this.btnSend.Location = new System.Drawing.Point(165, 3);
             this.btnSend.Name = "btnSend";
-            this.btnSend.Size = new System.Drawing.Size(72, 26);
+            this.btnSend.Size = new System.Drawing.Size(61, 26);
             this.btnSend.TabIndex = 2;
             this.btnSend.Text = "Send";
             this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
@@ -141,7 +203,7 @@ namespace Haptikos
             this.txtLog.Name = "txtLog";
             this.txtLog.ReadOnly = true;
             this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtLog.Size = new System.Drawing.Size(234, 79);
+            this.txtLog.Size = new System.Drawing.Size(223, 78);
             this.txtLog.TabIndex = 3;
             // 
             // labelStatus
@@ -163,10 +225,10 @@ namespace Haptikos
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPageMain);
-            this.tabControl1.Location = new System.Drawing.Point(0, 0);
+            this.tabControl1.Location = new System.Drawing.Point(0, -2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(240, 268);
+            this.tabControl1.Size = new System.Drawing.Size(239, 270);
             this.tabControl1.TabIndex = 4;
             // 
             // tabPageMain
@@ -189,12 +251,13 @@ namespace Haptikos
             this.tabPageMain.Controls.Add(this.labelStatus);
             this.tabPageMain.Location = new System.Drawing.Point(4, 22);
             this.tabPageMain.Name = "tabPageMain";
-            this.tabPageMain.Size = new System.Drawing.Size(232, 242);
+            this.tabPageMain.Size = new System.Drawing.Size(231, 244);
             this.tabPageMain.TabIndex = 0;
             this.tabPageMain.Text = "Haptics Main";
             // 
             // comboBoxCycles
             // 
+            this.comboBoxCycles.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxCycles.Location = new System.Drawing.Point(182, 132);
             this.comboBoxCycles.Name = "comboBoxCycles";
             this.comboBoxCycles.Size = new System.Drawing.Size(44, 21);
@@ -211,6 +274,7 @@ namespace Haptikos
             // 
             // comboBoxMag
             // 
+            this.comboBoxMag.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxMag.Location = new System.Drawing.Point(120, 132);
             this.comboBoxMag.Name = "comboBoxMag";
             this.comboBoxMag.Size = new System.Drawing.Size(56, 21);
@@ -227,6 +291,7 @@ namespace Haptikos
             // 
             // comboBoxRhy
             // 
+            this.comboBoxRhy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxRhy.Location = new System.Drawing.Point(61, 132);
             this.comboBoxRhy.Name = "comboBoxRhy";
             this.comboBoxRhy.Size = new System.Drawing.Size(53, 21);
@@ -243,6 +308,7 @@ namespace Haptikos
             // 
             // comboBoxMotor
             // 
+            this.comboBoxMotor.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxMotor.Location = new System.Drawing.Point(11, 132);
             this.comboBoxMotor.Name = "comboBoxMotor";
             this.comboBoxMotor.Size = new System.Drawing.Size(44, 21);
@@ -262,7 +328,7 @@ namespace Haptikos
             this.btnQuery.Enabled = false;
             this.btnQuery.Location = new System.Drawing.Point(137, 160);
             this.btnQuery.Name = "btnQuery";
-            this.btnQuery.Size = new System.Drawing.Size(99, 38);
+            this.btnQuery.Size = new System.Drawing.Size(89, 38);
             this.btnQuery.TabIndex = 6;
             this.btnQuery.Text = "Query Config";
             this.btnQuery.Click += new System.EventHandler(this.btnQuery_Click);
@@ -291,13 +357,12 @@ namespace Haptikos
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.AutoScroll = true;
-            this.ClientSize = new System.Drawing.Size(257, 302);
+            this.ClientSize = new System.Drawing.Size(240, 269);
             this.Controls.Add(this.tabControl1);
             this.Menu = this.mainMenu1;
             this.Name = "MainForm";
             this.Text = "Haptikos";
-            this.Closing += new System.ComponentModel.CancelEventHandler(this.Form1_Closing);
+            this.Closing += new System.ComponentModel.CancelEventHandler(this.MainForm_Closing);
             this.tabControl1.ResumeLayout(false);
             this.tabPageMain.ResumeLayout(false);
             this.tabPageMain.PerformLayout();
@@ -314,9 +379,9 @@ namespace Haptikos
         private System.Windows.Forms.Label labelStatusMsg;
         private System.Windows.Forms.MenuItem mnuClose;
         private System.Windows.Forms.MenuItem menuItem2;
-        private System.Windows.Forms.MenuItem mnuSettings;
-        private System.Windows.Forms.MenuItem mnuConnect;
-        private System.Windows.Forms.MenuItem mnuDisconnect;
+        private System.Windows.Forms.MenuItem menuSettings;
+        private System.Windows.Forms.MenuItem menuConnect;
+        private System.Windows.Forms.MenuItem menuDisconnect;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPageMain;
         private System.Windows.Forms.Button btnQuery;
@@ -330,8 +395,15 @@ namespace Haptikos
         private System.Windows.Forms.Label labelRhy;
         private System.Windows.Forms.ComboBox comboBoxMotor;
         private System.Windows.Forms.Label labelMtr;
-        private System.Windows.Forms.MenuItem mnuDemo;
+        private System.Windows.Forms.MenuItem menuDemo;
         private System.Windows.Forms.MenuItem mnuTempSpat;
+        private System.Windows.Forms.MenuItem menuItem1;
+        private System.Windows.Forms.MenuItem menuQryMtr;
+        private System.Windows.Forms.MenuItem menuQryRhy;
+        private System.Windows.Forms.MenuItem menuQryMag;
+        private System.Windows.Forms.MenuItem menuQryVer;
+        private System.Windows.Forms.MenuItem menuQryTempSpat;
+        private System.Windows.Forms.MenuItem menuSetupRhyMag;
         //private System.Windows.Forms.CheckBox checkBoxHeartbeats;
         //private System.Windows.Forms.CheckBox checkBoxSweep;
         //private System.Windows.Forms.Label labelDemoCfg;

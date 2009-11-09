@@ -6,8 +6,15 @@ namespace HapticDriver
 {
     public partial class HapticBelt
     {
+
+        internal static char[] hexDigits = {
+        '0', '1', '2', '3', '4', '5', '6', '7',
+        '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+
+        internal static char[] binaryDigits = { '0', '1' };
+
         /*
-         * This function converts hex values to binary
+         * This function converts a string representation of hex values to binary
          * By using a Switch function we can provide fault protection
          * against bit errors with serial communicaiton.  Invalid chars
          * will return an Error
@@ -16,7 +23,7 @@ namespace HapticDriver
         //            binary string in form "xxxx"
         //        Parameters:
         //            hex character (0 to F)
-        private string HexToBinary(string hexvalue) {
+        internal string HexToBinary(string hexvalue) {
             string binaryval = "";
             char[] c = hexvalue.ToCharArray();
 
@@ -78,6 +85,93 @@ namespace HapticDriver
             }
             return binaryval;
         }
+        
+        /*
+         * This function converts a string representation of binary values to hex
+         *  Invalid chars will return an Error
+         */
+        //        Returns:
+        //            hex character (0 to F)
+        //        Parameters:
+        //            binary string in form "xxxx"
+        internal string BinaryToHex(string binaryval) {
+            string hexvalue = "";
+            int i;
+            // Build hex value and increment by 4 binary chars
+            for (i = 0; i + 4 <= binaryval.Length; i += 4) {
+                if (binaryval.Substring(i, 4) == "0000") {
+                    hexvalue += "0";
+                    continue;
+                }
+                else if (binaryval.Substring(i, 4) == "0001") {
+                    hexvalue += "1";
+                    continue;
+                }
+                else if (binaryval.Substring(i, 4) == "0010") {
+                    hexvalue += "2";
+                    continue;
+                }
+                else if (binaryval.Substring(i, 4) == "0011") {
+                    hexvalue += "3";
+                    continue;
+                }
+                else if (binaryval.Substring(i, 4) == "0100") {
+                    hexvalue += "4";
+                    continue;
+                }
+                else if (binaryval.Substring(i, 4) == "0101") {
+                    hexvalue += "5";
+                    continue;
+                }
+                else if (binaryval.Substring(i, 4) == "0110") {
+                    hexvalue += "6";
+                    continue;
+                }
+                else if (binaryval.Substring(i, 4) == "0111") {
+                    hexvalue += "7";
+                    continue;
+                }
+                else if (binaryval.Substring(i, 4) == "1000") {
+                    hexvalue += "8";
+                    continue;
+                }
+                else if (binaryval.Substring(i, 4) == "1001") {
+                    hexvalue += "9";
+                    continue;
+                }
+                else if (binaryval.Substring(i, 4) == "1010") {
+                    hexvalue += "A";
+                    continue;
+                }
+                else if (binaryval.Substring(i, 4) == "1011") {
+                    hexvalue += "B";
+                    continue;
+                }
+                else if (binaryval.Substring(i, 4) == "1100") {
+                    hexvalue += "C";
+                    continue;
+                }
+                else if (binaryval.Substring(i, 4) == "1101") {
+                    hexvalue += "D";
+                    continue;
+                }
+                else if (binaryval.Substring(i, 4) == "1110") {
+                    hexvalue += "E";
+                    continue;
+                }
+                else if (binaryval.Substring(i, 4) == "1111") {
+                    hexvalue += "F";
+                    continue;
+                }
+                else {
+                    // clears all previous values to record error            
+                    hexvalue = "Error";
+                    break; // exits loop
+                }
+            }
+            return hexvalue;
+        }
+
         /*
         * This function converts char representation of hex values to byte value
         */
@@ -85,7 +179,7 @@ namespace HapticDriver
         //            byte value
         //        Parameters:
         //            hex character (0 to F)
-        private byte HexToByte(char hexValue) {
+        internal byte HexToByte(char hexValue) {
             byte byteValue = 0;
             switch (hexValue) {
                 case '0':
@@ -143,9 +237,39 @@ namespace HapticDriver
             return byteValue;
         }
 
-        internal static char[] hexDigits = {
-        '0', '1', '2', '3', '4', '5', '6', '7',
-        '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+        internal bool verifyHexDigits(string digits) {
+            bool verified = false;
+            int n = 0;
+
+            for (int i = 0; i < digits.Length; i++) {
+                verified = false;
+                n = 0;
+                while (n < hexDigits.Length) {
+                    if (digits[i] == hexDigits[n++])
+                        verified = true;
+                }
+                if (verified == false)
+                    break;
+            }
+            return verified;
+        }
+
+        internal bool verifyBinaryDigits(string digits) {
+            bool verified = false;
+            int n = 0;
+
+            for (int i = 0; i < digits.Length; i++) {
+                verified = false;
+                n = 0;
+                while (n < binaryDigits.Length) {
+                    if (digits[i] == binaryDigits[n++])
+                        verified = true;
+                }
+                if (verified == false)
+                    break;
+            }
+            return verified;
+        }
 
         internal static string BytesToHexStr(byte[] bytes) {
             char[] chars = new char[bytes.Length * 2];
@@ -157,14 +281,12 @@ namespace HapticDriver
             return new string(chars);
         }
 
-
-
         /*
          * This function converts an string representation of an int value to 
          * a byte value up to the max unsigned 8 bit value (255).  Given these
          * limitations, this function converts only the first 3 characters
          */
-        private byte[] IntegerStrToByte(string intString) {
+        internal byte[] IntegerStrToByte(string intString) {
             byte[] byteValue = { 0, 0, 0, 0 }; // 4bytes = 32bits
 
             int i = 0;
@@ -190,7 +312,7 @@ namespace HapticDriver
          * This function converts an string representation of an int value to 
          * the motor number offset
          */
-        private byte MotorStrToByte(string strInteger) {
+        internal byte MotorStrToByte(string strInteger) {
             byte byteValue = 0;
             switch (strInteger) {
                 case "1":
@@ -252,7 +374,7 @@ namespace HapticDriver
          * This function converts an alpha character of the vibration pattern 
          * to an byte value used for the firmware starting with A=0
          */
-        private byte VibStrToByte(string alphaStr) {
+        internal byte VibStrToByte(string alphaStr) {
             byte byteValue = 8;
             switch (alphaStr) {
                 case "A":
@@ -287,9 +409,9 @@ namespace HapticDriver
         }
 
         /*
- * This function converts an alpha character to an integer starting with A=1
- */
-        private string IntStrToAlpha(string intStr) {
+         * This function converts an alpha character to an integer starting with A=1
+         */
+        internal string IntStrToAlpha(string intStr) {
             string strValue = "";
             switch (intStr) {
                 case "1":
@@ -329,7 +451,7 @@ namespace HapticDriver
         /// </summary>
         /// <param name="msg">string to convert</param>
         /// <returns>a byte array</returns>
-        private byte[] HexToByte(string msg) {
+        internal byte[] HexToByte(string msg) {
             //remove any spaces from the string
             msg = msg.Replace(" ", "");
 
@@ -351,7 +473,7 @@ namespace HapticDriver
         /// </summary>
         /// <param name="comByte">byte array to convert</param>
         /// <returns>a hex string</returns>
-        private string ByteToHex(byte[] comByte) {
+        internal string ByteToHex(byte[] comByte) {
             //create a new StringBuilder object
             StringBuilder builder = new StringBuilder(comByte.Length * 3);
 
@@ -371,7 +493,7 @@ namespace HapticDriver
         /// </summary>
         /// <param name="comByte">byte array to convert</param>
         /// <returns>a hex string</returns>
-        private string ByteToAscii(byte[] comByte) {
+        internal string ByteToAscii(byte[] comByte) {
 
             //return the converted value
             return Encoding.ASCII.GetString(comByte);

@@ -8,17 +8,12 @@ namespace HapticDriver
 {
     public partial class HapticBelt
     {
-        public string[] Query_Rhythm() {
-            return Query("QRY RHY\r", 150);
+        public int Query_Rhythm() {
+            return Query("QRY RHY\r", 200);
         }
 
-        //FIXME not sure we want to return all rhythms
-        // should have get Rhythm that accepts Int for the rhythm requested.  Returns Structure object for 
-        // an individual rhythm (use firmware header).  Should have C++ wrapper class that has several accessor functions
-        // Do we want Rhy mutable? Easiest
-        // Compile DLL into MATLAB???
-        //
-        //This function queries the belt using the private Query_All() function and returns a specific rhythm value
+        // This function returns all rhythm values stored on belt, 
+        // QRY ALL or QRY RHY must be used before this command to get current data
         public string[] getRhythm(bool binary) {
             string[] return_values = new string[RHY_MAX_NO + 1];
             return_values[0] = "NONE DEFINED";
@@ -46,13 +41,11 @@ namespace HapticDriver
                                 }
                                 return_values[rhyCount + 1] += "," + binary_pattern;
                             }
-
                             // Check RHY length
                             if (Convert.ToInt32(split[4]) == 0)
                                 return_values[0] = "This rhythm is currently empty";
                             else {
                                 return_values[rhyCount + 1] += "," + split[4];
-
                             }
                             rhyCount++; // count of defined rhythms
                         }
@@ -65,6 +58,78 @@ namespace HapticDriver
             return_values[0] = rhyCount.ToString(); // count of defined magnitudes
 
             return return_values; // returns Rhythm "<A>,<hex/binary pattern>,<length>"
+        }
+
+        // Function returns a specific rhythm pattern stored on the belt
+        // QRY ALL or QRY RHY must be used before this command to get current data
+        public string getRhythmPattern(string rhy_id, bool binary) {
+
+            string return_values = "";
+            //return_values[0] = "NOT DEFINED";
+
+            try { //Convert.ToInt16 can cause exception
+                for (int index = 1; index < qry_resp.Length; index++) {
+                    if (qry_resp[index] != null) {
+                        string[] split = qry_resp[index].Split(' ');
+
+                        //put the values from the response into the return array
+                        if (split[1].Equals("RHY") && split[2].Equals(rhy_id)) {
+
+                            //Populate Return Values
+                            //return the rhythm pattern as hex (default) or as a binary string
+                            if (!binary) {
+                                return_values = split[3];
+                            }
+                            else {
+                                string binary_pattern = "";
+                                binary_pattern = HexToBinary(split[3]);
+                                if (String.Equals(binary_pattern, "Error")) {
+                                    //return_values[0] = "Invalid rhythm return, rhythm from query did not contain hex values";
+                                }
+                                return_values = binary_pattern;
+                            }
+                            // Check RHY length
+                            if (Convert.ToInt32(split[4]) == 0)
+                                ;//return_values[0] = "This rhythm is currently empty";
+                            else
+                                ;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) {
+                MessageBox.Show(ex.Message);
+            }
+            return return_values; // returns Rhythm "<hex/binary pattern>"
+        }
+
+        // Function returns a specific rhythm time stored on the belt
+        // which is the number of bits argument specifies how many of the 64 bits
+        // specified by the pattern are actually used in the rhythm.
+        // QRY ALL or QRY RHY must be used before this command to get current data
+        public string getRhythmTime(string rhy_id) {
+
+            string return_value = "";
+            //return_values[0] = "NOT DEFINED";
+
+            try { //Convert.ToInt16 can cause exception
+                for (int index = 1; index < qry_resp.Length; index++) {
+                    if (qry_resp[index] != null) {
+                        string[] split = qry_resp[index].Split(' ');
+
+                        //put the values from the response into the return array
+                        if (split[1].Equals("RHY") && split[2].Equals(rhy_id)) {
+
+                            //Populate Return Values
+                            return_value = split[4];
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) {
+                MessageBox.Show(ex.Message);
+            }
+            return return_value; // returns Rhythm "<hex/binary pattern>"
         }
 
         /*
@@ -86,102 +151,101 @@ namespace HapticDriver
         //        Parameters: 
         //            string id = ID of rhythm to be learned ("A" through "H")
         //            string pattern = rhythm to be learned (64 bit binary string)
-        public string[] Learn_Rhythm(string id, string pattern_string) {
-            string[] return_values = new string[2];
+        public int Learn_Rhythm(string rhy_id, string pattern_str, int rhy_time, bool binary) {
 
-            if (serialOut.IsOpen()) {
-                //convert the string into an array of integers
-                int[] pattern = new int[pattern_string.Length];
-                int i = 0;
-                foreach (char c in pattern_string) {
-                    pattern[i] = Convert.ToInt32(c.ToString());
-                    i++;
-                }
+            error_t return_error = error_t.EMAX;
 
-                //verify that the rhythm ID is between A and H
-                if (String.Compare(id, "H") > 0 || String.Compare(id, "A") < 0) {
-                    //invalid rhythm ID
-                    return_values[0] = "Invalid rhythm ID provided as argument to function";
-                    return_values[1] = "";
-                }
-                //make sure the length of the binary pattern is 64 bits or less
-                else if (pattern.Length > 64) {
-                    //invalid pattern length
-                    return_values[0] = "Invalid Pattern Length provided as argument to function";
-                    return_values[1] = "";
-                }
-                //copy the contents of the pattern array into a 64 bit array for conversion
-                else {
-                    int[] internal_pattern = new int[64];
-                    for (int pattern_index = 0; pattern_index < pattern.Length; pattern_index++) {
-                        //error check for 0 or 1 in the pattern array and copy to 64 bit pattern
-                        if (pattern[pattern_index] != 0 && pattern[pattern_index] != 1) {
-                            //pattern not a list of ones and zeros
-                            return_values[0] = "Pattern not a list of zeros and ones, invalid pattern provided as argument to function";
-                            return_values[1] = "";
-                            return return_values;
-                        }
-                        internal_pattern[pattern_index] = pattern[pattern_index];
-                    }
+            string hex_string = "";
+            string binary_string = "";
+
+            // "rhy_time" is the number of bits argument specifies how many of the 64 bits
+            // specified by the pattern are actually used in the rhythm.
+
+            //verify that the rhythm ID is between A and H
+            if (String.Compare(rhy_id, "H") > 0 || String.Compare(rhy_id, "A") < 0) {
+                //invalid rhythm ID
+                //return_values[0] = "Invalid rhythm ID provided as argument to function";
+                //return_values[1] = "";
+            }
+            //make sure the pattern uses hex characters only
+            else if (binary == false && !verifyHexDigits(pattern_str.Trim())) {
+                //pattern not a list of hex values
+                //return_values[0] = "Pattern not a list of hex values, invalid pattern provided as argument to function";
+                //return_values[1] = "";
+            }
+            //make sure the length of the hex pattern is 64 bits or less
+            else if (binary == false && pattern_str.Trim().Length > 16) {
+                //invalid pattern length
+                //return_values[0] = "Invalid Pattern Length provided as argument to function";
+                //return_values[1] = "";
+            }
+            else if (binary == true && !verifyBinaryDigits(pattern_str.Trim())) {
+                //pattern not a list of ones and zeros
+                //return_values[0] = "Pattern not a list of zeros and ones, invalid pattern provided as argument to function";
+                //return_values[1] = "";
+            }
+            //make sure the length of the binary pattern is 64 bits or less
+            else if (binary == true && pattern_str.Trim().Length > 64) {
+                //invalid pattern length
+                //return_values[0] = "Invalid Pattern Length provided as argument to function";
+                //return_values[1] = "";
+            }
+            else if (rhy_time > 64 || rhy_time < 0) {
+                //invalid pattern length
+                //return_values[0] = "Invalid Pattern Length provided as argument to function";
+                //return_values[1] = "";
+            }
+            else if (!serialOut.IsOpen()) {
+                //return_error = status_msg.COMPRTNOTOPEN; //FIXME
+            }
+            else { // Process normal LRN RHY
+                if (binary) {
+                    binary_string = pattern_str.Trim();
+
                     //put zeros in the remaining contents of the array
-                    for (int pattern_index2 = pattern.Length; pattern_index2 < 64; pattern_index2++) {
-                        internal_pattern[pattern_index2] = 0;
+                    for (int ix = binary_string.Length; ix < 64; ix++) {
+                        binary_string += "0";
                     }
-
                     //convert the array of values into a 16-character hex string
-                    int temp_decimal_value = 0;
-                    string hex_string = "";
-                    for (int count = 0; count < 64; count = count + 4) {
-                        for (int index = 0; index < 4; index++) {
-                            temp_decimal_value = (temp_decimal_value * 2) + internal_pattern[index + count];
-                        }
-                        hex_string += temp_decimal_value.ToString("X");
-                        temp_decimal_value = 0;
-                    }
+                    hex_string = BinaryToHex(binary_string);
+                }
+                else {
+                    hex_string = pattern_str.Trim();
 
-                    //at this point hex_string holds a string containing the 16-character hex code to be passed to belt
-
-                    string instruction = String.Concat("LRN RHY ", id.ToString(), " ", hex_string, " ", pattern.Length.ToString());
-
-                    //send this output to the belt
-                    try {
-                        if (acmd_mode != acmd_mode_t.ACM_LRN) {
-                            acmd_mode = acmd_mode_t.ACM_LRN;
-
-                            //return to learning mode, should be ASCII "00"
-                            byte[] returnState = { 0x30, 0x30 };
-                            serialOut.WriteData(returnState, 50);
-                        }
-
-                        serialOut.WriteData(instruction, 200);
-                        //check for STATUS <error number> [<info>]
-                        checkBeltStatus();
-                        if (belt_error != 0) {
-                            return_values[0] = "No response from belt or belt error";
-                            return_values[1] = "";
-                        }
-                        else {
-                            //if everything completes successfully
-                            return_values[0] = "";
-                            return_values[1] = "";
-                        }
-                    }
-                    catch {
-                        return_values[0] = "Error sending command over wireless";
-                        return_values[1] = "";
+                    //put zeros in the remaining contents of the array
+                    for (int ix = hex_string.Length; ix < 16; ix++) {
+                        hex_string += "0";
                     }
                 }
+                // hex_string holds a string containing the 16-character hex code to be passed to belt
+                string instruction = "LRN RHY " + rhy_id + " "
+                    + hex_string + " " + rhy_time + "\r"; 
+
+                //send output to the belt
+                try {
+                    change_acmd_mode(acmd_mode_t.ACM_LRN);
+                    if (acmd_mode == acmd_mode_t.ACM_LRN) {
+                        // Send command with wait time for belt to respond back.
+                        serialOut.WriteData(instruction, 200);
+                    }
+
+                    //check for STATUS <error number> [<info>]
+                    checkBeltStatus();
+                    if (belt_error != 0) {
+                        return_error = belt_error;
+                        //return_values[0] = "No response from belt or belt error";
+                        //return_values[1] = "";
+                    }
+                    else {
+                        return_error = error_t.ESUCCESS;
+                    }
+                }
+                catch (Exception ex) {
+                    MessageBox.Show(ex.Message);
+                    return_error = error_t.EMAX;
+                }
             }
-            else {
-                return_values[0] = "Serial port not open";
-                return_values[1] = "";
-            }
-            return return_values;
+            return (int)return_error;
         }
-
-
     }
-
-
-
 }
