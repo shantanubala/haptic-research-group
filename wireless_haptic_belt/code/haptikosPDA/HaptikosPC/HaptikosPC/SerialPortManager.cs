@@ -63,7 +63,6 @@ namespace HapticDriver
         private string _readTimeout = string.Empty;
 
         internal bool EchoBack = false;
-        internal DataType CurrentDataType;
 
         // Message passing items. 
         private bool _append_msg = false;
@@ -99,7 +98,6 @@ namespace HapticDriver
             _dataBits = dBits;
             _portName = portName;
             _readTimeout = timeout;
-            CurrentDataType = DataType.Text;
             _dataRecvBuffer = databuf;
             _statusBuffer = new Buffer(statusBufferMutex);
 
@@ -119,7 +117,6 @@ namespace HapticDriver
             _dataBits = dBits;
             _portName = portName;
             _readTimeout = timeout;
-            CurrentDataType = DataType.Text;
             _dataRecvBuffer = new Buffer(dataBufferMutex);
             _statusBuffer = new Buffer(statusBufferMutex);
         }
@@ -139,7 +136,6 @@ namespace HapticDriver
             _dataBits = "8"; // string.Empty;
             _portName = "COM1";
             _readTimeout = "1000";
-            CurrentDataType = DataType.Text;
             _dataRecvBuffer = new Buffer(dataBufferMutex);
             _statusBuffer = new Buffer(statusBufferMutex);
             //this.DataRecievedFxn = handler;
@@ -189,7 +185,7 @@ namespace HapticDriver
 
                 //send the message to the port
                 comPort.Write(msg);
-                ReturnData(MessageType.OUTGOING, (byte)status_msg.SUCCESS);
+                ReturnData(MessageType.OUTGOING, (byte)error_t.ESUCCESS);
 
                 //get response from belt
                 comPort_DataReceived(responseTimeout);
@@ -235,19 +231,18 @@ namespace HapticDriver
                 comPort.StopBits = (StopBits)Enum.Parse(typeof(StopBits), _stopBits, true);
                 comPort.Parity = (Parity)Enum.Parse(typeof(Parity), _parity, true);
                 comPort.PortName = _portName;
-                //comPort.ReadTimeout = int.Parse(_readTimeout); ;
 
                 //now open the port
                 comPort.Open();
                 _portOpened = true;
 
                 //display message
-                ReturnData(MessageType.NORMAL, (byte)status_msg.COMPRTOPEN);
+                ReturnData(MessageType.NORMAL, (byte)error_t.COMPRTOPEN);
                 return true;
             }
             catch (Exception ex) {
                 ReturnData(MessageType.ERROR, Encoding.ASCII.GetBytes(ex.Message));
-                //ReturnData(MessageType.Error, (byte)status_msg.EXCEPTION);
+                //ReturnData(MessageType.Error, (byte)error_t.EXCEPTION);
                 return false;
             }
         }
@@ -262,10 +257,10 @@ namespace HapticDriver
                     _portOpened = false;
 
                     //display message
-                    ReturnData(MessageType.NORMAL, (byte)status_msg.COMPRTCLS);
+                    ReturnData(MessageType.NORMAL, (byte)error_t.COMPRTCLS);
                 }
                 else
-                    ReturnData(MessageType.WARNING, (byte)status_msg.COMPRTCLSPREV);
+                    ReturnData(MessageType.WARNING, (byte)error_t.COMPRTCLSPREV);
 
                 // Help with garbage
                 this.DataReceivedFxn = null;

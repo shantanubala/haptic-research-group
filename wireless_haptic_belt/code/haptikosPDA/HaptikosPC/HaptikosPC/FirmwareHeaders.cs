@@ -7,18 +7,12 @@ namespace HapticDriver
 
     //Enums to handle bit fields in C# which are not allowed:
 
-
-    /*****************************************************************************
- * FILE:   active_command.h
- * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
- * DESCR:  Active mode command definition.
- * LOG:    20090510 - initial version
- ****************************************************************************/
-
-    //#ifndef ACTIVE_COMMAND_H
-    //#define ACTIVE_COMMAND_H
-
-    //#include "vibration.h"
+   /*****************************************************************************
+    * FILE:   active_command.h
+    * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
+    * DESCR:  Active mode command definition.
+    * LOG:    20090510 - initial version
+    ****************************************************************************/
 
     // active mode command
     [StructLayout(LayoutKind.Explicit, Size = 2)]
@@ -42,7 +36,7 @@ namespace HapticDriver
     internal enum acmd_mode_t
     {
         ACM_VIB,	// activate a motor
-        ACM_SPT,	// play back a spatio-temporal pattern
+        ACM_SPT,	// play back a spatio-temporal pattern (NOT YET IMPLEMENTED)
         ACM_GCL,	// send a command to all motors (general call)
         ACM_LRN		// return to learning mode
     } ;
@@ -55,17 +49,12 @@ namespace HapticDriver
         M_ACTIVE	// active mode: raw byte stream
     } ;
 
-    //#endif
-
     /*****************************************************************************
      * FILE:   vibration.h
      * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
      * DESCR:  Definition of the Funnel-to-tiny operational command.
      * LOG:    20090430 - initial version
      ****************************************************************************/
-
-    //#ifndef VIBRATION_H
-    //#define VIBRATION_H
 
     //#define MAX_DURATION 7	// max cycle count for rhythm playback
     [StructLayout(LayoutKind.Explicit, Size = 1)]
@@ -85,18 +74,12 @@ namespace HapticDriver
         internal byte rhythm; // upper 3 bits
     };
 
-    //#endif
-
-
-    /*****************************************************************************
- * FILE:   error.h
- * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
- * DESCR:  Type definitions and function declarations for error handling.
- * LOG:    20090501 - initial version
- ****************************************************************************/
-
-    //#ifndef ERROR_H
-    //#define ERROR_H
+   /*****************************************************************************
+    * FILE:   error.h
+    * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
+    * DESCR:  Type definitions and function declarations for error handling.
+    * LOG:    20090501 - initial version
+    ****************************************************************************/
 
     // error number definitions--must match the string table in error.c
     // in error descriptions, L = learning mode, O = operational mode,
@@ -121,18 +104,17 @@ namespace HapticDriver
         EBUSAN,		// I2C address not acknowledged		(L/O, M->V)
         EBUSDN,		// I2C data not acknowledged		(L/O, M->V)
         EMISSING,	// command not implemented yet		(L, P->M/M->V)
-        EMAX		// invalid error number
-    };
+        EMAX,		// invalid error number
 
-    // error number definitions generated from DLL project
-    public enum status_msg
-    {
-        // symbol	error type (belt mode, command source->destination)
-        SUCCESS,	    // no error
-        COMPRTOPEN,     // comm port opened
-        COMPRTCLS,    // comm port closed
-        COMPRTCLSPREV,// comm port previously closed
-        EXCEPTION,      // exception occured
+        // status_msg definitions generated from DLL project
+        // symbol
+        COMPRTINVALID, // invalid comm port parameters
+        COMPRTOPEN,    // comm port opened
+        COMPRTNOTOPEN, // comm port not open
+        COMPRTCLS,     // comm port closed
+        COMPRTCLSPREV, // comm port previously closed
+        EXCEPTION,     // exception occured
+        EXCWIRELESS    // exception occured - error sending over wireless
 
 
     };
@@ -166,15 +148,17 @@ namespace HapticDriver
 
         // name the dll status strings individually                                    
         // required to get the strings stored in program space   
-        private const string success = "Success";
+        private const string comprtinvalid = "Invalid comm port parameters";
         private const string comprtopen = "Com port opened";
+        private const string comprtnotopen = "Com port not opened";
         private const string comprtcls = "Com port closed";
         private const string comprtclsprev = "Com port previously closed";
         private const string exception = "Exception occured";
+        private const string excwireless = "Error sending command over wireless";
 
-        // error strings--must match the error_t enum in error.h
         internal static string[] error_t_names = {
-	        esuccess,
+	        // Firmware error strings--must match the error_t enum in error.h
+            esuccess,
 	        ebadcmd,
 	        etoobig,
 	        earg,
@@ -191,18 +175,20 @@ namespace HapticDriver
 	        ebusan,
 	        ebusdn,
 	        emissing,
-	        emax
-        };
+	        emax,
 
-        // status_msg strings--must match the order of status_msg enum
-        internal static string[] status_msg_names = {
-            success,
+            // Driver (DLL) status_msg strings--must match the order of status_msg enum
+            comprtinvalid,
             comprtopen,
+            comprtnotopen,
             comprtcls,
             comprtclsprev,
-            exception
-         };
+            exception,
+            excwireless
+        };
 
-
+        public const UInt16 uint16_t_max = 65535;
+        public const UInt16 PERIOD_MAX = 2000; //2000 microseconds (2 millisec)
+        public const UInt16 DUTY_CYCLE_MIN = 2; //2 microseconds
     }
 }

@@ -50,6 +50,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Buffer.cs" />
+    <Compile Include="PatternProgForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PatternProgForm.designer.cs">
+      <DependentUpon>PatternProgForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MutexLock.cs" />
     <Compile Include="Magnitude.cs" />
     <Compile Include="ConversionUtility.cs" />
@@ -71,6 +77,10 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="PatternProgForm.resx">
+      <DependentUpon>PatternProgForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="DemoForm.resx">
       <DependentUpon>DemoForm.cs</DependentUpon>
     </EmbeddedResource>

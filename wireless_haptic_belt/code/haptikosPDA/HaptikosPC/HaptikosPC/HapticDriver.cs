@@ -3,7 +3,7 @@
 //Date: April 20th, 2009
 
 // *
-// * MODIFIED to work on Windows Mobile 5.0 or Microsoft CF 2.5
+// * MODIFIED to work on Windows Mobile 5.0 or Microsoft CF 2.5 or 2.0???? //TODO
 // * Oct 22, 2009
 // * Nathan J. Edwards (nathan.edwards@asu.edu)
 // * 
@@ -14,12 +14,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO.Ports;
 using System.Windows.Forms;
-
-// ERROR CODES
-//invalid or no belt response to query = -1, this is returned in the starting point of the array at [belt location,0]
-//invalid rhythm ID = -3
-//invalid pattern length = -4;
-//pattern is something other than binary string = -5
 
 namespace HapticDriver
 {
@@ -44,7 +38,7 @@ namespace HapticDriver
 
         // parent class's data recieved function pointer
         public delegate void DataRecievedHandler();
-        public DataRecievedHandler DataReceivedFxn; //event???
+        public DataRecievedHandler DataReceivedFxn; //event
 
         //this is the array of results which will be returned to the calling function
         private string[] qry_resp;
@@ -54,26 +48,17 @@ namespace HapticDriver
         private error_t belt_error = error_t.EMAX;
         private mode_t glbl_mode = mode_t.M_LEARN;
 
-
         #region Manager Constructors
         /// <summary>
         /// Constructor to set the properties of our Driver Class
         /// </summary>
         public HapticBelt() {
-            // PLACEHOLDERS FOR FUTURE
-            //serialIn = new SerialPortManager(); 
-            //serialOut = new SerialPortManager();
-
-            //// Function pointer
-            //if (DataReceivedFxn != null) // Always seems to be null
-            //{
-            //    serialIn.DataReceivedFxn += new SerialPortManager.DataRecievedHandler(DataReceivedFxn);
-            //}
 
             qry_resp = new string[TOTAL_RESPONSE_COUNT + 1];
         }
         #endregion
 
+        #region COM PORT data accessors
         public byte getDataRecvType() {
             return serialIn.DataRecvBufferType();
         }
@@ -81,7 +66,9 @@ namespace HapticDriver
         public string getDataRecvBuffer() {
             return ByteToAscii(serialIn.DataRecvBuffer());
         }
+        #endregion
 
+        #region Driver Status accessors
         public byte getStatusType() {
             return serialOut.StatusBufferType();
         }
@@ -93,11 +80,25 @@ namespace HapticDriver
             string byteString = "";
             byte[] status = serialOut.StatusBuffer();
             for (int i = 0; i < status.Length; i++) {
-                byteString += "++" + Constants.status_msg_names[status[i]];
+                byteString += "++" + Constants.error_t_names[status[i]];
             }
             return byteString;
         }
+        #endregion
 
+        public string getErrorMsg() {
+            return "Code: " + (int)belt_error + " " + Constants.error_t_names[(int)belt_error];
+        }
+        public string getErrorMsg(int error_code) {
+            return "Code: " + (int)error_code + " " + Constants.error_t_names[(int)error_code];
+        }
+
+        // Reset haptic belt and driver to the default states
+        public int ResetHapticBelt() {
+            change_acmd_mode(acmd_mode_t.ACM_LRN);
+            return (int)belt_error;
+        }
+        
         //*** string[] Initialize_Serial_Port(string portno, string baud_string, string parity_string, string stopbits_string, string databits_string)
         //        Returns: 
         //            string array of length 2
@@ -111,7 +112,14 @@ namespace HapticDriver
         //            string stopbits_string = stop bits to be used (0, 1, 1.5, 2)
         //            string databits_string =  number of data bits to be sent at a time     
         public bool SetupPorts(string portInName, string portOutName, string baud, string dBits, string sBits, string par, string timeout) {
+            error_t error = error_t.ESUCCESS;
 
+            // validate parameters
+            if (portInName == null || portOutName == null || baud == null || dBits == null
+                || sBits == null || par == null || timeout == null) {
+
+                error = error_t.COMPRTINVALID;
+            }
             _portInName = portInName;
             _portOutName = portOutName;
 
@@ -135,7 +143,7 @@ namespace HapticDriver
             catch {
 
             }
-            return port_setup;
+            return port_setup; //TODO return error 
         }
 
         public void OpenPorts() {
@@ -168,22 +176,31 @@ namespace HapticDriver
                 serialOut.WriteData(data, 200);
         }
 
-        /* Temporary overload to handle the prototyped method that uses strings */
-        public string[] Vibrate_Motor(string motor_number, string rhythm_string, string magnitude_string, int rhythm_cycles) {
+        /* Wrapper using integers and strings as inputs */
+        public int Vibrate_Motor(int motor_number, string rhythm_string, string magnitude_string, int rhythm_cycles) {
 
-            byte motor = MotorStrToByte(motor_number);
+            byte motor = (byte)(motor_number);
             byte rhythm = VibStrToByte(rhythm_string);
             byte magnitude = VibStrToByte(magnitude_string);
             byte rhythm_length = (byte)(rhythm_cycles);
 
-            String[] response = Vibrate_Motor(motor, rhythm, magnitude, rhythm_length);
+            int response = Vibrate_Motor(motor, rhythm, magnitude, rhythm_length);
             return response;
         }
 
+        /* Wrapper method that uses most common case of ACM_VIB  * */
+        public int Vibrate_Motor(byte motor, byte rhythm, byte magnitude, byte rhythm_cycles) {
+            
+            acmd_mode_t cmd_mode = acmd_mode_t.ACM_VIB;
+
+            int response = Vibrate_Motor(cmd_mode, motor, rhythm, magnitude, rhythm_cycles);
+            return response;
+        }
+
+
         /*
-         * This function is used to vibrate motors - send a bit string command FIXME 
+         * This function is used to vibrate motors - send a bit string command
          */
-        //    string[] Vibrate_Motor(string motor_number, string rhythm, string magnitude, string rhythm_cycles)
         //        Returns: 
         //            string array of length 2
         //                where 
@@ -192,57 +209,81 @@ namespace HapticDriver
         //        Parameters:
         //            string motor_number = motor to be vibrated (1 to 16)
         //            string rhythm = rhythm to vibrate motor in ("A" to "H")
-        //            string magnitude = magnitude to vibrate motor in ("1" to "4")
-        //            string rhythm_cycles = cycles to repeate the rhythm ("0" to "15")       
-        public string[] Vibrate_Motor(byte motor, byte rhythm, byte magnitude, byte rhythm_cycles) {
+        //            string magnitude = magnitude to vibrate motor in ("A" to "D")
+        //            string rhythm_cycles = cycles to repeate the rhythm ("0" to "7")       
+        private int Vibrate_Motor(acmd_mode_t cmd_mode, byte motor, byte rhythm, byte magnitude, byte rhythm_cycles) {
             byte[] command_byte = { 0x00, 0x00 };
-            string[] return_values = new string[2];
-            return_values[1] = "";
+            int return_error = 0;
 
-            if (!serialOut.IsOpen()) {
-                return_values[0] = "Serial port not open";
+            // Validate parameters
+            if (motor < 0 || rhythm < 0 || rhythm > 8
+                || magnitude < 0 || magnitude > 8
+                || rhythm_cycles < 0 || rhythm_cycles > 7) {
+
+                return_error = (int)error_t.EARG;
+            }
+            else if (!serialOut.IsOpen()) {
+                return_error = (int)error_t.COMPRTNOTOPEN;
             }
             else {
-                //byte mode = 0;
+                byte mode = 0x0;
                 //byte motor = 0x0; // this is the first valid motor
                 //byte rhythm = 0x7; //rhy H =7
                 //byte magnitude = 0x0; //mag A = 0
                 //byte rhythm_length = 0x6;
                 // This equates to hex 01 36
 
-                //active_command_t command = new active_command_t();
-                //command.mode = (byte)(mode << 4);
-                //command.motor = (byte)(motor & 0xf);
-                //command.v.rhythm = (byte)((rhythm & 0x7) << 5);
-                //command.v.magnitude = (byte)((magnitude & 0x3) << 3);
-                //command.v.duration = (byte)(rhythm_cycles & 0x7);
-
                 try {
-                    change_acmd_mode(acmd_mode_t.ACM_VIB);
-                    if (acmd_mode == acmd_mode_t.ACM_VIB) {
-                        // Use the Headers from Firmware to compile TODO
-                        byte mode = (byte)acmd_mode_t.ACM_VIB;
-                        command_byte[0] = (byte)((mode << 4) | (motor & 0xf));
-                        command_byte[1] = (byte)(((rhythm & 0x7) << 5)
-                            | ((magnitude & 0x3) << 3)
-                            | (rhythm_cycles & 0x7));
-
-                        serialOut.WriteData(command_byte, 50); // send debug menu activation
-
-                        checkBeltStatus();
-                        if (belt_error == error_t.ESUCCESS)
-                            return_values[0] = "";//Successful if this point is reached w/o error
+                    change_acmd_mode(cmd_mode);
+                    if (acmd_mode == cmd_mode) {
+                        mode = (byte)cmd_mode;
                     }
                     else {
-                        return_values[0] = "Haptic Belt Error Code: "
-                            + belt_error.ToString() + ": ";// +Constants.error_t_names[belt_error];
+                        //return_values[0] = "Haptic Belt Error Code: "
+                        //    + belt_error.ToString() + ": ";// +Constants.error_t_names[belt_error];
+                        return_error = (int)belt_error; //TODO
                     }
+
+                    // Send mode first, it is the LSB of the first byte in firmware struct active_command_t
+                    command_byte[0] = (byte)((mode << 4) | (motor & 0xf));
+                    // Send rhythm first, it is the LSB of the firmware struct vibration_t
+                    command_byte[1] = (byte)(((rhythm & 0x7) << 5)
+                        | ((magnitude & 0x3) << 3)
+                        | (rhythm_cycles & 0x7));
+
+                    serialOut.WriteData(command_byte, 50); // send debug menu activation
+
+                    checkBeltStatus();
+                    return_error = (int)belt_error;
+
                 }
                 catch {
-                    return_values[0] = "Error sending command over wireless";
+                    return_error = (int)error_t.EXCWIRELESS;
                 }
             }
-            return return_values;
+            return return_error;
+        }
+
+        public string getVersion() {
+            string return_value = "0.0";
+
+            try {
+                for (int index = 1; index < qry_resp.Length; index++) {
+                    if (qry_resp[index] != null) {
+                        string[] split = qry_resp[index].Split(' ');
+
+                        //put the values from the response into the return string
+                        if (split[1].Equals("VER")) {
+                            return_value = split[2];
+                            break; // exit loop
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) {
+                MessageBox.Show(ex.Message);
+            }
+            return return_value;
         }
 
         //This function returns the motor count from the last QRY operation
@@ -312,7 +353,7 @@ namespace HapticDriver
         //                            1 = list of motors seperated by commas
         //        Parameters:
         //            NONE
-        private string[] Query(string typeMsg, int timeout) {
+        private int Query(string typeMsg, int timeout) {
 
             clearBuffer(qry_resp);
 
@@ -328,8 +369,7 @@ namespace HapticDriver
                         serialOut.WriteData(typeMsg, timeout);
                 }
                 catch {
-                    qry_resp[0] = "Error sending command over wireless";
-                    return qry_resp;
+                    qry_resp[0] = "Error sending command over wireless"; //TODO - error needs to be in CONSTANTS
                 }
             }
             checkBeltStatus();
@@ -352,11 +392,8 @@ namespace HapticDriver
                             qry_resp[rsp_index] = buffer[i];
                             rsp_index++;
                         }
-                        //else if (buffer[i].Substring(0, 3).Equals("STS")) {
-                        //    byte[] errors = IntStrToByte(buffer[i].Split(' ')[1]); // gets first error code
-                        //    belt_error = (error_t)errors[0]; // gets 1st error code byte
-                        //}
                         else if (buffer[i].Substring(0, 3).Equals("DBG")) {
+                            // Not yet implemented
                             //string[] split = buffer[i].Split(' ');
                             //sys_error = (error_t)split[1][0]; // get char at index 0
                         }
@@ -365,27 +402,22 @@ namespace HapticDriver
                 rsp_index--; // decrement from last increment to give count of elements
                 qry_resp[0] = rsp_index.ToString(); //count of elements
             }
-            //Check error status
-            if (belt_error != error_t.ESUCCESS) {
-                qry_resp[0] = "Haptic Belt Error Code: "
-                            + (int)belt_error + ": " + Constants.error_t_names[(int)belt_error];
-            }
-            return qry_resp;
+            return (int)belt_error;
         }
 
-        public string[] Query_All() {
-            return Query("QRY ALL\r", 250);
+        public int Query_All() {
+            return Query("QRY ALL\r", 300);
         }
 
-        public string[] Query_Motor() {
+        public int Query_Motor() {
             return Query("QRY MTR\r", 50);
         }
 
-        public string[] Query_SpatioTemporal() {
+        public int Query_SpatioTemporal() {
             return Query("QRY SPT\r", 250);
         }
 
-        public string[] Query_Version() {
+        public int Query_Version() {
             return Query("QRY VER\r", 50);
         }
 
@@ -393,14 +425,13 @@ namespace HapticDriver
          * Method switches the global mode
          */
         private void change_glbl_mode(mode_t mode) {
-            error_t error = error_t.EMAX;
+            //error_t error = error_t.EMAX;
 
             if (glbl_mode == mode) {
-                error = error_t.ESUCCESS; // already in requested mode
+                // already in requested mode, do nothing and no loss of performance
             }
             else if (glbl_mode == mode_t.M_LEARN) {
                 //switch to activate command mode
-                serialIn.CurrentDataType = SerialPortManager.DataType.Text;
                 serialOut.WriteData("BGN\n", 50);
                 checkBeltStatus();
 
@@ -409,8 +440,7 @@ namespace HapticDriver
             }
             else { //if (glbl_mode == mode_t.M_ACTIVE)
                 // back to learning mode
-                serialIn.CurrentDataType = SerialPortManager.DataType.Text;
-                byte[] returnState = { 0x30, 0x30 }; //should be Hex 0x30 0x00
+                byte[] returnState = { 0x30, 0x30 }; //should send Hex 0x30 0x30 = mode 0
                 serialOut.WriteData(returnState, 50);
                 checkBeltStatus();
 
@@ -430,45 +460,18 @@ namespace HapticDriver
             }
             else if (mode == acmd_mode_t.ACM_LRN) {
                 //return to learning mode
-                change_glbl_mode(mode_t.M_LEARN);
-                acmd_mode = mode;
-                serialIn.CurrentDataType = SerialPortManager.DataType.Text;
+                change_glbl_mode(mode_t.M_LEARN); //FIXME was commented out
+                if (belt_error == error_t.ESUCCESS) {
+                    acmd_mode = mode;
+                }
             }
             else { //(mode == acmd_mode_t.ACM_VIB || acmd_mode_t.ACM_SPT || acmd_mode_t.ACM_GCL)
                 change_glbl_mode(mode_t.M_ACTIVE);
-                acmd_mode = mode;
-                serialIn.CurrentDataType = SerialPortManager.DataType.Hex;
+                if (belt_error == error_t.ESUCCESS) {
+                    acmd_mode = mode;
+                }
             }
         }
-
-        //public string[] Back() {
-        //    string[] return_values = new string[2];
-        //    return_values[1] = "";
-
-        //    if (serialOut.IsOpen) {
-        //        //send BACK command through Serial_Port
-        //        try {
-        //            serialOut.CurrentTransmissionType = SerialPortManager.TransmissionType.Hex;
-        //            serialOut.WriteData("48"); //first_byte
-        //            serialOut.WriteData("0"); //second_byte
-
-        //            /*FIXME , do we ge a response here? check for STATUS <error number> [<info>]
-        //            if (Check_Belt() != 0)
-        //                return_values[0] = "No response from belt or belt error";
-        //            else
-        //                return_values[0] = "";
-        //             */
-        //            serialOut.CurrentTransmissionType = SerialPortManager.TransmissionType.Text;
-        //        }
-        //        catch {
-        //            return_values[0] = "Error sending command over wireless";
-        //        }
-        //    }
-        //    else
-        //        return_values[0] = "Serial port not open";
-
-        //    return return_values;
-        //}
 
         /*
          * This function is used to issue a general STOP command to the belt
@@ -481,40 +484,41 @@ namespace HapticDriver
         //                    string[1] = NULL
         //        Parameters: 
         //            NONE
-        public string[] Stop(byte motor_number) {
-            string[] return_values = new String[2];
+        public int Stop(byte motor_number) {
+            error_t return_error = error_t.EMAX;
 
-            if (serialOut.IsOpen()) {
+            if (motor_number < 0) {
+                // do nothing
+            }
+            else if (serialOut.IsOpen()) {
                 // sending rhythm_cycles = 0 stops motor
-                Vibrate_Motor(motor_number, 0x0, 0x0, 0x0);
-                return_values[0] = "";
-                return_values[1] = "";
+                return_error = (error_t)Vibrate_Motor(motor_number, 0x0, 0x0, 0x0);
             }
             else {
-                return_values[0] = "Serial port not open";
-                return_values[1] = "";
+                return_error = belt_error;
             }
-            return return_values;
+            return (int)return_error;
         }
 
 
         //this function is used to STOP all motors command to the belt
-        public string[] StopAll() {
-            string[] return_values = new String[2];
+        public int StopAll() {
+            error_t return_error = error_t.EMAX;
+            // DEBUG - TODO
+            // sending rhythm_cycles = 0 stops motor, ACM_GCL = all call
+            return_error = (error_t)Vibrate_Motor(acmd_mode_t.ACM_GCL, 0, 0x0, 0x0, 0x0);
 
             if (serialOut.IsOpen() && this.getMotors() != 0) {
-                for (byte i = 0; i < this.getMotors(); i++) {
-                    // sending rhythm_cycles = 0 stops motor
-                    Vibrate_Motor(i, 0x0, 0x0, 0x0);
-                    return_values[0] = "";
-                    return_values[1] = "";
-                }
+                //// WORKING VERSION BELOW
+                //for (byte i = 0; i < this.getMotors(); i++) {
+                //    // sending rhythm_cycles = 0 stops motor
+                //    return_error = (error_t)Vibrate_Motor(i, 0x0, 0x0, 0x0);
+                //}
             }
             else {
-                return_values[0] = "Serial port not open";
-                return_values[1] = "";
+                return_error = belt_error;
             }
-            return return_values;
+            return (int)return_error;
         }
 
         /*
@@ -542,8 +546,8 @@ namespace HapticDriver
                     }
                 }
             }
-            else if (acmd_mode == acmd_mode_t.ACM_VIB && serialIn.DataRecvBuffer()[0] == 0x00) {
-                error = error_t.ESUCCESS;
+            else if (acmd_mode == acmd_mode_t.ACM_VIB) {// && serialIn.DataRecvBuffer()[0] == 0x00) {
+                error = (error_t)(serialIn.DataRecvBuffer()[0]);
             }
             else { ; }//do nothing
             belt_error = error;
