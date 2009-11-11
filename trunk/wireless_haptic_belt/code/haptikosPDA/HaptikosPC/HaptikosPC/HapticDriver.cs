@@ -634,11 +634,7 @@ namespace HapticDriver
                 }
                 else {
                     // Send command with wait time for belt to respond back.
-                    // TODO - verify the ZAP command with Firmware.  Seems like 
-                    // ZAP calls erase_all_learned() which requires argc to be 3
-                    // inorder to erase all stored patterns.  There is no way
-                    // for the DLL to send this command with an argument.
-                    serialOut.WriteData("ZAP\n", 50);
+                    serialOut.WriteData("ZAP 1 2 3\n", 50); // requires 3 arguments
 
                     checkBeltStatus();
                     return_error = belt_error;
