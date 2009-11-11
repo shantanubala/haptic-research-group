@@ -9,10 +9,17 @@ using System.IO.Ports;
 using HapticDriver;
 namespace Haptikos
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public partial class PatternProgForm : Form
     {
         HapticBelt wirelessBelt;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="belt"></param>
         public PatternProgForm(HapticBelt belt) {
             InitializeComponent();
 
@@ -37,8 +44,11 @@ namespace Haptikos
             }
         }
 
-        // This function invokes the main thread's UpdateText function
-        // in a loop while waiting for a request to close the application.
+        /// <summary>
+        /// This function invokes the main thread's UpdateText function 
+        /// in a loop while waiting for a request to close the application
+        /// </summary>
+        /// <param name="line"></param>
         protected void UpdateTxtLog(string line) {
             txtLogProg.Text += line + "\r\n-----------\r\n";
             txtLogProg.Select(txtLogProg.TextLength, 0);
@@ -116,6 +126,13 @@ namespace Haptikos
             int rhy_time = Int16.Parse(textBoxRhyTime.Text.Trim());
 
             int return_code = wirelessBelt.Learn_Rhythm(rhy_id, pattern_str, rhy_time, false);
+
+            UpdateTxtLog(wirelessBelt.getErrorMsg(return_code));
+        }
+
+        private void btnZap_Click(object sender, EventArgs e) {
+            
+            int return_code = wirelessBelt.Erase_All();
 
             UpdateTxtLog(wirelessBelt.getErrorMsg(return_code));
         }

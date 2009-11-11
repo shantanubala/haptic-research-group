@@ -8,9 +8,16 @@ using System.Windows.Forms;
 using System.IO.Ports;
 namespace Haptikos
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public partial class DemoForm : Form
     {
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="rhyItems"></param>
+        /// <param name="magItems"></param>
         public DemoForm(string[] rhyItems, string[] magItems)
         {
             InitializeComponent();
@@ -36,18 +43,31 @@ namespace Haptikos
             comboBoxCycles3.SelectedIndex = 0;
            
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public string GetSelectedRhy()     {
             return (string)comboBoxRhy3.SelectedItem;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public int GetSelectedMag()      {
             return (int)comboBoxMag3.SelectedIndex;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public int GetSelectedCycles() {
             return (int)(comboBoxCycles3.SelectedIndex);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public MainForm.demoTypes GetDemoType() {
             if (checkBoxSweep.Checked == true)
                 return MainForm.demoTypes.SWEEP;

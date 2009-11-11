@@ -8,130 +8,120 @@ namespace HapticDriver
 {
     public partial class HapticBelt
     {
+        /// <summary>
+        /// Function queries all haptic belt magnitude setting configurations
+        /// </summary>
+        /// <returns>error code resulting from Query command</returns>
         public int Query_Magnitude() {
             return Query("QRY MAG\r", 150);
         }
 
-        // This function returns all magnitude values stored on belt, 
-        // QRY ALL or QRY RHY must be used before this command to get current data
+        /// <summary>
+        /// This function returns all magnitude settings stored on belt from the last 
+        /// QRY ALL or QRY MAG operation
+        /// </summary>
+        /// <param name="dutyCycleFormat">determines if the returned string is in 
+        /// period/duty cycle format</param>
+        /// <returns> If dutyCycleFormat = true, then Magnitudes "[ID],[period],[dutyCycle]"
+        /// If dutyCycleFormat = false, then Magnitudes "[ID],[percentage]"</returns>
         public string[] getMagnitude(bool dutyCycleFormat) {
-            double Period, DutyCycle;
-            int Percentage;
 
             string[] return_values = new string[MAG_MAX_NO + 1];
-            return_values[0] = "NONE DEFINED";
+            double Period, DutyCycle;
+            int Percentage;
             int magCount = 0;
 
-            try { //Convert.ToInt16 can cause exception
+            for (int index = 1; index < qry_resp.Length; index++) {
+                if (qry_resp[index] != null) {
+                    string[] split = qry_resp[index].Split(' ');
 
-                for (int index = 1; index < qry_resp.Length; index++) {
-                    if (qry_resp[index] != null) {
-                        string[] split = qry_resp[index].Split(' ');
-
-                        //put the values from the response into the return array
-                        if (split[1].Equals("MAG")) {
-                            if (dutyCycleFormat == true) {
-                                //Populate Return Values --> Equals "Mag letter,period,dutyCycle"
-                                return_values[magCount + 1] = split[2] + "," + split[3] + "," + split[4];
-                            }
-                            else {
-                                //Populate Return Values --> Equals "Mag letter, percent magnitude"
-                                Period = Convert.ToInt32(split[3]);
-                                DutyCycle = Convert.ToInt32(split[4]);
-                                Percentage = (int)((DutyCycle / Period) * 100);
-                                return_values[magCount + 1] = split[2] + "," + Percentage;
-                            }
-                            magCount++; // count of defined magnitudes
+                    //put the values from the response into the return array
+                    if (split[1].Equals("MAG")) {
+                        if (dutyCycleFormat == true) {
+                            //Populate Return Values --> Equals "Mag letter,period,dutyCycle"
+                            return_values[magCount + 1] = split[2] + "," + split[3] + "," + split[4];
                         }
+                        else {
+                            //Populate Return Values --> Equals "Mag letter, percent magnitude"
+                            Period = Convert.ToInt32(split[3]);
+                            DutyCycle = Convert.ToInt32(split[4]);
+                            Percentage = (int)((DutyCycle / Period) * 100);
+                            return_values[magCount + 1] = split[2] + "," + Percentage;
+                        }
+                        magCount++; // count of defined magnitudes
                     }
                 }
             }
-            catch (Exception ex) {
-                MessageBox.Show("ERROR" + ex.Message);
-            }
-            return_values[0] = magCount.ToString(); // count of defined magnitudes
+            return_values[0] = magCount.ToString(); // count of defined magnitudes     
             return return_values;
         }
 
-        // Function returns a specific rhythm pattern stored on the belt
-        // QRY ALL or QRY RHY must be used before this command to get current data
+        /// <summary>
+        /// This function returns a specific magnitude setting stored on belt from the last 
+        /// QRY ALL or QRY RHY operation.
+        /// </summary>
+        /// <param name="mag_id">magnitude ID is between A and D</param>
+        /// <param name="dutyCycleFormat">determines if the returned string is in 
+        /// period/duty cycle format</param>
+        /// <returns> If dutyCycleFormat = true, then Magnitudes "[period],[dutyCycle]"
+        /// If dutyCycleFormat = false, then Magnitudes "[percentage]"</returns>
         public string getMagnitude(string mag_id, bool dutyCycleFormat) {
-            
+
             double Period, DutyCycle;
             int Percentage;
             string return_values = "";
-            //return_values[0] = "NONE DEFINED";
 
-            try { //Convert.ToInt16 can cause exception
+            for (int index = 1; index < qry_resp.Length; index++) {
+                if (qry_resp[index] != null) {
+                    string[] split = qry_resp[index].Split(' ');
 
-                for (int index = 1; index < qry_resp.Length; index++) {
-                    if (qry_resp[index] != null) {
-                        string[] split = qry_resp[index].Split(' ');
-
-                        //put the values from the response into the return array
-                        if (split[1].Equals("MAG") && split[2].Equals(mag_id)) {
-                            if (dutyCycleFormat == true) {
-                                //Populate Return Values --> Equals period,dutyCycle"
-                                return_values = split[3] + "," + split[4];
-                            }
-                            else {
-                                //Populate Return Values --> Equals "Mag letter, percent magnitude"
-                                Period = Convert.ToInt32(split[3]);
-                                DutyCycle = Convert.ToInt32(split[4]);
-                                Percentage = (int)((DutyCycle / Period) * 100);
-                                return_values =  "" + Percentage;
-                            }
+                    //put the values from the response into the return array
+                    if (split[1].Equals("MAG") && split[2].Equals(mag_id)) {
+                        if (dutyCycleFormat == true) {
+                            //Populate Return Values --> Equals period,dutyCycle"
+                            return_values = split[3] + "," + split[4];
+                        }
+                        else {
+                            //Populate Return Values --> Equals "Mag letter, percent magnitude"
+                            Period = Convert.ToInt32(split[3]);
+                            DutyCycle = Convert.ToInt32(split[4]);
+                            Percentage = (int)((DutyCycle / Period) * 100);
+                            return_values = "" + Percentage;
                         }
                     }
                 }
             }
-            catch (Exception ex) {
-                MessageBox.Show("ERROR" + ex.Message);
-            }
-            //return_values[0] = magCount.ToString(); // count of defined magnitudes
             return return_values;
         }
 
-        /* 
-         * This function sends a learn magnitude command to the belt in the form 
-         * LEARN MAGNITUDE <period> <duty cycle> 
-         */
-        //Belt Command: 
-        //    LEARN MAGNITUDE <period> <duty cycle>
-        //Belt Returns:
-        //    a response in the form
-        //        STATUS <error num> [<info>]
-        //
-        //*** string[] Learn_Magnitude(string period, string duty_cycle)
-        //        Returns:
-        //            string array of length 2
-        //                where 
-        //                    string[0] = error response
-        //                    string[1] = command sent
-        //        Parameters: 
-        //            string period = period of magnitude to be learned
-        //            string duty_cycle = duty_cycle of magnitude to be learned
+        /// <summary>
+        /// This function is used to program a specific magnitude on the belt
+        /// It sends a learn magnitude command to the belt in the form 
+        /// LRN MAG [id] [period] [duty_cycle]
+        /// </summary>
+        /// <param name="mag_id">magnitude ID is between "A" and "D"</param>
+        /// <param name="period">period of magnitude to be learned.  Maxmimum of 
+        /// 2000 microseconds</param>
+        /// <param name="duty_cycle">duty_cycle of magnitude to be learned.  
+        /// Minimum of 2 microseconds</param>
+        /// <returns>error code resulting from Learn Magnitude command</returns>
         public int Learn_Magnitude(string mag_id, UInt16 period, UInt16 duty_cycle) {
 
-            error_t return_error = error_t.EMAX;
+            error_t return_error = error_t.EINVM;
 
             if (String.Compare(mag_id, "A") < 0 || String.Compare(mag_id, "D") > 0) {
                 //invalid magnitude ID
-                //return_values[0] = "Invalid magnitude ID provided as argument to function";
-                //return_values[1] = "";
+                return_error = error_t.INVMAGID;
             }
             // ensure minimum duty because PWM TOP cannot be too small
             // duty cycle in microseconds must be < period
-            else if (period > Constants.PERIOD_MAX 
-                || duty_cycle > period 
+            else if (period > Constants.PERIOD_MAX
+                || duty_cycle > period
                 || duty_cycle < Constants.DUTY_CYCLE_MIN) {
                 return_error = error_t.EINVM;
             }
-            else if (!serialOut.IsOpen()) {
-                //return_error = status_msg.COMPRTNOTOPEN; //FIXME
-            }
             else {
-                string instruction = "LRN MAG " + mag_id + " " 
+                string instruction = "LRN MAG " + mag_id + " "
                     + period + " " + duty_cycle + "\r";
 
                 //send this output to the belt
@@ -141,42 +131,50 @@ namespace HapticDriver
                         // Send command with wait time for belt to respond back.
                         serialOut.WriteData(instruction, 200);
                     }
-
                     //check for STATUS <error number> [<info>]
                     checkBeltStatus();
                     if (belt_error != 0) {
                         return_error = belt_error;
-                        //return_values[0] = "No response from belt or belt error";
-                        //return_values[1] = "";
                     }
                     else {
                         return_error = error_t.ESUCCESS;
                     }
                 }
-                catch (Exception ex) {
-                    MessageBox.Show(ex.Message);
-                    return_error = error_t.EMAX;
+                catch {
+                    return_error = error_t.EXCLRNMAG;
                 }
             }
             return (int)return_error;
         }
 
-        // Wrapper to convert percentage to period and duty cycle
-        public int Learn_Magnitude(string rhy_id, int percentage) {
+        /// <summary>
+        /// Overload function is used to program a specific magnitude on the belt
+        /// by using a percent magnituded instead of a period and duty cycle
+        /// </summary>
+        /// <param name="mag_id">magnitude ID is between "A" and "D"</param>
+        /// <param name="percentage"></param>
+        /// <returns>error code resulting from Learn Magnitude command</returns>
+        public int Learn_Magnitude(string mag_id, int percentage) {
+            
             UInt16 period, duty_cycle, percent;
-
+            error_t return_error = error_t.EINVM;
+            
             // ensure that the percentage is a system minimum of 2%
             if (percentage < 1)
                 percent = 2;
-            else
+            else if (percentage > 100)
+                return_error = error_t.INVMAGHIGH;
+            else {
                 percent = (UInt16)percentage;
 
-            // Use PERIOD_MAX for belt's resolution at 2% magnitude to calculate 
-            // the duty cylce from the percent parameter.
-            period = Constants.PERIOD_MAX;
-            duty_cycle = (UInt16)((percent * period) / 100);
+                // Use PERIOD_MAX for belt's resolution at 2% magnitude to calculate 
+                // the duty cylce from the percent parameter.
+                period = Constants.PERIOD_MAX;
+                duty_cycle = (UInt16)((percent * period) / 100);
 
-            return Learn_Magnitude(rhy_id, period, duty_cycle); //returns error code
+                return_error = (error_t)Learn_Magnitude(mag_id, period, duty_cycle);
+            }
+            return (int)return_error;
         }
 
     }

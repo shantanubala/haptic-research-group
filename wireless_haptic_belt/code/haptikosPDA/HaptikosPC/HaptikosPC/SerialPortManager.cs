@@ -4,32 +4,9 @@ using System.Drawing;
 using System.IO.Ports;
 using System.Windows.Forms;
 //*****************************************************************************************
-//                           LICENSE INFORMATION
-//*****************************************************************************************
-//   PCCom.SerialCommunication Version 1.0.0.0
-//   Class file for managing serial port communication
-//
-//   Copyright (C) 2007  
-//   Richard L. McCutchen 
-//   Email: richard@psychocoder.net
-//   Created: 20OCT07
-//
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-//
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-//
-//   You should have received a copy of the GNU General Public License
-//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//*****************************************************************************************
 /*
- * SerialCommManager.cs Version 2.0.0.1, Jul 15, 2009
- * Modified Class file from above to be more portable.
+ * SerialCommManager.cs Nov 10, 2009
+ * Created to be more portable than regular .NET applications.
  * 
  * Nathan J. Edwards (nathan.edwards@asu.edu)
  */
@@ -66,8 +43,6 @@ namespace HapticDriver
 
         // Message passing items. 
         private bool _append_msg = false;
-        //internal bool _data_recv_ready = false;
-        //private bool _data_recv_event = false;
         private MutexLock serialMutex;
         private MutexLock dataBufferMutex;
         private MutexLock statusBufferMutex;
@@ -80,13 +55,15 @@ namespace HapticDriver
 
         #region Manager Constructors
         /// <summary>
-        /// Constructor to set the properties of our Manager Class
+        /// Constructor to set the properties of the SerialPortManager Class
         /// </summary>
-        /// <param name="baud">Desired BaudRate</param>
-        /// <param name="par">Desired Parity</param>
-        /// <param name="sBits">Desired StopBits</param>
-        /// <param name="dBits">Desired DataBits</param>
-        /// <param name="name">Desired PortName</param>
+        /// <param name="portName"></param>
+        /// <param name="baud"></param>
+        /// <param name="dBits"></param>
+        /// <param name="sBits"></param>
+        /// <param name="par"></param>
+        /// <param name="timeout"></param>
+        /// <param name="databuf"></param>
         internal SerialPortManager(string portName, string baud, string dBits, string sBits, string par, string timeout, Buffer databuf) {
             comPort = new SerialPort();
             serialMutex = new MutexLock();
@@ -181,7 +158,10 @@ namespace HapticDriver
             //*** _transType == TransmissionType.Text ***//
             try {
                 //first make sure the port is open, if its not open then open it
-                if (comPort.IsOpen == false) comPort.Open();
+                if (comPort.IsOpen == false) {
+                    comPort.Open();
+                    ReturnData(MessageType.WARNING, (byte)error_t.COMPRTNOTOPEN);
+                }
 
                 //send the message to the port
                 comPort.Write(msg);
@@ -190,9 +170,12 @@ namespace HapticDriver
                 //get response from belt
                 comPort_DataReceived(responseTimeout);
             }
-            catch (FormatException ex) {
-                ReturnData(MessageType.ERROR, Encoding.ASCII.GetBytes(ex.Message));
-                //ReturnData(MessageType.Error, (byte)status_msg.EXCEPTION);
+            // Saved for debug purposes
+            //catch (FormatException ex) {
+            //    ReturnData(MessageType.ERROR, Encoding.ASCII.GetBytes(ex.Message));
+            //}
+            catch {
+                ReturnData(MessageType.ERROR, (byte)error_t.EXCCOMPRTWRITE);
             }
         }
         internal void WriteData(byte[] msg, int responseTimeout) {
@@ -201,7 +184,10 @@ namespace HapticDriver
             try {
                 //first make sure the port is open
                 //if its not open then open it
-                if (!(comPort.IsOpen == true)) comPort.Open();
+                if (comPort.IsOpen == false) {
+                    comPort.Open();
+                    ReturnData(MessageType.WARNING, (byte)error_t.COMPRTNOTOPEN);
+                }
 
                 //send the message to the port  
                 comPort.Write(msg, 0, msg.Length);
@@ -212,9 +198,12 @@ namespace HapticDriver
                 //get response from belt
                 comPort_DataReceived(responseTimeout);
             }
-            catch (FormatException ex) {
-                ReturnData(MessageType.ERROR, Encoding.ASCII.GetBytes(ex.Message));
-                //ReturnData(MessageType.Error, (byte)status_msg.EXCEPTION);
+            // Saved for debug purposes
+            //catch (FormatException ex) {
+            //    ReturnData(MessageType.ERROR, Encoding.ASCII.GetBytes(ex.Message));
+            //}
+            catch {
+                ReturnData(MessageType.ERROR, (byte)error_t.EXCCOMPRTWRITE);
             }
         }
         #endregion
@@ -237,14 +226,16 @@ namespace HapticDriver
                 _portOpened = true;
 
                 //display message
-                ReturnData(MessageType.NORMAL, (byte)error_t.COMPRTOPEN);
-                return true;
+                ReturnData(MessageType.NORMAL, (byte)error_t.COMPRTOPEN);                
             }
-            catch (Exception ex) {
-                ReturnData(MessageType.ERROR, Encoding.ASCII.GetBytes(ex.Message));
-                //ReturnData(MessageType.Error, (byte)error_t.EXCEPTION);
-                return false;
+            // Saved for debug purposes
+            //catch (FormatException ex) {
+            //    ReturnData(MessageType.ERROR, Encoding.ASCII.GetBytes(ex.Message));
+            //}
+            catch {
+                ReturnData(MessageType.ERROR, (byte)error_t.EXCCOMPRTOPEN);
             }
+            return _portOpened;
         }
         #endregion
 
@@ -253,7 +244,7 @@ namespace HapticDriver
             try {
                 //first check if the port is already open, if its open then close it
                 if (comPort.IsOpen == true) {
-                    comPort.Close(); //TODO cannot close if serial port thread is sleeping or waiting.
+                    comPort.Close();
                     _portOpened = false;
 
                     //display message
@@ -264,14 +255,15 @@ namespace HapticDriver
 
                 // Help with garbage
                 this.DataReceivedFxn = null;
-
-                return true;
             }
-            catch (Exception ex) {
-                ReturnData(MessageType.ERROR, Encoding.ASCII.GetBytes(ex.Message));
-                //ReturnData(MessageType.Error, (byte)status_msg.EXCEPTION);
-                return false;
+            // Saved for debug purposes
+            //catch (FormatException ex) {
+            //    ReturnData(MessageType.ERROR, Encoding.ASCII.GetBytes(ex.Message));
+            //}
+            catch {
+                ReturnData(MessageType.ERROR, (byte)error_t.EXCCOMPRTCLS);
             }
+            return !_portOpened; // portOpened == false means success in operation
         }
         #endregion
 
@@ -306,12 +298,13 @@ namespace HapticDriver
         #endregion
 
         #region comPort_DataReceived
+
         /// <summary>
         /// method that will be called when there is data waiting in the buffer
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        internal void comPort_DataReceived(int timeout) {//object sender, SerialDataReceivedEventArgs e) {
+        /// <param name="timeout">Time allowed to recieve data on incoming 
+        /// serial COM port before processing buffer</param>
+        internal void comPort_DataReceived(int timeout) {
             byte[] comBuffer;
             int byte_count;
 

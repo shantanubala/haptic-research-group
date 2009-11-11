@@ -4,15 +4,14 @@ using System.Runtime.InteropServices;
 
 namespace HapticDriver
 {
-
     //Enums to handle bit fields in C# which are not allowed:
 
-   /*****************************************************************************
-    * FILE:   active_command.h
-    * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
-    * DESCR:  Active mode command definition.
-    * LOG:    20090510 - initial version
-    ****************************************************************************/
+    /*****************************************************************************
+     * FILE:   active_command.h
+     * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
+     * DESCR:  Active mode command definition.
+     * LOG:    20090510 - initial version
+     ****************************************************************************/
 
     // active mode command
     [StructLayout(LayoutKind.Explicit, Size = 2)]
@@ -74,17 +73,17 @@ namespace HapticDriver
         internal byte rhythm; // upper 3 bits
     };
 
-   /*****************************************************************************
-    * FILE:   error.h
-    * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
-    * DESCR:  Type definitions and function declarations for error handling.
-    * LOG:    20090501 - initial version
-    ****************************************************************************/
+    /*****************************************************************************
+     * FILE:   error.h
+     * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
+     * DESCR:  Type definitions and function declarations for error handling.
+     * LOG:    20090501 - initial version
+     ****************************************************************************/
 
     // error number definitions--must match the string table in error.c
     // in error descriptions, L = learning mode, O = operational mode,
     // P = controlling PC, M = main belt controller, V = vibrator controller
-    public enum error_t
+    internal enum error_t
     {
         // symbol	error type (belt mode, command source->destination)
         ESUCCESS,	// no error
@@ -104,20 +103,35 @@ namespace HapticDriver
         EBUSAN,		// I2C address not acknowledged		(L/O, M->V)
         EBUSDN,		// I2C data not acknowledged		(L/O, M->V)
         EMISSING,	// command not implemented yet		(L, P->M/M->V)
-        EMAX,		// invalid error number
+        EMAX,		// unknown error
 
         // status_msg definitions generated from DLL project
         // symbol
-        COMPRTINVALID, // invalid comm port parameters
-        COMPRTOPEN,    // comm port opened
-        COMPRTNOTOPEN, // comm port not open
-        COMPRTCLS,     // comm port closed
-        COMPRTCLSPREV, // comm port previously closed
-        EXCEPTION,     // exception occured
-        EXCWIRELESS    // exception occured - error sending over wireless
-
-
+        COMPRTINVALID,  // invalid comm port parameters
+        COMPRTOPEN,     // com port opened
+        COMPRTNOTOPEN,  // com port not open
+        COMPRTCLS,      // com port closed
+        COMPRTCLSPREV,  // com port previously closed
+        COMPRTSETUP,    // com port setup error
+        INVRHYID,       // invalid rhythm ID
+        INVRHYPATHEX,   // rhythm pattern not a list of hex values
+        INVRHYPATBIN,   // rhythm pattern not a list of binary values
+        INVRHYPATLEN,   // invalid pattern length - too long
+        INVRHYTIME,     // invalid rhythm time
+        INVMAGID,       // invalid magnitude ID
+        INVMAGHIGH,     // invalid magnitude - exceeds maximum of 100%
+        EXCEPTION,      // exception occured
+        EXCVIBCMD,      // exception occured - vibrate command
+        EXCQRYCMD,      // exception occured - query command
+        EXCZAPCMD,      // exception occured - erase all command
+        EXCLRNRHY,      // exception occured - learn rhythm command
+        EXCLRNMAG,      // exception occured - learn magnitude command
+        EXCCOMPRTWRITE, // exception occured - serial com port write data
+        EXCCOMPRTOPEN,  // exception occured - opening serial com port
+        EXCCOMPRTCLS,   // exception occured - closing serial com port
+        EXCWIRELESS     // exception occured - error sending over wireless
     };
+
     /// <summary>
     /// enumeration to hold SerialPortManager message types
     /// </summary>
@@ -153,7 +167,23 @@ namespace HapticDriver
         private const string comprtnotopen = "Com port not opened";
         private const string comprtcls = "Com port closed";
         private const string comprtclsprev = "Com port previously closed";
+        private const string comprtsetup = "Com port setup error";
+        private const string invrhyid = "Invalid rhythm ID";
+        private const string invrhypathex = "Rhythm pattern not a list of hex values";
+        private const string invrhypatbin = "Rhythm pattern not a list of binary values";
+        private const string invrhypatlen = "Invalid pattern length - too long";
+        private const string invrhytime = "Invalid rhythm time";
+        private const string invmagid = "Invalid magnitude ID";
+        private const string invmaghigh = "Invalid magnitude - exceeds maximum of 100%";
         private const string exception = "Exception occured";
+        private const string excvibcmd = "Exception occured - vibrate command";
+        private const string excqrycmd = "Exception occured - query command";
+        private const string exczapcmd = "Exception occured - erase all command";
+        private const string exclrnrhy = "Exception occured - learn rhythm command";
+        private const string exclrnmag = "Exception occured - learn magnitude command";
+        private const string execomprtwrite = "Exception occured - serial com port write data";
+        private const string execomprtopen = "Exception occured - opening serial com port";
+        private const string execomprtcls = "Exception occured - closing serial com port";
         private const string excwireless = "Error sending command over wireless";
 
         internal static string[] error_t_names = {
@@ -183,7 +213,23 @@ namespace HapticDriver
             comprtnotopen,
             comprtcls,
             comprtclsprev,
+            comprtsetup,
+            invrhyid,
+            invrhypathex,
+            invrhypatbin,
+            invrhypatlen,
+            invrhytime,
+            invmagid,
+            invmaghigh,
             exception,
+            excvibcmd,
+            excqrycmd,
+            exczapcmd,
+            exclrnrhy,
+            exclrnmag,
+            execomprtwrite,
+            execomprtopen,
+            execomprtcls,
             excwireless
         };
 

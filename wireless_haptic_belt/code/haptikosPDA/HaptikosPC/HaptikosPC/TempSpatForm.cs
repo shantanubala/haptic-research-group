@@ -10,6 +10,11 @@ namespace Haptikos
 {
     public partial class TempSpatForm : Form
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="rhyItems"></param>
+        /// <param name="magItems"></param>
         public TempSpatForm(string[] rhyItems, string[] magItems) {
             InitializeComponent();
 

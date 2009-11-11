@@ -11,11 +11,21 @@ using HapticDriver;
 
 namespace Haptikos
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public partial class MainForm : Form
     {
         HapticBelt wirelessBelt;// = new HapticBelt();
 
+        /// <summary>
+        /// Enumeration for data types, used when populating combo-boxes
+        /// </summary>
         public enum dataTypes { MTR, RHY, MAG };
+        
+        /// <summary>
+        /// Enumeration for demo types, used when activating various demos
+        /// </summary>
         public enum demoTypes { SCAN, SWEEP, HEARTBEATS };
 
         private string inboundPort = "";
@@ -26,14 +36,13 @@ namespace Haptikos
         private string databits_string = "8";
         private string readTimeout_string = "1000";
 
-        protected UInt16 newDataAvail = 0;
         private string[] magnitude_table;
 
         //Demo elements
         DemoForm demoForm;
         TempSpatForm tempSpatForm;
-        bool stop_demo = false;
-        private string demoMotor = "";
+        //bool stop_demo = false;
+        //private string demoMotor = "";
         private string demoRhy = "";
         private int demoMag = 0;
         private int demoCycles = 0;
@@ -48,11 +57,12 @@ namespace Haptikos
         //Thread demoThread;
 
         // Use delegates to point to the main thread's fucntions
-        //private delegate void _demoThread();
         private delegate void updateText(string s);
-        //private delegate void closeDel();
         private delegate void disconnectDel();
 
+        /// <summary>
+        /// 
+        /// </summary>
         public MainForm() {
             InitializeComponent();
             labelStatusMsg.Text = "Ports not set.";
@@ -90,8 +100,10 @@ namespace Haptikos
 
         }
 
-        // This function invokes the main thread's UpdateText function
-        // in a loop while waiting for a request to close the application.
+        /// <summary>
+        /// This function invokes the main thread's onDisconnect or 
+        /// closeRequested.
+        /// </summary>
         protected void MainControlThread() {
             do {
                 Thread.Sleep(2000);
@@ -104,8 +116,10 @@ namespace Haptikos
                 this.Invoke(new disconnectDel(onDisconnect));
         }
 
-        // This function invokes the main thread's UpdateText function
-        // in a loop while waiting for a request to close the application.
+        /// <summary>
+        /// This function invokes the main thread's UpdateText function in 
+        /// a loop while waiting for a request to close the application.
+        /// </summary>
         protected void UpdateTxtLog() {
             if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.INCOMING) {
                 try {
@@ -289,6 +303,7 @@ namespace Haptikos
             form.Close();
             MessageBox.Show("Please make sure the Bluetooth device and PDA are turned on!");
             // autoconnect
+            System.Threading.Thread.Sleep(50);
             mnuConnect_Click(sender, e);
         }
 
@@ -307,6 +322,7 @@ namespace Haptikos
                 labelStatusMsg.Text = "Ports set. in:";
             }
             form.Close();
+            System.Threading.Thread.Sleep(50);
             btnQuery_Click(sender,e); // Send a Query Command to refresh menus
         }
 
@@ -567,10 +583,10 @@ namespace Haptikos
 
         private void btnStopAll_Click(object sender, EventArgs e) {
             try {
-                stop_demo = true;
+                //stop_demo = true;
                 int response = wirelessBelt.StopAll();
 
-                labelStatusMsg.Text = "Stoping All Motors.  " ; //TODO
+                labelStatusMsg.Text = "Stoping All Motors." ;
             }
             catch (Exception ex) {
                 MessageBox.Show(ex.Message);
@@ -623,14 +639,14 @@ namespace Haptikos
         }
 
         private void btnActivateDemo_Click(object sender, EventArgs e) {
-            //string motor_no, string rhy_string, string mag_string, int rhy_cycles) {//object sender, EventArgs e) {
-            stop_demo = false;
+            //string motor_no, string rhy_string, string mag_string, int rhy_cycles) {
+            //stop_demo = false;
             int response;
             int motor_total = comboBoxMotor.Items.Count;
 
             //int index = 1;
 
-            demoMotor = "1";
+            //demoMotor = "1";
             demoRhy = demoForm.GetSelectedRhy();
             demoMag = demoForm.GetSelectedMag();
             demoCycles = demoForm.GetSelectedCycles() +1; // list is zero based, 0 = stop
