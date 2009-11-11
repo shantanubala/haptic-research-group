@@ -106,7 +106,7 @@ namespace Haptikos
             // 
             this.menuSetupRhyMag.Enabled = false;
             this.menuSetupRhyMag.Index = 2;
-            this.menuSetupRhyMag.Text = "Setup Rhythm + Mag";
+            this.menuSetupRhyMag.Text = "Haptics Setup";
             this.menuSetupRhyMag.Click += new System.EventHandler(this.mnuSetupRhyMag_Click);
             // 
             // menuDisconnect
@@ -357,7 +357,7 @@ namespace Haptikos
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(240, 269);
+            this.ClientSize = new System.Drawing.Size(240, 249);
             this.Controls.Add(this.tabControl1);
             this.Menu = this.mainMenu1;
             this.Name = "MainForm";

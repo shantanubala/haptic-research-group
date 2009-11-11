@@ -1,5 +1,8 @@
 namespace Haptikos
 {
+    /// <summary>
+    /// 
+    /// </summary>
     partial class SettingsForm
     {
         /// <summary>

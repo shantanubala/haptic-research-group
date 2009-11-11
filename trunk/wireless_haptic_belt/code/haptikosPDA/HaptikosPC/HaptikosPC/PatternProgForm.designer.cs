@@ -199,6 +199,7 @@ namespace Haptikos
             this.btnZap.TabIndex = 26;
             this.btnZap.Text = "Erase All";
             this.btnZap.UseVisualStyleBackColor = true;
+            this.btnZap.Click += new System.EventHandler(this.btnZap_Click);
             // 
             // btnQryMag
             // 

@@ -12,6 +12,12 @@ namespace Haptikos
     {
         private string inboundPort;
         private string outboundPort;
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="inbound"></param>
+        /// <param name="outbound"></param>
         public SettingsForm(string inbound, string outbound) {
             InitializeComponent();
 
@@ -56,9 +62,17 @@ namespace Haptikos
             //}
 
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public string GetInboundPort() {
             return (string)comboBoxInbound.SelectedItem;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public string GetOutboundPort() {
             return (string)comboBoxOutbound.SelectedItem;
         }
