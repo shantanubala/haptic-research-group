@@ -226,7 +226,10 @@ namespace HapticDriver
                 _portOpened = true;
 
                 //display message
-                ReturnData(MessageType.NORMAL, (byte)error_t.COMPRTOPEN);                
+                ReturnData(MessageType.NORMAL, (byte)error_t.COMPRTOPEN);
+
+                // Add slight timing delay before other functions can use serial port.
+                System.Threading.Thread.Sleep(50); 
             }
             // Saved for debug purposes
             //catch (FormatException ex) {

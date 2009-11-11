@@ -607,11 +607,6 @@
             enumeration to hold our transmission types
             </summary>
         </member>
-        <member name="T:HapticDriver.MessageType">
-            <summary>
-            enumeration to hold SerialPortManager message types
-            </summary>
-        </member>
         <member name="T:HaptikosPC.Properties.Resources">
             <summary>
               A strongly-typed resource class, for looking up localized strings, etc.
@@ -626,6 +621,11 @@
             <summary>
               Overrides the current thread's CurrentUICulture property for all
               resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="T:HapticDriver.MessageType">
+            <summary>
+            enumeration to hold SerialPortManager message types
             </summary>
         </member>
     </members>
