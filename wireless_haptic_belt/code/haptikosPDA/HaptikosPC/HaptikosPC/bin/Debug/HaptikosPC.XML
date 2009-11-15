@@ -15,24 +15,26 @@
             </summary>
             <returns>error code resulting from Query command</returns>
         </member>
-        <member name="M:HapticDriver.HapticBelt.getRhythm(System.Boolean)">
+        <member name="M:HapticDriver.HapticBelt.getRhythm(System.Boolean,HapticDriver.QueryType)">
             <summary>
             This function returns all rhythm values stored on belt from the last 
             QRY ALL or QRY RHY operation
             </summary>
             <param name="binary">determines if the returned string is in binary format</param>
+            <param name="query_type">specifies which type of query to execute</param>
             <returns> Rhythm "[ID],[hex/binary pattern],[length]"</returns>
         </member>
-        <member name="M:HapticDriver.HapticBelt.getRhythmPattern(System.String,System.Boolean)">
+        <member name="M:HapticDriver.HapticBelt.getRhythmPattern(System.String,System.Boolean,HapticDriver.QueryType)">
             <summary>
             This function returns a specific rhythm pattern stored on belt from the last 
             QRY ALL or QRY RHY operation.
             </summary>
             <param name="rhy_id">rhythm ID is between "A" and "H"</param>
             <param name="binary">determines if the returned string is in binary format</param>
+            <param name="query_type">specifies which type of query to execute</param>
             <returns> Rhythm "[hex/binary pattern]" or blank if not defined</returns>
         </member>
-        <member name="M:HapticDriver.HapticBelt.getRhythmTime(System.String)">
+        <member name="M:HapticDriver.HapticBelt.getRhythmTime(System.String,HapticDriver.QueryType)">
             <summary>
             Function returns a specific rhythm time stored on the belt from the last 
             QRY ALL or QRY RHY operation. This time is the number of bits argument 
@@ -40,6 +42,7 @@
             used in the rhythm.
             </summary>
             <param name="rhy_id">rhythm ID is between "A" and "H"</param>
+            <param name="query_type">specifies which type of query to execute</param>
             <returns>rhythm time of rhythm in increments of 50 milliseconds</returns>
         </member>
         <member name="M:HapticDriver.HapticBelt.Learn_Rhythm(System.String,System.String,System.Int32,System.Boolean)">
@@ -55,6 +58,14 @@
             of the 64 bits specified by the pattern are actually used in the rhythm.</param>
             <param name="binary">Set TRUE if the rhythm pattern string is in binary format</param>
             <returns>error code resulting from Learn Rhythm command</returns>
+        </member>
+        <member name="F:HapticDriver.HapticBelt.MAX_RESPONSE_TIMEOUT">
+            <summary>
+            The maximum time to wait for a status response from
+            the Haptic Belt before generating a timeout error.  The
+            default is 400 milliseconds, which might need to be increased
+            for long wireless transmission distances (up to 100m outdoors).
+            </summary>
         </member>
         <member name="F:HapticDriver.HapticBelt.MTR_MAX_NO">
             <summary>
@@ -114,12 +125,17 @@
             from the outgoing serial COM port
             </summary>
         </member>
-        <member name="M:HapticDriver.HapticBelt.getErrorMsg">
+        <member name="M:HapticDriver.HapticBelt.getError">
             <summary>
-            Accessor method that returns the Haptic Belt driver's current error code message
+            Accessor method that returns the Haptic Belt's current error code
             </summary>
         </member>
-        <member name="M:HapticDriver.HapticBelt.getErrorMsg(System.Int32)">
+        <member name="M:HapticDriver.HapticBelt.getErrorMsg">
+            <summary>
+            Accessor method that returns the Haptic Belt's current error code message
+            </summary>
+        </member>
+        <member name="M:HapticDriver.HapticBelt.getErrorMsg(HapticDriver.error_t)">
             <summary>
             Accessor method that returns the error code message for a particular error code.
             </summary>
@@ -147,18 +163,22 @@
             Closes all COM ports in use for the wireless haptic belt.
             </summary>
         </member>
-        <member name="M:HapticDriver.HapticBelt.WriteData(System.String)">
+        <member name="M:HapticDriver.HapticBelt.SerialPortWriteData(System.String,System.Int32)">
             <summary>
             Send a string to the outgoing serial COM port
             </summary>
             <param name="dataString"></param>
+            /// <param name="responseTimeout">Time allowed to recieve data on incoming 
+            serial COM port before processing buffer</param>
             <returns>error code resulting from sending the string data</returns>
         </member>
-        <member name="M:HapticDriver.HapticBelt.WriteData(System.Byte[])">
+        <member name="M:HapticDriver.HapticBelt.SerialPortWriteData(System.Byte[],System.Int32)">
             <summary>
             Send binary data (byte array) to the outgoing serial COM port
             </summary>
             <param name="data"></param>
+            /// <param name="responseTimeout">Time allowed to recieve data on incoming 
+            serial COM port before processing buffer</param>
             <returns>error code resulting from sending the binary data</returns>
         </member>
         <member name="M:HapticDriver.HapticBelt.ResetHapticBelt">
@@ -241,14 +261,14 @@
             </summary>
             <returns>error code resulting from Query command</returns>
         </member>
-        <member name="M:HapticDriver.HapticBelt.getVersion">
+        <member name="M:HapticDriver.HapticBelt.getVersion(HapticDriver.QueryType)">
             <summary>
-            This function returns the firmware version from the last QRY ALL operation
+            This function returns the firmware version from the specified QRY operation
             </summary>
         </member>
-        <member name="M:HapticDriver.HapticBelt.getMotors">
+        <member name="M:HapticDriver.HapticBelt.getMotors(HapticDriver.QueryType)">
             <summary>
-            This function returns the motor count from the last QRY ALL operation
+            This function returns the motor count from the specified QRY operation
             </summary>
         </member>
         <member name="M:HapticDriver.HapticBelt.Erase_All">
@@ -278,23 +298,31 @@
             <param name="comByte">byte array to convert</param>
             <returns>a hex string</returns>
         </member>
+        <member name="M:HapticDriver.HapticBelt.AsciiToByte(System.String)">
+            <summary>
+            method to convert ASCII string into a byte array.
+            </summary>
+            <param name="msg">string to convert</param>
+            <returns>a hex string</returns>
+        </member>
         <member name="M:HapticDriver.HapticBelt.Query_Magnitude">
             <summary>
             Function queries all haptic belt magnitude setting configurations
             </summary>
             <returns>error code resulting from Query command</returns>
         </member>
-        <member name="M:HapticDriver.HapticBelt.getMagnitude(System.Boolean)">
+        <member name="M:HapticDriver.HapticBelt.getMagnitude(System.Boolean,HapticDriver.QueryType)">
             <summary>
             This function returns all magnitude settings stored on belt from the last 
             QRY ALL or QRY MAG operation
             </summary>
             <param name="dutyCycleFormat">determines if the returned string is in 
             period/duty cycle format</param>
+            <param name="query_type">specifies which type of query to execute</param>
             <returns> If dutyCycleFormat = true, then Magnitudes "[ID],[period],[dutyCycle]"
             If dutyCycleFormat = false, then Magnitudes "[ID],[percentage]"</returns>
         </member>
-        <member name="M:HapticDriver.HapticBelt.getMagnitude(System.String,System.Boolean)">
+        <member name="M:HapticDriver.HapticBelt.getMagnitude(System.String,System.Boolean,HapticDriver.QueryType)">
             <summary>
             This function returns a specific magnitude setting stored on belt from the last 
             QRY ALL or QRY RHY operation.
@@ -302,6 +330,7 @@
             <param name="mag_id">magnitude ID is between A and D</param>
             <param name="dutyCycleFormat">determines if the returned string is in 
             period/duty cycle format</param>
+            <param name="query_type">specifies which type of query to execute</param>
             <returns> If dutyCycleFormat = true, then Magnitudes "[period],[dutyCycle]"
             If dutyCycleFormat = false, then Magnitudes "[percentage]"</returns>
         </member>
@@ -595,10 +624,11 @@
             <param name="type">MessageType of the message</param>
             <param name="msg">Message to display</param>
         </member>
-        <member name="M:HapticDriver.SerialPortManager.comPort_DataReceived(System.Int32)">
+        <member name="M:HapticDriver.SerialPortManager.ReceiveData(HapticDriver.SerialPortManager.DataType,System.Int32)">
             <summary>
             method that will be called when there is data waiting in the buffer
             </summary>
+            <param name="type">The expected data type to be read from the serial port</param>
             <param name="timeout">Time allowed to recieve data on incoming 
             serial COM port before processing buffer</param>
         </member>
@@ -623,9 +653,198 @@
               resource lookups using this strongly typed resource class.
             </summary>
         </member>
+        <member name="T:HapticDriver.error_t">
+            <summary>
+            Error number definitions--must match the string table in class Constants
+            </summary>
+        </member>
+        <member name="F:HapticDriver.error_t.ESUCCESS">
+            <summary>No error</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EBADCMD">
+            <summary>Command not recognized</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.ETOOBIG">
+            <summary>Command too long</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EARG">
+            <summary>Invalid argument</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.ENOR">
+            <summary>Requested rhythm not defined</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.ENOM">
+            <summary>Requested magnitude not defined</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.ENOS">
+            <summary>Spatio-temporal pattern not defined</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.ENOMOTOR">
+            <summary>Requested motor not present on belt</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EINVR">
+            <summary>Invalid rhythm definition</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EINVM">
+            <summary>Invalid magnitude definition</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EINVS">
+            <summary>Invalid spatio-temporal definition</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EBADVC">
+            <summary>Vibrator command not recognized</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EBUS">
+            <summary>I2C communication failed</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EBUSOF">
+            <summary>I2C transmit overflow</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EBUSAN">
+            <summary>I2C address not acknowledged</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EBUSDN">
+            <summary>I2C data not acknowledged</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EMISSING">
+            <summary>Command not implemented yet</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EMAX">
+            <summary>Unknown error</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.COMPRTINVALID">
+            <summary>Invalid comm port parameters</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.COMPRTOPEN">
+            <summary>Com port opened</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.COMPRTNOTOPEN">
+            <summary>Com port not open</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.COMPRTCLS">
+            <summary>Com port closed</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.COMPRTCLSPREV">
+            <summary>Com port previously closed</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.COMPRTSETUP">
+            <summary>Com port setup error</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.COMPRTWRITE">
+            <summary>Com port write data error</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.COMPRTREADTIME">
+            <summary>Com port read data timeout</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.INVRHYID">
+            <summary>Invalid rhythm ID</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.INVRHYPATHEX">
+            <summary>Rhythm pattern not a list of hex values</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.INVRHYPATBIN">
+            <summary>Rhythm pattern not a list of binary values</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.INVRHYPATLEN">
+            <summary>Invalid pattern length - too long</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.INVRHYTIME">
+            <summary>Invalid rhythm time</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.INVMAGID">
+            <summary>Invalid magnitude ID</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.INVMAGHIGH">
+            <summary>Invalid magnitude - exceeds maximum of 100%</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EXCEPTION">
+            <summary>Exception occured</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EXCVIBCMD">
+            <summary>Exception occured - vibrate command</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EXCQRYCMD">
+            <summary>Exception occured - query command</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EXCZAPCMD">
+            <summary>Exception occured - erase all command</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EXCLRNRHY">
+            <summary>Exception occured - learn rhythm command</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EXCLRNMAG">
+            <summary>Exception occured - learn magnitude command</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EXCCOMPRTWRITE">
+            <summary>Exception occured - serial com port write data</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EXCCOMPRTOPEN">
+            <summary>Exception occured - opening serial com port</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EXCCOMPRTCLS">
+            <summary>Exception occured - closing serial com port</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EXCWIRELESS">
+            <summary>Exception occured - error sending over wireless</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.EXCDATASEARCH">
+            <summary>Exception occured - searching for requested data</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.NOTFOUND">
+            <summary>Requested data not found</summary> 
+        </member>
         <member name="T:HapticDriver.MessageType">
             <summary>
-            enumeration to hold SerialPortManager message types
+            Enumeration to hold SerialPortManager message types
+            </summary>
+        </member>
+        <member name="F:HapticDriver.MessageType.INCOMING">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:HapticDriver.MessageType.OUTGOING">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:HapticDriver.MessageType.NORMAL">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:HapticDriver.MessageType.WARNING">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:HapticDriver.MessageType.ERROR">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:HapticDriver.QueryType">
+            <summary>
+            Enumeration that specifies which type of query to execute 
+            </summary>
+        </member>
+        <member name="F:HapticDriver.QueryType.PREVIOUS">
+            <summary>
+            Does not execute query.  Used in methods where you want 
+            the previous local data returned without executing a query
+            of the haptic belt's configuration. NOTE: may be old data.
+            </summary>
+        </member>
+        <member name="F:HapticDriver.QueryType.SINGLE">
+            <summary>
+            Execute query of a single item (such as Rhythms).  Used
+            in methods where you want current belt configuration
+            returned but do not want to wait for a Query All
+            </summary>
+        </member>
+        <member name="F:HapticDriver.QueryType.ALL">
+            <summary>
+            Execute query of all haptic belt configurations.
             </summary>
         </member>
     </members>

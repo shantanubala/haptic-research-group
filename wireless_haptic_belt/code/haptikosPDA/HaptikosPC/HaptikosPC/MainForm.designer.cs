@@ -42,6 +42,8 @@ namespace Haptikos
             this.menuQryRhy = new System.Windows.Forms.MenuItem();
             this.menuQryMag = new System.Windows.Forms.MenuItem();
             this.menuQryTempSpat = new System.Windows.Forms.MenuItem();
+            this.menuStopAll = new System.Windows.Forms.MenuItem();
+            this.menuResetBelt = new System.Windows.Forms.MenuItem();
             this.txtMess = new System.Windows.Forms.TextBox();
             this.btnSend = new System.Windows.Forms.Button();
             this.txtLog = new System.Windows.Forms.TextBox();
@@ -138,7 +140,9 @@ namespace Haptikos
             this.menuQryMtr,
             this.menuQryRhy,
             this.menuQryMag,
-            this.menuQryTempSpat});
+            this.menuQryTempSpat,
+            this.menuStopAll,
+            this.menuResetBelt});
             this.menuItem1.Text = "System Tests";
             // 
             // menuQryVer
@@ -175,6 +179,20 @@ namespace Haptikos
             this.menuQryTempSpat.Index = 4;
             this.menuQryTempSpat.Text = "Query Temp-Spat";
             this.menuQryTempSpat.Click += new System.EventHandler(this.menuItemQryTempSpat_Click);
+            // 
+            // menuStopAll
+            // 
+            this.menuStopAll.Enabled = false;
+            this.menuStopAll.Index = 5;
+            this.menuStopAll.Text = "Stop All";
+            this.menuStopAll.Click += new System.EventHandler(this.menuStopAll_Click);
+            // 
+            // menuResetBelt
+            // 
+            this.menuResetBelt.Enabled = false;
+            this.menuResetBelt.Index = 6;
+            this.menuResetBelt.Text = "Reset Haptic Belt";
+            this.menuResetBelt.Click += new System.EventHandler(this.menuResetBelt_Click);
             // 
             // txtMess
             // 
@@ -357,7 +375,7 @@ namespace Haptikos
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(240, 249);
+            this.ClientSize = new System.Drawing.Size(240, 268);
             this.Controls.Add(this.tabControl1);
             this.Menu = this.mainMenu1;
             this.Name = "MainForm";
@@ -404,6 +422,8 @@ namespace Haptikos
         private System.Windows.Forms.MenuItem menuQryVer;
         private System.Windows.Forms.MenuItem menuQryTempSpat;
         private System.Windows.Forms.MenuItem menuSetupRhyMag;
+        private System.Windows.Forms.MenuItem menuStopAll;
+        private System.Windows.Forms.MenuItem menuResetBelt;
         //private System.Windows.Forms.CheckBox checkBoxHeartbeats;
         //private System.Windows.Forms.CheckBox checkBoxSweep;
         //private System.Windows.Forms.Label labelDemoCfg;

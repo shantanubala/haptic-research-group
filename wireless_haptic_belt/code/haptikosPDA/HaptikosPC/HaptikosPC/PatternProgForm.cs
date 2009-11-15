@@ -33,7 +33,7 @@ namespace Haptikos
 
             // Display current belt information
             try {
-                int response = wirelessBelt.Query_All();
+                error_t response = wirelessBelt.Query_All();
                 if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.INCOMING) {
                     string line = wirelessBelt.getDataRecvBuffer();
                     UpdateTxtLog(line);
@@ -57,18 +57,18 @@ namespace Haptikos
 
         private void comboBoxRhySel_SelectedIndexChanged(object sender, EventArgs e) {
             string rhy_id = comboBoxRhySel.SelectedItem.ToString();
-            textBoxRhyPattern.Text = wirelessBelt.getRhythmPattern(rhy_id, false);
-            textBoxRhyTime.Text = wirelessBelt.getRhythmTime(rhy_id);
+            textBoxRhyPattern.Text = wirelessBelt.getRhythmPattern(rhy_id, false, QueryType.PREVIOUS);
+            textBoxRhyTime.Text = wirelessBelt.getRhythmTime(rhy_id, QueryType.PREVIOUS);
         }
 
         private void comboBoxMagSel_SelectedIndexChanged(object sender, EventArgs e) {
             string mag_id = comboBoxMagSel.SelectedItem.ToString();
-            textBoxMagPercent.Text = wirelessBelt.getMagnitude(mag_id, false);
+            textBoxMagPercent.Text = wirelessBelt.getMagnitude(mag_id, false, QueryType.PREVIOUS);
         }
 
         private void btnQryAll_Click(object sender, EventArgs e) {
             try {
-                int response = wirelessBelt.Query_All();
+                error_t response = wirelessBelt.Query_All();
                 if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.INCOMING) {
                     string line = wirelessBelt.getDataRecvBuffer();
                     UpdateTxtLog(line);
@@ -83,7 +83,8 @@ namespace Haptikos
 
         private void btnQryRhy_Click(object sender, EventArgs e) {
             try {
-                int response = wirelessBelt.Query_Rhythm();
+                String[] rhythm = wirelessBelt.getRhythm(false, QueryType.SINGLE);
+
                 if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.INCOMING) {
                     string line = wirelessBelt.getDataRecvBuffer();
                     UpdateTxtLog(line);
@@ -97,7 +98,8 @@ namespace Haptikos
 
         private void btnQryMag_Click(object sender, EventArgs e) {
             try {
-                int response = wirelessBelt.Query_Magnitude();
+                String[] magnitude = wirelessBelt.getMagnitude(false, QueryType.SINGLE);
+
                 if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.INCOMING) {
                     string line = wirelessBelt.getDataRecvBuffer();
                     UpdateTxtLog(line);
@@ -113,7 +115,7 @@ namespace Haptikos
             string mag_id = comboBoxMagSel.SelectedItem.ToString();
             int percentage = Int16.Parse(textBoxMagPercent.Text.Trim());
 
-            int return_code = wirelessBelt.Learn_Magnitude(mag_id, percentage);
+            error_t return_code = wirelessBelt.Learn_Magnitude(mag_id, percentage);
 
             UpdateTxtLog(wirelessBelt.getErrorMsg(return_code));
         }
@@ -125,14 +127,14 @@ namespace Haptikos
             string pattern_str = textBoxRhyPattern.Text.Trim().ToUpper();
             int rhy_time = Int16.Parse(textBoxRhyTime.Text.Trim());
 
-            int return_code = wirelessBelt.Learn_Rhythm(rhy_id, pattern_str, rhy_time, false);
+            error_t return_code = wirelessBelt.Learn_Rhythm(rhy_id, pattern_str, rhy_time, false);
 
             UpdateTxtLog(wirelessBelt.getErrorMsg(return_code));
         }
 
         private void btnZap_Click(object sender, EventArgs e) {
             
-            int return_code = wirelessBelt.Erase_All();
+            error_t return_code = wirelessBelt.Erase_All();
 
             UpdateTxtLog(wirelessBelt.getErrorMsg(return_code));
         }
