@@ -12,7 +12,7 @@ namespace HapticDriver
         /// Function queries all haptic belt rhythm pattern configurations
         /// </summary>
         /// <returns>error code resulting from Query command</returns>
-        public int Query_Rhythm() {
+        private error_t Query_Rhythm() {
             return Query("QRY RHY\r", 200);
         }
 
@@ -21,44 +21,54 @@ namespace HapticDriver
         /// QRY ALL or QRY RHY operation
         /// </summary>
         /// <param name="binary">determines if the returned string is in binary format</param>
+        /// <param name="query_type">specifies which type of query to execute</param>
         /// <returns> Rhythm "[ID],[hex/binary pattern],[length]"</returns>
-        public string[] getRhythm(bool binary) {
-
+        public string[] getRhythm(bool binary, QueryType query_type) {
             string[] return_values = new string[RHY_MAX_NO + 1];
             int rhyCount = 0;
+            error_t return_error = error_t.NOTFOUND;
 
-            for (int index = 1; index < qry_resp.Length; index++) {
-                if (qry_resp[index] != null) {
-                    string[] split = qry_resp[index].Split(' ');
+            // Query configuration data from belt
+            return_error = QuerySelect("QRY RHY\r", query_type);
 
-                    //put the values from the response into the return array
-                    if (split[1].Equals("RHY")) {
-                        //Populate Return Values
-                        return_values[rhyCount + 1] = split[2];
+            // Search and process data
+            if (return_error == error_t.ESUCCESS) {
+                return_error = error_t.NOTFOUND;
+                for (int index = 1; index < qry_resp.Length; index++) {
+                    if (qry_resp[index] != null) {
+                        string[] split = qry_resp[index].Split(' ');
 
-                        //return the rhythm pattern as hex (default) or as a binary string
-                        if (!binary) {
-                            return_values[rhyCount + 1] += "," + split[3];
-                        }
-                        else {
-                            string binary_pattern = "";
-                            binary_pattern = HexToBinary(split[3]);
-                            if (String.Equals(binary_pattern, "Error")) {
-                                return_values[0] = "Invalid rhythm query - does not contain hex values";
+                        //put the values from the response into the return array
+                        if (split[1].Equals("RHY")) {
+                            //Populate Return Values
+                            return_values[rhyCount + 1] = split[2];
+                            return_error = error_t.ESUCCESS;
+
+                            //return the rhythm pattern as hex (default) or as a binary string
+                            if (!binary) {
+                                return_values[rhyCount + 1] += "," + split[3];
                             }
-                            return_values[rhyCount + 1] += "," + binary_pattern;
+                            else {
+                                string binary_pattern = "";
+                                binary_pattern = HexToBinary(split[3]);
+                                if (String.Equals(binary_pattern, "Error")) {
+                                    return_values[0] = "Invalid rhythm query - does not contain hex values";
+                                }
+                                return_values[rhyCount + 1] += "," + binary_pattern;
+                            }
+                            // Check RHY length
+                            if (Convert.ToInt32(split[4]) == 0)
+                                return_values[0] = "rhythm is currently empty";
+                            else {
+                                return_values[rhyCount + 1] += "," + split[4];
+                            }
+                            rhyCount++; // count of defined rhythms
                         }
-                        // Check RHY length
-                        if (Convert.ToInt32(split[4]) == 0)
-                            return_values[0] = "rhythm is currently empty";
-                        else {
-                            return_values[rhyCount + 1] += "," + split[4];
-                        }
-                        rhyCount++; // count of defined rhythms
                     }
                 }
             }
             return_values[0] = rhyCount.ToString(); // count of defined magnitudes
+            _belt_error = return_error;
 
             return return_values;
         }
@@ -70,34 +80,45 @@ namespace HapticDriver
         /// </summary>
         /// <param name="rhy_id">rhythm ID is between "A" and "H"</param>
         /// <param name="binary">determines if the returned string is in binary format</param>
+        /// <param name="query_type">specifies which type of query to execute</param>
         /// <returns> Rhythm "[hex/binary pattern]" or blank if not defined</returns>
-        public string getRhythmPattern(string rhy_id, bool binary) {
+        public string getRhythmPattern(string rhy_id, bool binary, QueryType query_type) {
 
             string return_values = "";
+            error_t return_error = error_t.NOTFOUND;
 
-            for (int index = 1; index < qry_resp.Length; index++) {
-                if (qry_resp[index] != null) {
-                    string[] split = qry_resp[index].Split(' ');
+            // Query configuration data from belt
+            return_error = QuerySelect("QRY RHY\r", query_type);
 
-                    //put the values from the response into the return array
-                    if (split[1].Equals("RHY") && split[2].Equals(rhy_id)) {
+            // Search and process data
+            if (return_error == error_t.ESUCCESS) {
+                return_error = error_t.NOTFOUND;
+                for (int index = 1; index < qry_resp.Length; index++) {
+                    if (qry_resp[index] != null) {
+                        string[] split = qry_resp[index].Split(' ');
 
-                        //Populate Return Values
-                        //return the rhythm pattern as hex (default) or as a binary string
-                        if (!binary) {
-                            return_values = split[3];
-                        }
-                        else {
-                            string binary_pattern = "";
-                            binary_pattern = HexToBinary(split[3]);
-                            if (String.Equals(binary_pattern, "Error")) {
-                                //return_values[0] = "Invalid rhythm return, rhythm from query did not contain hex values";
+                        //put the values from the response into the return array
+                        if (split[1].Equals("RHY") && split[2].Equals(rhy_id)) {
+                            return_error = error_t.ESUCCESS;
+
+                            //Populate Return Values
+                            //return the rhythm pattern as hex (default) or as a binary string
+                            if (!binary) {
+                                return_values = split[3];
                             }
-                            return_values = binary_pattern;
+                            else {
+                                string binary_pattern = "";
+                                binary_pattern = HexToBinary(split[3]);
+                                if (String.Equals(binary_pattern, "Error")) {
+                                    //return_values[0] = "Invalid rhythm return, rhythm from query did not contain hex values";
+                                }
+                                return_values = binary_pattern;
+                            }
                         }
                     }
                 }
             }
+            _belt_error = return_error;
             return return_values; // returns Rhythm "<hex/binary pattern>"
         }
 
@@ -108,24 +129,34 @@ namespace HapticDriver
         /// used in the rhythm.
         /// </summary>
         /// <param name="rhy_id">rhythm ID is between "A" and "H"</param>
+        /// <param name="query_type">specifies which type of query to execute</param>
         /// <returns>rhythm time of rhythm in increments of 50 milliseconds</returns>
-        public string getRhythmTime(string rhy_id) {
+        public string getRhythmTime(string rhy_id, QueryType query_type) {
 
             string return_value = "";
-            //return_values[0] = "NOT DEFINED";
+            error_t return_error = error_t.NOTFOUND;
 
-            for (int index = 1; index < qry_resp.Length; index++) {
-                if (qry_resp[index] != null) {
-                    string[] split = qry_resp[index].Split(' ');
+            // Query configuration data from belt
+            return_error = QuerySelect("QRY RHY\r", query_type);
 
-                    //put the values from the response into the return array
-                    if (split[1].Equals("RHY") && split[2].Equals(rhy_id)) {
+            // Search and process data
+            if (return_error == error_t.ESUCCESS) {
+                return_error = error_t.NOTFOUND;
+                for (int index = 1; index < qry_resp.Length; index++) {
+                    if (qry_resp[index] != null) {
+                        string[] split = qry_resp[index].Split(' ');
 
-                        //Populate Return Values
-                        return_value = split[4];
+                        //put the values from the response into the return array
+                        if (split[1].Equals("RHY") && split[2].Equals(rhy_id)) {
+                            return_error = error_t.ESUCCESS;
+
+                            //Populate Return Values
+                            return_value = split[4];
+                        }
                     }
                 }
             }
+            _belt_error = return_error;
             return return_value; // returns Rhythm "time"
         }
 
@@ -141,7 +172,7 @@ namespace HapticDriver
         /// of the 64 bits specified by the pattern are actually used in the rhythm.</param>
         /// <param name="binary">Set TRUE if the rhythm pattern string is in binary format</param>
         /// <returns>error code resulting from Learn Rhythm command</returns>
-        public int Learn_Rhythm(string rhy_id, string pattern_str, int rhy_time, bool binary) {
+        public error_t Learn_Rhythm(string rhy_id, string pattern_str, int rhy_time, bool binary) {
 
             error_t return_error = error_t.EINVR;
 
@@ -204,25 +235,24 @@ namespace HapticDriver
                 //send output to the belt
                 try {
                     change_acmd_mode(acmd_mode_t.ACM_LRN);
-                    if (acmd_mode == acmd_mode_t.ACM_LRN) {
-                        // Send command with wait time for belt to respond back.
-                        serialOut.WriteData(instruction, 200);
-                    }
-
-                    //check for STATUS <error number> [<info>]
-                    checkBeltStatus();
-                    if (belt_error != 0) {
-                        return_error = belt_error;
+                    if (acmd_mode != acmd_mode_t.ACM_LRN) {
+                        return_error = _belt_error;
                     }
                     else {
-                        return_error = error_t.ESUCCESS;
+                        // Send command with wait time for belt to respond back.
+                        return_error = SerialPortWriteData(instruction, MAX_RESPONSE_TIMEOUT);
+
+                        if (return_error == error_t.ESUCCESS){
+                            // Query configuration data from belt to ensure settings
+                            return_error = QuerySelect("QRY RHY\r", QueryType.SINGLE);
+                        }
                     }
                 }
                 catch {
                     return_error = error_t.EXCLRNRHY;
                 }
             }
-            return (int)return_error;
+            return return_error;
         }
     }
 }

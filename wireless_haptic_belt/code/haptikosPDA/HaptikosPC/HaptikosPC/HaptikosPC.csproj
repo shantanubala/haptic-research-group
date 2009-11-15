@@ -33,6 +33,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="HapticDriver, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\HapticDriver.DLL</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -50,26 +54,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Buffer.cs" />
     <Compile Include="PatternProgForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="PatternProgForm.designer.cs">
       <DependentUpon>PatternProgForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MutexLock.cs" />
-    <Compile Include="Magnitude.cs" />
-    <Compile Include="ConversionUtility.cs" />
     <Compile Include="DemoForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="DemoForm.Designer.cs">
       <DependentUpon>DemoForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Constants.cs" />
-    <Compile Include="Rhythm.cs" />
-    <Compile Include="SerialPortManager.cs" />
-    <Compile Include="HapticDriver.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

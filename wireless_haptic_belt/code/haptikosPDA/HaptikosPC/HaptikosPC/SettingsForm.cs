@@ -6,35 +6,40 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.IO.Ports;
+using HapticDriver;
 namespace Haptikos
 {
     public partial class SettingsForm : Form
     {
         private string inboundPort;
         private string outboundPort;
-        
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="inbound"></param>
         /// <param name="outbound"></param>
-        public SettingsForm(string inbound, string outbound) {
+        /// <param name="belt"></param>
+        public SettingsForm(string inbound, string outbound, HapticBelt belt) {
             InitializeComponent();
 
             // Setup ports
             inboundPort = inbound;
             outboundPort = outbound;
-            string[] ports = SerialPort.GetPortNames();
+            string[] ports = belt.GetSerialPortNames();//SerialPort.GetPortNames();
 
             // ComboBox 1 = inbound ports
             comboBoxInbound.Items.Add("NO PORT SELECTED");
-            for (int i = 0; i < ports.Length; i++)
+            for (int i = 0; i < ports.Length; i++) {
                 comboBoxInbound.Items.Add(ports[i]);
+            }
 
             // ComboBox 2 = outbound ports
             comboBoxOutbound.Items.Add("NO PORT SELECTED");
-            for (int i = 0; i < ports.Length; i++)
+            for (int i = 0; i < ports.Length; i++) {
                 comboBoxOutbound.Items.Add(ports[i]);
+            }
+
 
             // Selection of port names
             if (comboBoxInbound.Items.Contains(inboundPort))
