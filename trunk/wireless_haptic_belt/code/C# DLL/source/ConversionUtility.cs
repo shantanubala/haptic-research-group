@@ -23,7 +23,7 @@ namespace HapticDriver
         //            binary string in form "xxxx"
         //        Parameters:
         //            hex character (0 to F)
-        internal string HexToBinary(string hexvalue) {
+        internal static string HexToBinary(string hexvalue) {
             string binaryval = "";
             char[] c = hexvalue.ToCharArray();
 
@@ -94,7 +94,7 @@ namespace HapticDriver
         //            hex character (0 to F)
         //        Parameters:
         //            binary string in form "xxxx"
-        internal string BinaryToHex(string binaryval) {
+        internal static string BinaryToHex(string binaryval) {
             string hexvalue = "";
             int i;
             // Build hex value and increment by 4 binary chars
@@ -179,7 +179,7 @@ namespace HapticDriver
         //            byte value
         //        Parameters:
         //            hex character (0 to F)
-        internal byte HexToByte(char hexValue) {
+        internal static byte HexToByte(char hexValue) {
             byte byteValue = 0;
             switch (hexValue) {
                 case '0':
@@ -237,7 +237,7 @@ namespace HapticDriver
             return byteValue;
         }
 
-        internal bool verifyHexDigits(string digits) {
+        internal static bool verifyHexDigits(string digits) {
             bool verified = false;
             int n = 0;
 
@@ -254,7 +254,7 @@ namespace HapticDriver
             return verified;
         }
 
-        internal bool verifyBinaryDigits(string digits) {
+        internal static bool verifyBinaryDigits(string digits) {
             bool verified = false;
             int n = 0;
 
@@ -286,7 +286,7 @@ namespace HapticDriver
          * a byte value up to the max unsigned 8 bit value (255).  Given these
          * limitations, this function converts only the first 3 characters
          */
-        internal byte[] IntegerStrToByte(string intString) {
+        internal static byte[] IntegerStrToByte(string intString) {
             byte[] byteValue = { 0, 0, 0, 0 }; // 4bytes = 32bits
 
             int i = 0;
@@ -312,7 +312,7 @@ namespace HapticDriver
          * This function converts an string representation of an int value to 
          * the motor number offset
          */
-        internal byte MotorStrToByte(string strInteger) {
+        internal static byte MotorStrToByte(string strInteger) {
             byte byteValue = 0;
             switch (strInteger) {
                 case "1":
@@ -374,7 +374,7 @@ namespace HapticDriver
          * This function converts an alpha character of the vibration pattern 
          * to an byte value used for the firmware starting with A=0
          */
-        internal byte VibStrToByte(string alphaStr) {
+        internal static byte VibStrToByte(string alphaStr) {
             byte byteValue = 8;
             switch (alphaStr) {
                 case "A":
@@ -411,7 +411,7 @@ namespace HapticDriver
         /*
          * This function converts an alpha character to an integer starting with A=1
          */
-        internal string IntStrToAlpha(string intStr) {
+        internal static string IntStrToAlpha(string intStr) {
             string strValue = "";
             switch (intStr) {
                 case "1":
@@ -451,7 +451,7 @@ namespace HapticDriver
         /// </summary>
         /// <param name="msg">string to convert</param>
         /// <returns>a byte array</returns>
-        internal byte[] HexToByte(string msg) {
+        internal static byte[] HexToByte(string msg) {
             //remove any spaces from the string
             msg = msg.Replace(" ", "");
 
@@ -473,7 +473,7 @@ namespace HapticDriver
         /// </summary>
         /// <param name="comByte">byte array to convert</param>
         /// <returns>a hex string</returns>
-        internal string ByteToHex(byte[] comByte) {
+        internal static string ByteToHex(byte[] comByte) {
             //create a new StringBuilder object
             StringBuilder builder = new StringBuilder(comByte.Length * 3);
 
@@ -493,10 +493,31 @@ namespace HapticDriver
         /// </summary>
         /// <param name="comByte">byte array to convert</param>
         /// <returns>a hex string</returns>
-        internal string ByteToAscii(byte[] comByte) {
+        internal static string ByteToAscii(byte[] comByte) {
 
             //return the converted value
             return Encoding.ASCII.GetString(comByte);
+        }
+        #endregion
+
+        #region AsciiToByte
+        /// <summary>
+        /// method to convert ASCII string into a byte array.
+        /// </summary>
+        /// <param name="msg">string to convert</param>
+        /// <returns>a hex string</returns>
+        internal static byte[] AsciiToByte(string msg) {
+            
+            //create a byte array the length of the string
+            byte[] byteBuffer = new byte[msg.Length];
+            
+            //loop through the length of the provided string
+            for (int i = 0; i < msg.Length; i ++)
+                //convert each character to a byte and add to the array
+                byteBuffer[i] = (byte)Convert.ToByte( msg[i]);//msg.Substring(i, 1));
+
+            //return the array
+            return byteBuffer;
         }
         #endregion
 

@@ -24,11 +24,6 @@ namespace Haptikos
             InitializeComponent();
 
             wirelessBelt = belt;
-
-            //comboBoxMagSel.Items.Add(" ");
-            comboBoxMagSel.SelectedIndex = 0;
-            comboBoxRhySel.SelectedIndex = 0;
-
             txtLogProg.Enabled = true;
 
             // Display current belt information
@@ -42,6 +37,10 @@ namespace Haptikos
             catch (Exception ex) {
                 MessageBox.Show(ex.Message);
             }
+
+            //comboBoxMagSel.Items.Add(" ");
+            comboBoxMagSel.SelectedIndex = 0;
+            comboBoxRhySel.SelectedIndex = 0;
         }
 
         /// <summary>

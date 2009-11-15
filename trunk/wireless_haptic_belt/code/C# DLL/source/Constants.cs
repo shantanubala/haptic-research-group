@@ -83,59 +83,157 @@ namespace HapticDriver
     // error number definitions--must match the string table in error.c
     // in error descriptions, L = learning mode, O = operational mode,
     // P = controlling PC, M = main belt controller, V = vibrator controller
-    internal enum error_t
+
+    /// <summary>
+    /// Error number definitions--must match the string table in class Constants
+    /// </summary>
+    public enum error_t
     {
         // symbol	error type (belt mode, command source->destination)
-        ESUCCESS,	// no error
-        EBADCMD,	// command not recognized		(L/O, P->M)
-        ETOOBIG,	// command too long			(L, M->V)
-        EARG,		// invalid argument			(L, P->M/M->V)
-        ENOR,		// requested rhythm not defined		(O, P->M/M->V)
-        ENOM,		// requested magnitude not defined	(O, P->M/M->V)
-        ENOS,		// spatio-temporal pattern not defined	(O, P->M/M->V)
-        ENOMOTOR,	// requested motor not present on belt	(O, P->M)
-        EINVR,		// invalid rhythm definition		(L, P->M/M->V)
-        EINVM,		// invalid magnitude definition		(L, P->M/M->V)
-        EINVS,		// invalid spatio-temporal definition	(L, P->M)
-        EBADVC,		// vibrator command not recognized	(L/O, M->V)
-        EBUS,		// I2C communication failed		(L/O, M->V)
-        EBUSOF,		// I2C transmit overflow		(L/O, M->V)
-        EBUSAN,		// I2C address not acknowledged		(L/O, M->V)
-        EBUSDN,		// I2C data not acknowledged		(L/O, M->V)
-        EMISSING,	// command not implemented yet		(L, P->M/M->V)
-        EMAX,		// unknown error
+        /// <summary>No error</summary> 
+        ESUCCESS,
+        /// <summary>Command not recognized</summary> 
+        EBADCMD,
+        /// <summary>Command too long</summary> 
+        ETOOBIG,
+        /// <summary>Invalid argument</summary> 
+        EARG,
+        /// <summary>Requested rhythm not defined</summary> 
+        ENOR,
+        /// <summary>Requested magnitude not defined</summary> 
+        ENOM,
+        /// <summary>Spatio-temporal pattern not defined</summary> 
+        ENOS,
+        /// <summary>Requested motor not present on belt</summary> 
+        ENOMOTOR,
+        /// <summary>Invalid rhythm definition</summary> 
+        EINVR,
+        /// <summary>Invalid magnitude definition</summary> 
+        EINVM,
+        /// <summary>Invalid spatio-temporal definition</summary> 
+        EINVS,
+        /// <summary>Vibrator command not recognized</summary> 
+        EBADVC,
+        /// <summary>I2C communication failed</summary> 
+        EBUS,
+        /// <summary>I2C transmit overflow</summary> 
+        EBUSOF,
+        /// <summary>I2C address not acknowledged</summary> 
+        EBUSAN,
+        /// <summary>I2C data not acknowledged</summary> 
+        EBUSDN,
+        /// <summary>Command not implemented yet</summary> 
+        EMISSING,
+        /// <summary>Unknown error</summary> 
+        EMAX,
 
-        // status_msg definitions generated from DLL project
-        // symbol
-        COMPRTINVALID,  // invalid comm port parameters
-        COMPRTOPEN,     // com port opened
-        COMPRTNOTOPEN,  // com port not open
-        COMPRTCLS,      // com port closed
-        COMPRTCLSPREV,  // com port previously closed
-        COMPRTSETUP,    // com port setup error
-        INVRHYID,       // invalid rhythm ID
-        INVRHYPATHEX,   // rhythm pattern not a list of hex values
-        INVRHYPATBIN,   // rhythm pattern not a list of binary values
-        INVRHYPATLEN,   // invalid pattern length - too long
-        INVRHYTIME,     // invalid rhythm time
-        INVMAGID,       // invalid magnitude ID
-        INVMAGHIGH,     // invalid magnitude - exceeds maximum of 100%
-        EXCEPTION,      // exception occured
-        EXCVIBCMD,      // exception occured - vibrate command
-        EXCQRYCMD,      // exception occured - query command
-        EXCZAPCMD,      // exception occured - erase all command
-        EXCLRNRHY,      // exception occured - learn rhythm command
-        EXCLRNMAG,      // exception occured - learn magnitude command
-        EXCCOMPRTWRITE, // exception occured - serial com port write data
-        EXCCOMPRTOPEN,  // exception occured - opening serial com port
-        EXCCOMPRTCLS,   // exception occured - closing serial com port
-        EXCWIRELESS     // exception occured - error sending over wireless
+        /*
+         * Status msg definitions generated from DLL project
+         */
+        /// <summary>Invalid comm port parameters</summary> 
+        COMPRTINVALID,
+        /// <summary>Com port opened</summary> 
+        COMPRTOPEN,
+        /// <summary>Com port not open</summary> 
+        COMPRTNOTOPEN,
+        /// <summary>Com port closed</summary> 
+        COMPRTCLS,
+        /// <summary>Com port previously closed</summary> 
+        COMPRTCLSPREV,
+        /// <summary>Com port setup error</summary> 
+        COMPRTSETUP,
+        /// <summary>Com port write data error</summary> 
+        COMPRTWRITE,
+        /// <summary>Com port read data timeout</summary> 
+        COMPRTREADTIME,
+        /// <summary>Invalid rhythm ID</summary> 
+        INVRHYID,
+        /// <summary>Rhythm pattern not a list of hex values</summary> 
+        INVRHYPATHEX,
+        /// <summary>Rhythm pattern not a list of binary values</summary> 
+        INVRHYPATBIN,
+        /// <summary>Invalid pattern length - too long</summary> 
+        INVRHYPATLEN,
+        /// <summary>Invalid rhythm time</summary> 
+        INVRHYTIME,
+        /// <summary>Invalid magnitude ID</summary> 
+        INVMAGID,
+        /// <summary>Invalid magnitude - exceeds maximum of 100%</summary> 
+        INVMAGHIGH,
+        /// <summary>Exception occured</summary> 
+        EXCEPTION,
+        /// <summary>Exception occured - vibrate command</summary> 
+        EXCVIBCMD,
+        /// <summary>Exception occured - query command</summary> 
+        EXCQRYCMD,
+        /// <summary>Exception occured - erase all command</summary> 
+        EXCZAPCMD,
+        /// <summary>Exception occured - learn rhythm command</summary> 
+        EXCLRNRHY,
+        /// <summary>Exception occured - learn magnitude command</summary> 
+        EXCLRNMAG,
+        /// <summary>Exception occured - serial com port write data</summary> 
+        EXCCOMPRTWRITE,
+        /// <summary>Exception occured - opening serial com port</summary> 
+        EXCCOMPRTOPEN,
+        /// <summary>Exception occured - closing serial com port</summary> 
+        EXCCOMPRTCLS,
+        /// <summary>Exception occured - error sending over wireless</summary> 
+        EXCWIRELESS,
+        /// <summary>Exception occured - searching for requested data</summary> 
+        EXCDATASEARCH,
+        /// <summary>Requested data not found</summary> 
+        NOTFOUND
     };
 
     /// <summary>
-    /// enumeration to hold SerialPortManager message types
+    /// Enumeration to hold SerialPortManager message types
     /// </summary>
-    public enum MessageType { INCOMING, OUTGOING, NORMAL, WARNING, ERROR };
+    public enum MessageType { 
+        // The XML tags are not populated since this enumeration is self-explanatory.
+        /// <summary>
+        /// 
+        /// </summary>
+        INCOMING, 
+        /// <summary>
+        /// 
+        /// </summary>
+        OUTGOING, 
+        /// <summary>
+        /// 
+        /// </summary>
+        NORMAL, 
+        /// <summary>
+        /// 
+        /// </summary>
+        WARNING, 
+        /// <summary>
+        /// 
+        /// </summary>
+        ERROR 
+    };
+
+    /// <summary>
+    /// Enumeration that specifies which type of query to execute 
+    /// </summary>
+    public enum QueryType { 
+        /// <summary>
+        /// Does not execute query.  Used in methods where you want 
+        /// the previous local data returned without executing a query
+        /// of the haptic belt's configuration. NOTE: may be old data.
+        /// </summary>
+        PREVIOUS, 
+        /// <summary>
+        /// Execute query of a single item (such as Rhythms).  Used
+        /// in methods where you want current belt configuration
+        /// returned but do not want to wait for a Query All
+        /// </summary>
+        SINGLE, 
+        /// <summary>
+        /// Execute query of all haptic belt configurations.
+        /// </summary>
+        ALL 
+    };
 
     internal static class Constants
     {
@@ -168,6 +266,8 @@ namespace HapticDriver
         private const string comprtcls = "Com port closed";
         private const string comprtclsprev = "Com port previously closed";
         private const string comprtsetup = "Com port setup error";
+        private const string comprtwrite = "Com port write data error";
+        private const string comprtreadtime = "Com port read data timeout";
         private const string invrhyid = "Invalid rhythm ID";
         private const string invrhypathex = "Rhythm pattern not a list of hex values";
         private const string invrhypatbin = "Rhythm pattern not a list of binary values";
@@ -185,6 +285,8 @@ namespace HapticDriver
         private const string execomprtopen = "Exception occured - opening serial com port";
         private const string execomprtcls = "Exception occured - closing serial com port";
         private const string excwireless = "Error sending command over wireless";
+        private const string excdatasearch = "Exception occured - searching for requested data";
+        private const string notfound = "Requested data not found";
 
         internal static string[] error_t_names = {
 	        // Firmware error strings--must match the error_t enum in error.h
@@ -214,6 +316,8 @@ namespace HapticDriver
             comprtcls,
             comprtclsprev,
             comprtsetup,
+            comprtwrite,
+            comprtreadtime,
             invrhyid,
             invrhypathex,
             invrhypatbin,
@@ -230,7 +334,9 @@ namespace HapticDriver
             execomprtwrite,
             execomprtopen,
             execomprtcls,
-            excwireless
+            excwireless,
+            excdatasearch,
+            notfound
         };
 
         public const UInt16 uint16_t_max = 65535;

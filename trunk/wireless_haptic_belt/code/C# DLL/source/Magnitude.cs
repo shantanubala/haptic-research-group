@@ -12,7 +12,7 @@ namespace HapticDriver
         /// Function queries all haptic belt magnitude setting configurations
         /// </summary>
         /// <returns>error code resulting from Query command</returns>
-        public int Query_Magnitude() {
+        private error_t Query_Magnitude() {
             return Query("QRY MAG\r", 150);
         }
 
@@ -22,37 +22,50 @@ namespace HapticDriver
         /// </summary>
         /// <param name="dutyCycleFormat">determines if the returned string is in 
         /// period/duty cycle format</param>
+        /// <param name="query_type">specifies which type of query to execute</param>
         /// <returns> If dutyCycleFormat = true, then Magnitudes "[ID],[period],[dutyCycle]"
         /// If dutyCycleFormat = false, then Magnitudes "[ID],[percentage]"</returns>
-        public string[] getMagnitude(bool dutyCycleFormat) {
+        public string[] getMagnitude(bool dutyCycleFormat, QueryType query_type) {
 
             string[] return_values = new string[MAG_MAX_NO + 1];
             double Period, DutyCycle;
             int Percentage;
             int magCount = 0;
+            error_t return_error = error_t.NOTFOUND;
 
-            for (int index = 1; index < qry_resp.Length; index++) {
-                if (qry_resp[index] != null) {
-                    string[] split = qry_resp[index].Split(' ');
+            // Query configuration data from belt
+            return_error = QuerySelect("QRY MAG\r", query_type);
 
-                    //put the values from the response into the return array
-                    if (split[1].Equals("MAG")) {
-                        if (dutyCycleFormat == true) {
-                            //Populate Return Values --> Equals "Mag letter,period,dutyCycle"
-                            return_values[magCount + 1] = split[2] + "," + split[3] + "," + split[4];
+            // Search and process data
+            if (return_error == error_t.ESUCCESS) {
+                return_error = error_t.NOTFOUND;
+                for (int index = 1; index < qry_resp.Length; index++) {
+                    if (qry_resp[index] != null) {
+                        string[] split = qry_resp[index].Split(' ');
+
+                        //put the values from the response into the return array
+                        if (split[1].Equals("MAG")) {
+                            return_error = error_t.ESUCCESS;
+
+                            if (dutyCycleFormat == true) {
+                                //Populate Return Values --> Equals "Mag letter,period,dutyCycle"
+                                return_values[magCount + 1] = split[2] + "," + split[3] + "," + split[4];
+                            }
+                            else {
+                                //Populate Return Values --> Equals "Mag letter, percent magnitude"
+                                Period = Convert.ToInt32(split[3]);
+                                DutyCycle = Convert.ToInt32(split[4]);
+                                Percentage = (int)((DutyCycle / Period) * 100);
+                                return_values[magCount + 1] = split[2] + "," + Percentage;
+                            }
+                            magCount++; // count of defined magnitudes
                         }
-                        else {
-                            //Populate Return Values --> Equals "Mag letter, percent magnitude"
-                            Period = Convert.ToInt32(split[3]);
-                            DutyCycle = Convert.ToInt32(split[4]);
-                            Percentage = (int)((DutyCycle / Period) * 100);
-                            return_values[magCount + 1] = split[2] + "," + Percentage;
-                        }
-                        magCount++; // count of defined magnitudes
                     }
                 }
             }
-            return_values[0] = magCount.ToString(); // count of defined magnitudes     
+            return_values[0] = magCount.ToString(); // count of defined magnitudes 
+            _belt_error = return_error;
+
             return return_values;
         }
 
@@ -63,34 +76,46 @@ namespace HapticDriver
         /// <param name="mag_id">magnitude ID is between A and D</param>
         /// <param name="dutyCycleFormat">determines if the returned string is in 
         /// period/duty cycle format</param>
+        /// <param name="query_type">specifies which type of query to execute</param>
         /// <returns> If dutyCycleFormat = true, then Magnitudes "[period],[dutyCycle]"
         /// If dutyCycleFormat = false, then Magnitudes "[percentage]"</returns>
-        public string getMagnitude(string mag_id, bool dutyCycleFormat) {
+        public string getMagnitude(string mag_id, bool dutyCycleFormat, QueryType query_type) {
 
             double Period, DutyCycle;
             int Percentage;
             string return_values = "";
+            error_t return_error = error_t.NOTFOUND;
 
-            for (int index = 1; index < qry_resp.Length; index++) {
-                if (qry_resp[index] != null) {
-                    string[] split = qry_resp[index].Split(' ');
+            // Query configuration data from belt
+            return_error = QuerySelect("QRY MAG\r", query_type);
 
-                    //put the values from the response into the return array
-                    if (split[1].Equals("MAG") && split[2].Equals(mag_id)) {
-                        if (dutyCycleFormat == true) {
-                            //Populate Return Values --> Equals period,dutyCycle"
-                            return_values = split[3] + "," + split[4];
-                        }
-                        else {
-                            //Populate Return Values --> Equals "Mag letter, percent magnitude"
-                            Period = Convert.ToInt32(split[3]);
-                            DutyCycle = Convert.ToInt32(split[4]);
-                            Percentage = (int)((DutyCycle / Period) * 100);
-                            return_values = "" + Percentage;
+            // Search and process data
+            if (return_error == error_t.ESUCCESS) {
+                return_error = error_t.NOTFOUND;
+                for (int index = 1; index < qry_resp.Length; index++) {
+                    if (qry_resp[index] != null) {
+                        string[] split = qry_resp[index].Split(' ');
+
+                        //put the values from the response into the return array
+                        if (split[1].Equals("MAG") && split[2].Equals(mag_id)) {
+                            return_error = error_t.ESUCCESS;
+
+                            if (dutyCycleFormat == true) {
+                                //Populate Return Values --> Equals period,dutyCycle"
+                                return_values = split[3] + "," + split[4];
+                            }
+                            else {
+                                //Populate Return Values --> Equals "Mag letter, percent magnitude"
+                                Period = Convert.ToInt32(split[3]);
+                                DutyCycle = Convert.ToInt32(split[4]);
+                                Percentage = (int)((DutyCycle / Period) * 100);
+                                return_values = "" + Percentage;
+                            }
                         }
                     }
                 }
             }
+            _belt_error = return_error;
             return return_values;
         }
 
@@ -105,7 +130,7 @@ namespace HapticDriver
         /// <param name="duty_cycle">duty_cycle of magnitude to be learned.  
         /// Minimum of 2 microseconds</param>
         /// <returns>error code resulting from Learn Magnitude command</returns>
-        public int Learn_Magnitude(string mag_id, UInt16 period, UInt16 duty_cycle) {
+        public error_t Learn_Magnitude(string mag_id, UInt16 period, UInt16 duty_cycle) {
 
             error_t return_error = error_t.EINVM;
 
@@ -127,24 +152,24 @@ namespace HapticDriver
                 //send this output to the belt
                 try {
                     change_acmd_mode(acmd_mode_t.ACM_LRN);
-                    if (acmd_mode == acmd_mode_t.ACM_LRN) {
-                        // Send command with wait time for belt to respond back.
-                        serialOut.WriteData(instruction, 200);
-                    }
-                    //check for STATUS <error number> [<info>]
-                    checkBeltStatus();
-                    if (belt_error != 0) {
-                        return_error = belt_error;
+                    if (acmd_mode != acmd_mode_t.ACM_LRN) {
+                        return_error = _belt_error;
                     }
                     else {
-                        return_error = error_t.ESUCCESS;
+                        // Send command with wait time for belt to respond back.
+                        return_error = SerialPortWriteData(instruction, MAX_RESPONSE_TIMEOUT);
+
+                        if (return_error == error_t.ESUCCESS) {
+                            // Query configuration data from belt to ensure settings
+                            return_error = QuerySelect("QRY MAG\r", QueryType.SINGLE);
+                        }
                     }
                 }
                 catch {
                     return_error = error_t.EXCLRNMAG;
                 }
             }
-            return (int)return_error;
+            return return_error;
         }
 
         /// <summary>
@@ -154,11 +179,11 @@ namespace HapticDriver
         /// <param name="mag_id">magnitude ID is between "A" and "D"</param>
         /// <param name="percentage"></param>
         /// <returns>error code resulting from Learn Magnitude command</returns>
-        public int Learn_Magnitude(string mag_id, int percentage) {
-            
+        public error_t Learn_Magnitude(string mag_id, int percentage) {
+
             UInt16 period, duty_cycle, percent;
             error_t return_error = error_t.EINVM;
-            
+
             // ensure that the percentage is a system minimum of 2%
             if (percentage < 1)
                 percent = 2;
@@ -174,7 +199,7 @@ namespace HapticDriver
 
                 return_error = (error_t)Learn_Magnitude(mag_id, period, duty_cycle);
             }
-            return (int)return_error;
+            return return_error;
         }
 
     }

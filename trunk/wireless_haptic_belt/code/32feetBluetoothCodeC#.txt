@@ -1,0 +1,81 @@
+using InTheHand.Net;
+using InTheHand.Net.Sockets;
+using InTheHand.Net.Bluetooth;
+
+namespace ThirtyTwoFeet
+{
+/// <summary>
+/// used to send keys
+/// </summary>
+public class RemoteControlForm : System.Windows.Forms.Form
+{
+	private BluetoothClient bc;
+	private System.Windows.Forms.ComboBox cmbDevices;
+	
+	//unique service identifier
+	private Guid service = new Guid("{7A51FDC2-FDDF-4c9b-AFFC-98BCD91BF93B}");
+
+
+
+private void Form1_Load(object sender, System.EventArgs e)
+{		
+	//turn on bt radio
+	BluetoothRadio radio = BluetoothRadio.PrimaryRadio;
+	if (radio != null && radio.Mode == RadioMode.PowerOff) {
+		BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
+	}
+	bc = new BluetoothClient();
+}
+
+
+
+private void mnuSearch_Click(object sender, System.EventArgs e)
+{
+	//this will take a while...
+	Cursor.Current = Cursors.WaitCursor;
+	BluetoothDeviceInfo[] bdi = bc.DiscoverDevices(12);
+	//bind the combo
+	cmbDevices.DataSource = bdi;
+	cmbDevices.DisplayMember = "DeviceName";
+	cmbDevices.ValueMember = "DeviceAddress";
+	cmbDevices.Visible = true;
+	cmbDevices.Focus();
+	Cursor.Current = Cursors.Default;
+
+	if(bdi.Length > 0)
+	{
+		mnuConnect.Enabled = true;
+	}
+}
+
+private void mnuConnect_Click(object sender, System.EventArgs e)
+{
+	if(cmbDevices.SelectedValue != null)
+	{
+		try
+		{
+			bc.Connect(new BluetoothEndPoint((BluetoothAddress)cmbDevices.SelectedValue, service)); 
+			mnuConnect.Enabled = false;
+			this.Controls.Remove(cmbDevices);
+			this.BackColor = Color.PaleGreen;
+			this.Focus();
+		}
+		catch
+		{
+			//error connecting
+			this.BackColor = Color.Salmon;
+		}
+	}
+}
+
+private void mnuClose_Click(object sender, System.EventArgs e)
+{
+	bc.Close();
+	this.Close();
+}
+
+
+//using InTheHand.Net.Sockets
+// Provides information about an available device obtained by the client during device discovery
+// Returns the signal strength for the Bluetooth connection with the peer device
+BluetoothDeviceInfo.Rssi  // Returns int

@@ -282,7 +282,7 @@ namespace Haptikos
             this.Close();
         }
         private void mnuSettings_Click(object sender, EventArgs e) {
-            SettingsForm form = new SettingsForm(inboundPort, outboundPort);
+            SettingsForm form = new SettingsForm(inboundPort, outboundPort, wirelessBelt);
             if (form.ShowDialog() == DialogResult.OK) {
                 if (form.GetInboundPort().CompareTo("NO PORT SELECTED") == 0 ||
                     form.GetOutboundPort().CompareTo("NO PORT SELECTED") == 0) {
