@@ -1,3 +1,0 @@
-C:\Users\Kris\Desktop\GUI\obj\Debug\ResolveAssemblyReference.cache
-C:\Users\Kris\Desktop\GUI\obj\Debug\HapticBelt.GUI.resources
-C:\Users\Kris\Desktop\GUI\obj\Debug\Haptic Belt GUI.csproj.GenerateResource.Cache
