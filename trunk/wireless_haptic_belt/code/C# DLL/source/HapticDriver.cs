@@ -95,12 +95,11 @@ namespace HapticDriver
         public string[] GetSerialPortNames() {
             string[] ports = SerialPort.GetPortNames();
 
-            // Protection against clobbered names like "COM12c".
-            // Only "COM12" is valid in such case, so truncate the last char then.
-            // The highest port can be "COM99", so this shouldn't be a problem.
+            // Protection against clobbered names like "COM12c" or "COM6o".
+            // Only "COM12" or "COM6" is valid in such case, so truncate the last char.
             for (int i = 0; i < ports.Length; i++) {
-                if ((ports[i].Substring(0, 3) == "COM") && (ports[i].Substring(3).Length > 2))
-                    ports[i] = ports[i].Substring(0, 5);
+                if (!Char.isDigit(ports[i], ports[i].Length-1))
+                    ports[i] = ports[i].Substring(0, ports[i].Length - 1);
             }
 
             return ports;
