@@ -375,7 +375,7 @@ namespace Haptikos
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(240, 268);
+            this.ClientSize = new System.Drawing.Size(240, 267);
             this.Controls.Add(this.tabControl1);
             this.Menu = this.mainMenu1;
             this.Name = "MainForm";

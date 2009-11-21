@@ -1,4 +1,17 @@
-﻿using System;
+﻿/*****************************************************************************
+ * FILE:   Rhythm.cs
+ * AUTHOR: Daniel Moberly (Daniel.Moberly@gmail.com)
+ *         Kris Blair (Kristopher.Blair@asu.edu)
+ *         Nathan J. Edwards (nathan.edwards@asu.edu)
+ *         
+ * DESCR:  Contains all functions related to haptic belt rhythm
+ *         cofiguration & settings.
+ * LOG:    20090420 - initial version
+ *         20091109 - refactored DLL to smaller code files, added features
+ *                    from prototype GUI application.
+ ****************************************************************************/
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO.Ports;

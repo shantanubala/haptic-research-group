@@ -1,5 +1,15 @@
-﻿using System;
+﻿/*****************************************************************************
+ * FILE:   MutexLock.cs
+ * AUTHOR: Nathan J. Edwards (nathan.edwards@asu.edu)
+ *         
+ * DESCR:  Class provides synchronization Monitor utility so that 
+ *         DLL synchronization does not rely on the slower performance 
+ *         OS system call (or wrapper classes)
+ * LOG:    20091109 - initial version
+ * 
+ ****************************************************************************/
 
+using System;
 
 namespace HapticDriver
 {
