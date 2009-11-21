@@ -1,15 +1,20 @@
-﻿//Haptic Belt Accessor Functions for Sending belt commands from C# GUI interface
-//Author: Daniel Moberly
-//Date: April 20th, 2009
-
-// *
-// * MODIFIED to work on Windows Mobile 5.0 or Microsoft CF 2.5 or 2.0
-// * Commented all methods using .NET XML document syntax
-// *
-// * Nov 9, 2009
-// * Nathan J. Edwards (nathan.edwards@asu.edu)
-// * 
-// * 
+﻿/*****************************************************************************
+ * FILE:   HapticDriver.cs
+ * AUTHOR: Daniel Moberly (Daniel.Moberly@gmail.com)
+ *         Kris Blair (Kristopher.Blair@asu.edu)
+ *         Nathan J. Edwards (nathan.edwards@asu.edu)
+ *         
+ * DESCR:  Haptic Belt DLL public interface that links C# or other high level
+ *         application to Serial Communications with the haptic belt firmware.
+ * LOG:    20090420 - initial version
+ *         20091109 - refactored DLL to smaller code files, added features
+ *                    from prototype GUI application. MODIFIED to work on 
+ *                    Windows Mobile 5.0 or Microsoft CF 2.5 or 2.0.
+ *                    Commented all methods using .NET XML document syntax
+ *                    so that the helper pop-ups are available in Visual
+ *                    Studio when using the DLL.
+ *         20091120 - Fixed GetSerialPortNames() to handle all COM port No.         
+ ****************************************************************************/
 
 using System;
 using System.Collections.Generic;
@@ -98,10 +103,11 @@ namespace HapticDriver
             // Protection against clobbered names like "COM12c" or "COM6o".
             // Only "COM12" or "COM6" is valid in such case, so truncate the last char.
             for (int i = 0; i < ports.Length; i++) {
-                if (!Char.isDigit(ports[i], ports[i].Length-1))
-                    ports[i] = ports[i].Substring(0, ports[i].Length - 1);
-            }
 
+                // Replace all non-digit chars after "COM" with spaces and then trim.
+                String decDigits = replaceNonDecDigits(ports[i].Substring(3, ports[i].Length - 3));
+                ports[i] = "COM" + decDigits.Trim();
+            }
             return ports;
         }
 
@@ -342,7 +348,7 @@ namespace HapticDriver
          * Method switches the global mode
          */
         private void change_glbl_mode(mode_t mode) {
-            error_t return_error  = error_t.EMAX;
+            error_t return_error = error_t.EMAX;
 
             if (glbl_mode == mode) {
                 // already in requested mode, do nothing and no loss of performance

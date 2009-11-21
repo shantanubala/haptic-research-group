@@ -1,6 +1,14 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿/*****************************************************************************
+ * FILE:   Constants.cs
+ * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
+ *         Nathan J. Edwards (nathan.edwards@asu.edu)
+ * DESCR:  Firmware and DLL Enumeration and standard messaging.
+ * LOG:    20090510 - initial version
+ *         20091109 - ported to DLL, added additional messaging
+ ****************************************************************************/
 
+using System;
+using System.Runtime.InteropServices;
 
 namespace HapticDriver
 {

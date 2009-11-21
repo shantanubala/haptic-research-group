@@ -1,4 +1,20 @@
-﻿using System;
+﻿/*****************************************************************************
+ * FILE:   ConversionUtility.cs
+ * AUTHOR: Daniel Moberly (Daniel.Moberly@gmail.com)
+ *         Kris Blair (Kristopher.Blair@asu.edu)
+ *         Nathan J. Edwards (nathan.edwards@asu.edu)
+ *         
+ * DESCR:  All DLL utility functions implemented in this source code.  The 
+ *         goal is to have more portable code base and not use managed 
+ *         code when possible.  Otherwise the managed code fuctions
+ *         are contained in a single location in this file and can be 
+ *         modified to fit the programming language or OS.
+ * LOG:    20090420 - initial version
+ *         20091109 - refactored DLL to smaller code files, added features
+ *                    from prototype GUI application.
+ ****************************************************************************/
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,6 +22,9 @@ namespace HapticDriver
 {
     public partial class HapticBelt
     {
+        internal static char[] decDigits = {
+        '0', '1', '2', '3', '4', '5', '6', '7',
+        '8', '9'};
 
         internal static char[] hexDigits = {
         '0', '1', '2', '3', '4', '5', '6', '7',
@@ -235,6 +254,43 @@ namespace HapticDriver
                     break;
             }
             return byteValue;
+        }
+
+        internal static string replaceNonDecDigits(string digits) {
+            bool verified = false;
+            string digitStr = "";
+            int n = 0;
+
+            for (int i = 0; i < digits.Length; i++) {
+                verified = false;
+                n = 0;
+                while (n < decDigits.Length) {
+                    if (digits[i] == decDigits[n++])
+                        verified = true;
+                }
+                if (verified == false)
+                    digitStr += ' ';
+                else
+                    digitStr += digits[i];
+            }
+            return digitStr;
+        }
+
+        internal static bool verifyDecDigits(string digits) {
+            bool verified = false;
+            int n = 0;
+
+            for (int i = 0; i < digits.Length; i++) {
+                verified = false;
+                n = 0;
+                while (n < decDigits.Length) {
+                    if (digits[i] == decDigits[n++])
+                        verified = true;
+                }
+                if (verified == false)
+                    break;
+            }
+            return verified;
         }
 
         internal static bool verifyHexDigits(string digits) {

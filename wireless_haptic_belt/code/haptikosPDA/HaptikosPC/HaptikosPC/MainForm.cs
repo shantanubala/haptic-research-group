@@ -99,6 +99,38 @@ namespace Haptikos
             wirelessBelt.DataReceivedFxn = this.UpdateTxtLog;
 
         }
+        
+        private void closeMe() {
+            numThreads--;
+            this.Close();
+        }
+
+        private void MainForm_Closing(object sender, CancelEventArgs e) {
+            if (this.numThreads > 0) {
+                //e.Cancel = true; // cancel Close event if there are still threads
+            }
+            else {
+                //e.Cancel = false;
+                wirelessBelt.ClosePorts();
+                error_t response = wirelessBelt.ResetHapticBelt();
+                if (response != error_t.ESUCCESS)
+                    MessageBox.Show(wirelessBelt.getErrorMsg(response)
+                        + "\n\r Application will be closed when you click OK.");
+            }
+            // Once this flag is set the UpdateTxtLog thread will catch
+            // and handle the request to close.
+            // **** THREADS NOT USED
+            this.closeRequested = true;
+            //this.Close();
+        }
+
+        private void mnuClose_Click(object sender, EventArgs e) {
+            // Once this flag is set the UpdateTxtLog thread will catch
+            // and handle the request to close.
+            // **** THREADS NOT USED
+            this.closeRequested = true;
+            closeMe();
+        }
 
         /// <summary>
         /// This function invokes the main thread's onDisconnect or 
@@ -258,29 +290,6 @@ namespace Haptikos
             }
         }
 
-        private void closeMe() {
-            numThreads--;
-            this.Close();
-        }
-
-        private void MainForm_Closing(object sender, CancelEventArgs e) {
-            if (this.numThreads > 0) {
-                e.Cancel = true; // cancel Close event if there are still threads
-            }
-            else {
-                e.Cancel = false;
-                wirelessBelt.ClosePorts();
-                error_t response = wirelessBelt.ResetHapticBelt();
-                if (response != error_t.ESUCCESS)
-                    MessageBox.Show(wirelessBelt.getErrorMsg(response)
-                        + "\n\r Application will be closed when you click OK.");
-            }
-            // Once this flag is set the UpdateTxtLog thread will catch
-            // and handle the request to close.
-            // **** THREADS NOT USED
-            this.closeRequested = true;
-            this.Close();
-        }
         private void mnuSettings_Click(object sender, EventArgs e) {
             SettingsForm form = new SettingsForm(inboundPort, outboundPort, wirelessBelt);
             if (form.ShowDialog() == DialogResult.OK) {
@@ -305,7 +314,7 @@ namespace Haptikos
             }
             form.Close();
             MessageBox.Show("Please make sure the Bluetooth device and PDA are turned on!");
-            // autoconnect
+            // Autoconnect
             System.Threading.Thread.Sleep(50);
             mnuConnect_Click(sender, e);
         }
@@ -411,30 +420,6 @@ namespace Haptikos
             catch (Exception ex) {
                 MessageBox.Show(ex.Message);
             }
-        }
-
-        private void mnuClose_Click(object sender, EventArgs e) {
-            // Old methods...
-            ////closeMe();
-            //this.Close();
-
-            // See also MainForm_Closing(object sender, CancelEventArgs e) {
-            if (this.numThreads > 0) {
-                //e.Cancel = true; // cancel Close event if there are still threads
-            }
-            else {
-                //e.Cancel = false;
-                wirelessBelt.ClosePorts();
-                error_t response = wirelessBelt.ResetHapticBelt();
-                if (response != error_t.ESUCCESS)
-                    MessageBox.Show(wirelessBelt.getErrorMsg(response)
-                        + "\n\r Application will be closed when you click OK.");
-            }
-            // Once this flag is set the UpdateTxtLog thread will catch
-            // and handle the request to close.
-            // **** THREADS NOT USED
-            this.closeRequested = true;
-            this.Close();
         }
 
         private void btnQuery_Click(object sender, EventArgs e) {

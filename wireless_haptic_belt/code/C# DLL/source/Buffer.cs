@@ -1,5 +1,14 @@
-﻿using System;
+﻿/*****************************************************************************
+ * FILE:   Buffer.cs
+ * AUTHOR: Nathan J. Edwards (nathan.edwards@asu.edu)
+ *         
+ * DESCR:  Class provides synchronized binary data structure (byte[]) used 
+ *         for incoming and outgoing serial communications.
+ * LOG:    20091109 - initial version
+ * 
+ ****************************************************************************/
 
+using System;
 
 namespace HapticDriver
 {

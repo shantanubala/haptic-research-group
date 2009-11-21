@@ -1,16 +1,24 @@
+/*****************************************************************************
+ * FILE:   SerialPortManager.cs
+ * AUTHOR: Nathan J. Edwards (nathan.edwards@asu.edu)
+ *         
+ * DESCR:  Contains serial port communication functions, buffers, and message
+ *         retrieval.  Created to be more portable than regular .NET 
+ *         applications where the managed Serial Port code is contained
+ *         within this file and can easily be changed for a different
+ *         programming language or target OS.
+ * LOG:    20090708 - initial version
+ *         20091110 - Changed from event driven design to functional
+ *                    single thread design (more portable and less memory
+ *                    intensive).
+ ****************************************************************************/
+
 using System;
 using System.Text;
 using System.Drawing;
 using System.IO.Ports;
 using System.Windows.Forms;
-//*****************************************************************************************
-/*
- * SerialCommManager.cs Nov 10, 2009
- * Created to be more portable than regular .NET applications.
- * 
- * Nathan J. Edwards (nathan.edwards@asu.edu)
- */
-//*****************************************************************************************
+
 namespace HapticDriver
 {
     // "internal" protection so that elements are accesible only through HapticDriver
