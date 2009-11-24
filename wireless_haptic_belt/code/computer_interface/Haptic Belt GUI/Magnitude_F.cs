@@ -5,31 +5,24 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using HapticDriver;
 
-namespace HapticBelt
+namespace HapticGUI
 {
     partial class GUI
     {
         //Queries Library to get the Learned magnitudes, and populate fields
         private void Populate_Magnitude(string sel)
         {
-ErrorStatus.Text = "Error Status: " + "Waiting for Query_Magnitude() to respond";
-ErrorLocation.Text = "Error Location: " + "Calling Query_Magnitude()";
-            response = belt.Query_Magnitude(sel);
-ErrorStatus.Text = "Error Status: " + response[0];
-            if(!(response[0].Equals("")))
-            { 
-//ERROR
-            }
-            else
+            String[] splitMag = new String[2];
+            splitMag = belt.getMagnitude(sel,true,QueryType.SINGLE).Split(',');
+            if(hasError(belt.getError(),"getMagnitude()"))
             {
-ErrorLocation.Text = "Error Location: ";
-                String[] splitMag = new String[2];
-                splitMag = response[1].Split(',');
-                Period.Value = Convert.ToInt32(splitMag[0]);
-                DutyCycle.Value = Convert.ToInt32(splitMag[1]);
-                Percentage.Value = (DutyCycle.Value / Period.Value) * 100;
+                //Handle Error
             }
+            Period.Value = Convert.ToInt32(splitMag[0]);
+            DutyCycle.Value = Convert.ToInt32(splitMag[1]);
+            Percentage.Value = (DutyCycle.Value / Period.Value) * 100;
         }
         //Upholds the truth DutyCycle must be <= Period at all times
         private void Change_Maximum_DutyCycle()

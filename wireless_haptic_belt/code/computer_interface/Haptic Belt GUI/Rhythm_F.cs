@@ -5,8 +5,9 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using HapticDriver;
 
-namespace HapticBelt
+namespace HapticGUI
 {
     partial class GUI  
     {
@@ -139,20 +140,19 @@ namespace HapticBelt
          */
         private void Populate_Rhythm(String sel)
         {           
+            String pattern = belt.getRhythmPattern(sel,true,QueryType.SINGLE);
             String currChar = "";
             String prevChar = "";
-ErrorStatus.Text = "Error Status: " + "Waiting for Query_Rhythm() to respond";
-ErrorLocation.Text = "Error Location: " + "Calling Query_Rhythm()";
-            response = belt.Query_Rhythm(sel);
-ErrorStatus.Text = "Error Status: " + response[0];
-            if (!(response[0].Equals("")))
+
+            response = belt.getError();
+
+            if (response == error_t.ESUCCESS)
             {
-//ERROR
+                ErrorLocation.Text = "Error Location: " + "Calling getRhythmPattern()";
+                ErrorStatus.Text = belt.getErrorMsg(response);
             }
             else
             {
-ErrorLocation.Text = "Error Location: ";
-                String pattern = response[1];
                 int duration = 0;    //Accumulates successive 1's or 0's as 50ms increments
                 rhythmItems = new String[64];
                 pairs = 0;       //Number of On,Off pairs
@@ -269,15 +269,17 @@ ErrorLocation.Text = "Error Location: ";
          *and convert them into a string pattern which consists of multiple
          *"1"'s or "0"'s.
          * 
-         * Return String - Length 1-64 Characters "1" or "0"
+         * Return String - Pattern (consecutive 1's and 0's), Length (1-64) of pattern. Output: Pattern,Length
          */
         private String Get_Pattern()
         {
+            int on = 0;
+            int off = 0;
+            int length = 0;
             String[] splitPair = new String[2];
             String pattern = "";
             /*Uninitalized values*/
-            int on = -1;
-            int off = -1;
+            
             for (int i = 0; i < pairs; i++)
             {
                 splitPair = rhythmItems[i].Split(',');
@@ -288,15 +290,17 @@ ErrorLocation.Text = "Error Location: ";
                 for (j = 0; j < (on / 50); j++)
                 {
                     pattern += "1";
+                    length++;
                 }
                 //Appends multiple 0's dependent on the value of ON/50
                 for (j = 0; j < (off / 50); j++)
                 {
                     pattern += "0";
+                    length++;
                 }
             }
+            pattern += "," + length.ToString();
             return pattern;
-        }
-        
+        }        
     }
 }

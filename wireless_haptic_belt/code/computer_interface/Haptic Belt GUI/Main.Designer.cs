@@ -1,4 +1,4 @@
-namespace HapticBelt
+namespace HapticGUI
 {
     partial class GUI
     {
@@ -58,6 +58,7 @@ namespace HapticBelt
             this.MagComboBox = new System.Windows.Forms.ComboBox();
             this.MagSelLabel = new System.Windows.Forms.Label();
             this.RhythmPanel = new System.Windows.Forms.Panel();
+            this.RhythmTestStop = new System.Windows.Forms.Button();
             this.RhythmTime = new System.Windows.Forms.Label();
             this.TimeLabel = new System.Windows.Forms.Label();
             this.RhythmClear = new System.Windows.Forms.Button();
@@ -72,6 +73,7 @@ namespace HapticBelt
             this.RhythmOn = new System.Windows.Forms.NumericUpDown();
             this.RhythmLabel = new System.Windows.Forms.Label();
             this.DirectPanel = new System.Windows.Forms.Panel();
+            this.DirectBack = new System.Windows.Forms.Button();
             this.RenameSetField = new System.Windows.Forms.TextBox();
             this.RenameSet = new System.Windows.Forms.Button();
             this.DirectStop = new System.Windows.Forms.Button();
@@ -96,7 +98,7 @@ namespace HapticBelt
             this.AvailableList = new System.Windows.Forms.ListBox();
             this.ErrorStatus = new System.Windows.Forms.Label();
             this.ErrorLocation = new System.Windows.Forms.Label();
-            this.DirectBack = new System.Windows.Forms.Button();
+            this.MagTestStop = new System.Windows.Forms.Button();
             this.MainPanel.SuspendLayout();
             this.MagPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DutyCycle)).BeginInit();
@@ -165,7 +167,6 @@ namespace HapticBelt
             this.RhythmComboBox.Size = new System.Drawing.Size(78, 21);
             this.RhythmComboBox.TabIndex = 15;
             this.RhythmComboBox.Text = "A";
-            this.RhythmComboBox.SelectedIndexChanged += new System.EventHandler(this.RhythmComboBox_SelectedIndexChanged);
             // 
             // RhythmLearn
             // 
@@ -204,7 +205,6 @@ namespace HapticBelt
             this.RhythmPatternList.Name = "RhythmPatternList";
             this.RhythmPatternList.Size = new System.Drawing.Size(97, 95);
             this.RhythmPatternList.TabIndex = 23;
-            this.RhythmPatternList.SelectedIndexChanged += new System.EventHandler(this.RhythmPattern_SelectedIndexChanged);
             // 
             // MainPanel
             // 
@@ -272,6 +272,7 @@ namespace HapticBelt
             // 
             // MagPanel
             // 
+            this.MagPanel.Controls.Add(this.MagTestStop);
             this.MagPanel.Controls.Add(this.DutyLabel);
             this.MagPanel.Controls.Add(this.DutyCycle);
             this.MagPanel.Controls.Add(this.Period);
@@ -438,6 +439,7 @@ namespace HapticBelt
             // RhythmPanel
             // 
             this.RhythmPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.RhythmPanel.Controls.Add(this.RhythmTestStop);
             this.RhythmPanel.Controls.Add(this.RhythmTime);
             this.RhythmPanel.Controls.Add(this.TimeLabel);
             this.RhythmPanel.Controls.Add(this.RhythmClear);
@@ -462,6 +464,17 @@ namespace HapticBelt
             this.RhythmPanel.Size = new System.Drawing.Size(270, 248);
             this.RhythmPanel.TabIndex = 26;
             this.RhythmPanel.Visible = false;
+            // 
+            // RhythmTestStop
+            // 
+            this.RhythmTestStop.Location = new System.Drawing.Point(97, 222);
+            this.RhythmTestStop.Name = "RhythmTestStop";
+            this.RhythmTestStop.Size = new System.Drawing.Size(75, 23);
+            this.RhythmTestStop.TabIndex = 36;
+            this.RhythmTestStop.Text = "Stop";
+            this.RhythmTestStop.UseVisualStyleBackColor = true;
+            this.RhythmTestStop.Visible = false;
+            this.RhythmTestStop.Click += new System.EventHandler(this.RhythmTestStop_Click);
             // 
             // RhythmTime
             // 
@@ -488,7 +501,6 @@ namespace HapticBelt
             this.RhythmClear.TabIndex = 33;
             this.RhythmClear.Text = "Clear";
             this.RhythmClear.UseVisualStyleBackColor = true;
-            this.RhythmClear.Click += new System.EventHandler(this.RhythmClear_Click);
             // 
             // RhythmPaint
             // 
@@ -496,7 +508,6 @@ namespace HapticBelt
             this.RhythmPaint.Name = "RhythmPaint";
             this.RhythmPaint.Size = new System.Drawing.Size(257, 41);
             this.RhythmPaint.TabIndex = 32;
-            this.RhythmPaint.Paint += new System.Windows.Forms.PaintEventHandler(this.RhythmPaint_Paint);
             // 
             // RhythmDelete
             // 
@@ -506,7 +517,6 @@ namespace HapticBelt
             this.RhythmDelete.TabIndex = 31;
             this.RhythmDelete.Text = "Delete";
             this.RhythmDelete.UseVisualStyleBackColor = true;
-            this.RhythmDelete.Click += new System.EventHandler(this.RhythmDelete_Click);
             // 
             // RhythmReplace
             // 
@@ -516,7 +526,6 @@ namespace HapticBelt
             this.RhythmReplace.TabIndex = 30;
             this.RhythmReplace.Text = "Replace";
             this.RhythmReplace.UseVisualStyleBackColor = true;
-            this.RhythmReplace.Click += new System.EventHandler(this.RhythmReplace_Click);
             // 
             // RhythmInsert
             // 
@@ -526,7 +535,6 @@ namespace HapticBelt
             this.RhythmInsert.TabIndex = 29;
             this.RhythmInsert.Text = "Insert";
             this.RhythmInsert.UseVisualStyleBackColor = true;
-            this.RhythmInsert.Click += new System.EventHandler(this.RhythmInsert_Click);
             // 
             // RhythmAdd
             // 
@@ -536,7 +544,6 @@ namespace HapticBelt
             this.RhythmAdd.TabIndex = 28;
             this.RhythmAdd.Text = "Add";
             this.RhythmAdd.UseVisualStyleBackColor = true;
-            this.RhythmAdd.Click += new System.EventHandler(this.RhythmAdd_Click);
             // 
             // RhythmOffLabel
             // 
@@ -632,6 +639,16 @@ namespace HapticBelt
             this.DirectPanel.Size = new System.Drawing.Size(270, 248);
             this.DirectPanel.TabIndex = 27;
             this.DirectPanel.Visible = false;
+            // 
+            // DirectBack
+            // 
+            this.DirectBack.Location = new System.Drawing.Point(16, 222);
+            this.DirectBack.Name = "DirectBack";
+            this.DirectBack.Size = new System.Drawing.Size(75, 23);
+            this.DirectBack.TabIndex = 26;
+            this.DirectBack.Text = "Back";
+            this.DirectBack.UseVisualStyleBackColor = true;
+            this.DirectBack.Click += new System.EventHandler(this.DirectBack_Click);
             // 
             // RenameSetField
             // 
@@ -813,7 +830,7 @@ namespace HapticBelt
             // DirectAddedLabel
             // 
             this.DirectAddedLabel.AutoSize = true;
-            this.DirectAddedLabel.Location = new System.Drawing.Point(66, 17);
+            this.DirectAddedLabel.Location = new System.Drawing.Point(58, 18);
             this.DirectAddedLabel.Name = "DirectAddedLabel";
             this.DirectAddedLabel.Size = new System.Drawing.Size(38, 13);
             this.DirectAddedLabel.TabIndex = 4;
@@ -822,7 +839,7 @@ namespace HapticBelt
             // DirectAvailableLabel
             // 
             this.DirectAvailableLabel.AutoSize = true;
-            this.DirectAvailableLabel.Location = new System.Drawing.Point(18, 17);
+            this.DirectAvailableLabel.Location = new System.Drawing.Point(12, 18);
             this.DirectAvailableLabel.Name = "DirectAvailableLabel";
             this.DirectAvailableLabel.Size = new System.Drawing.Size(50, 13);
             this.DirectAvailableLabel.TabIndex = 3;
@@ -889,15 +906,16 @@ namespace HapticBelt
             this.ErrorLocation.TabIndex = 29;
             this.ErrorLocation.Text = "Error Location:";
             // 
-            // DirectBack
+            // MagTestStop
             // 
-            this.DirectBack.Location = new System.Drawing.Point(16, 222);
-            this.DirectBack.Name = "DirectBack";
-            this.DirectBack.Size = new System.Drawing.Size(75, 23);
-            this.DirectBack.TabIndex = 26;
-            this.DirectBack.Text = "Back";
-            this.DirectBack.UseVisualStyleBackColor = true;
-            this.DirectBack.Click += new System.EventHandler(this.DirectBack_Click);
+            this.MagTestStop.Location = new System.Drawing.Point(98, 222);
+            this.MagTestStop.Name = "MagTestStop";
+            this.MagTestStop.Size = new System.Drawing.Size(75, 23);
+            this.MagTestStop.TabIndex = 37;
+            this.MagTestStop.Text = "Stop";
+            this.MagTestStop.UseVisualStyleBackColor = true;
+            this.MagTestStop.Visible = false;
+            this.MagTestStop.Click += new System.EventHandler(this.MagTestStop_Click);
             // 
             // GUI
             // 
@@ -1002,6 +1020,8 @@ namespace HapticBelt
         private System.Windows.Forms.Label ErrorStatus;
         private System.Windows.Forms.Label ErrorLocation;
         private System.Windows.Forms.Button DirectBack;
+        private System.Windows.Forms.Button RhythmTestStop;
+        private System.Windows.Forms.Button MagTestStop;
 
     }
 }

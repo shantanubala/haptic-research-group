@@ -5,7 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using Haptic_Belt_Library;
+using HapticDriver;
 /* Description: This class, along with all its partial classes provides a
  * front end to the Haptic_Belt_Library to program the Haptic Belt. A user
  * may define multiple Magnitudes, Rhythms, and activate motors in group
@@ -21,14 +21,15 @@ using Haptic_Belt_Library;
  * obtain a good idea of how the class works without understanding the
  * implementation (F).
  */
-namespace HapticBelt
+namespace HapticGUI
 {        
     public partial class GUI : Form
     { 
-        Library belt = new Library(); //Library functionality
-        String[] response = new String[2]; //Return array for all Library calls
+        HapticBelt belt = new HapticBelt(); //Library functionality
+        error_t response = new error_t(); //Return array for all Library calls
         Boolean COM_Available = false; //represents availablity of a COM port
         Boolean Port_Open = false; //represents if a port has been initialized
+        TimeSpan wait; //Used for timing in the Testing functions
 
         public GUI()
         {
@@ -40,13 +41,11 @@ namespace HapticBelt
             //Clear ComboBox
             COMComboBox.Items.Clear();
             //Populate ComboBox w/ COM port list
-            String[] ports = belt.Get_Available_Ports();
-            for (int i = 0; i < ports.Length; i++)
+            String[] ports = belt.GetSerialPortNames();
+            if (ports.Length > 0)
             {
-//QUICK FIX for some reason on connection of BT comports have an additional o.
-//EG: COM6o is returned...
-                if(ports[i].Contains("o"))
-                    COMComboBox.Items.Add(ports[i].Substring(0,ports[i].Length - 1));
+                for (int i = 0; i < ports.Length; i++)
+                    COMComboBox.Items.Add(ports[i]);
                 COM_Available = true;
             }
         }
@@ -89,17 +88,13 @@ namespace HapticBelt
             //If there is a COM available, and no port is open, open a port!
             if (!Port_Open && COM_Available && (COMComboBox.SelectedIndex > -1))
             {
-ErrorStatus.Text = "Error Status: " + "Waiting for Initialize_Serial_Port() to respond";
-ErrorLocation.Text = "Error Location: " + "Calling Initialize_Serial_Port()";
-                response = belt.Initialize_Serial_Port(COMComboBox.SelectedItem.ToString(), "9600", "None", "1", "8");
-ErrorStatus.Text = "Error Status: " + response[0];
-                if (!response[0].Equals(""))
+                String com = COMComboBox.SelectedItem.ToString();
+                if (hasError(belt.SetupPorts(com, com, "9600", "8", "1", "None", "1000"), "SetupPorts()"))
                 {
-                    //ERROR
+                    //Handle Error
                 }
                 else
                 {
-ErrorLocation.Text = "Error Location: ";
                     Port_Open = true;
                     OpenPort.Hide();
                     ClosePort.Show();
@@ -111,7 +106,7 @@ ErrorLocation.Text = "Error Location: ";
         {
             if (Port_Open)
             {
-                belt.Close_Serial_Port();
+                belt.ClosePorts();
                 Port_Open = false;
                 OpenPort.Show();
                 ClosePort.Hide();
@@ -126,6 +121,48 @@ ErrorLocation.Text = "Error Location: ";
         private void Exit_Click(object sender, EventArgs e)
         {
             Close();
+        }
+        //Checks for error based on given error_t param, errorLOC param is used for specificying the location of the error for debugging
+        private bool hasError(error_t error, String errorLOC)
+        {
+            if (error == error_t.ESUCCESS)
+                return false;
+            else
+            {
+                ErrorLocation.Text = "Error Location: " + errorLOC;
+                ErrorStatus.Text = belt.getErrorMsg(response);
+                return true;
+            }
+        }    
+        //Same as hasError, except has a specificed ignore array of errors
+        private bool hasError(error_t error, String errorLOC, error_t[] ignoreList)
+        {
+            if (error == error_t.ESUCCESS)
+                return false;
+            else
+            {
+                //Check all errors to ignore 
+                for(int i = 0; i < ignoreList.Length; i++)
+                {
+                    if(error == ignoreList[i])
+                        return false;
+                }
+                ErrorLocation.Text = "Error Location: " + errorLOC;
+                ErrorStatus.Text = belt.getErrorMsg(response);
+                return true;
+            }
+        }
+        //Check for a particular error
+        private bool hasError(error_t error, String errorLOC, error_t check)
+        {
+            if (error != check)
+                return false;
+            else
+            {
+                ErrorLocation.Text = "Error Location: " + errorLOC;
+                ErrorStatus.Text = belt.getErrorMsg(response);
+                return true;
+            }
         }
     }
 }

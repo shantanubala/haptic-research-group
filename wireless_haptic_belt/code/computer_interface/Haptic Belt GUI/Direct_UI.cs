@@ -5,8 +5,9 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using HapticDriver;
 
-namespace HapticBelt
+namespace HapticGUI
 {
     partial class GUI
     {
@@ -16,20 +17,12 @@ namespace HapticBelt
         private void Show_Direct_Mode()
         {
             //Must be done before start, if error occurs go back
-            if (Populate_AvailibleList() == 0)
+            if (Populate_AvailibleList() > 0)
             {
                 //Send belt start command
-ErrorStatus.Text = "Error Status: " + "Waiting on Start() to respond";
-ErrorLocation.Text = "Error Location: " + "Calling Start()";
-                response = belt.Start();
-ErrorStatus.Text = "Error Status: " + response[0];
-                if (!response[0].Equals(""))
+                if (hasError(belt.StartHapticBelt(),"StartHapticBelt.()"))
                 {
-                    //ERROR
-                }
-                else
-                {
-ErrorLocation.Text = "Error Location: ";
+                    //Handle Error
                 }
                 DirectPanel.Show();
                 //Load Saved Sets later?
@@ -57,36 +50,24 @@ ErrorLocation.Text = "Error Location: ";
         //Triggers stop button and goes back to Menu
         private void DirectBack_Click(object sender, EventArgs e)
         {
-            //Stop All Motors, activate Stop button
-            DirectStop_Click(sender,e);
-            //Go back to menu
-ErrorStatus.Text = "Error Status: " + "Waiting on Back() to respond";
-ErrorLocation.Text = "Error Location: " + "Calling Back()";
-            response = belt.Back();
-ErrorStatus.Text = "Error Status: " + response[0];
-            if (!response[0].Equals(""))
+            //Stop All Motors before going back
+            if (hasError(belt.StopAll(), "StopAll()"))
             {
-                //ERROR
+                //Handle Error
             }
-            else
+            //Go back to menu
+            if (hasError(belt.ResetHapticBelt(),"ResetHapticBelt()"))
             {
-ErrorLocation.Text = "Error Location: ";
+                //Handle Error
             }
         }
         //Stops all motors from vibrating
         private void DirectStop_Click(object sender, EventArgs e)
         {
-ErrorStatus.Text = "Error Status: " + "Waiting on Stop() to respond";
-ErrorLocation.Text = "Error Location: " + "Calling Stop()";
-            response = belt.Stop();
-ErrorStatus.Text = "Error Status: " + response[0];
-            if (!response[0].Equals(""))
+            //Stop All Motors
+            if (hasError(belt.StopAll(),"StopAll()"))
             {
-                //ERROR
-            }
-            else
-            {
-ErrorLocation.Text = "Error Location: ";
+                //Handle Error
             }
         }
         //Renames a set with any characters in the Text Field.

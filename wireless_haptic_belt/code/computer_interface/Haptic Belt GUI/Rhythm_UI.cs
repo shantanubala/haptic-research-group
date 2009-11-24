@@ -5,8 +5,10 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using HapticDriver;
 
-namespace HapticBelt
+
+namespace HapticGUI
 { 
     partial class GUI
     {
@@ -36,24 +38,95 @@ namespace HapticBelt
         {
             if (pairs != 0)
             {
-ErrorStatus.Text = "Error Status: " + "Waiting for Learn_Rhythm() to respond";
-ErrorLocation.Text = "Error Location: " + "Calling Learn_Rhythm()";
-                response = belt.Learn_Rhythm(RhythmComboBox.SelectedItem.ToString(), Get_Pattern());
-ErrorStatus.Text = "Error Status: " + response[0];
-                if (!response[0].Equals(""))
+                String[] pattern = Get_Pattern().Split(',');
+
+                if(hasError(belt.Learn_Rhythm(RhythmComboBox.SelectedItem.ToString(), pattern[0],Convert.ToInt16(pattern[1]),true),"Learn_Rhythm()"))
                 {
-                    //ERROR
-                }
-                else
-                {
-ErrorLocation.Text = "Error Location: ";
+                    //Handle Error
                 }
             }
         }
-        //FIXME not yet implemented in the library/arduino
+        //Learns and plays Rhythm on belt using Rhythm H and Learns 100% Magnitude on setting A, and replaces A at the end
+        //Note that we must use TimeSpan, so that we can replace the original Magnitude upon completion
         private void RhythmTest_Click(object sender, EventArgs e)
         {
-//          belt.Test_Rhythm();
+            if (pairs != 0)
+            {
+                DateTime start;
+                DateTime now;
+                String hold_magnitude;
+                String[] split_magnitude = new String[2];
+                //Hide Rhythm Buttons so no interference will occur
+                RhythmTest.Hide();
+                RhythmBack.Hide();
+                RhythmLearn.Hide();
+
+                //Get the User Inputed Pattern
+                String[] pattern = Get_Pattern().Split(',');
+                
+                //Learn the test Rhythm to temp spot "H"
+                if(hasError(belt.Learn_Rhythm("H", pattern[0],Convert.ToInt16(pattern[1]),true),"Learn_Rhythm()"))
+                {
+                    //Handle Error
+                }
+
+                //Store the current Magnitude
+                hold_magnitude = belt.getMagnitude("A",true, QueryType.SINGLE);
+                if(hasError(belt.getError(),"getMagnitude()"))
+                {
+                    //Handle Error
+                }
+                //Learn a 100% Magnitude setting
+                if(hasError(belt.Learn_Magnitude("A",100),"Learn_Magnitude()"))
+                {
+                    //Handle Error
+                }
+                //Vibrate all available motors on belt with test Rhythm and 100% Magnitude and 7 cycles
+                for(int i = 0; i < 16; i++)
+                {
+                    //Ignore the error of a motor not being found
+                    error_t[] ignore = {error_t.ENOMOTOR};
+                    if(hasError(belt.Vibrate_Motor(i,"H","A",7),"Vibrate_Motor()",ignore))
+                    {
+                        //Handle Error
+                    }
+                }
+                //Wait for motors to finish vibrating or user to click "Stop" on RhythmTestStop Button
+                RhythmTestStop.Show();
+                
+                //Note: 1 Tick in Timespan(long ticks) = 100ns. Thus 1ms = 10000 ticks.
+                //Timespan wait = new TimeSpan(Rhythm Length(ms)*10000(ticks/ms)*cycles)
+                wait = new TimeSpan(Convert.ToInt16(pattern[1])*10000*7);
+                start = DateTime.Now;
+                now = DateTime.Now;
+                while (now - start < wait)
+                {
+                    //This function allows user clicks to still register while in this while loop
+                    Application.DoEvents();
+                    now = DateTime.Now;
+                }
+                //Issue a stop command to all motors on the belt
+                if(hasError(belt.StopAll(), "belt.StopAll()"))
+                {
+                    //Handle Error
+                }
+                //Reset original state of magnitude "A"
+                split_magnitude = hold_magnitude.Split(',');
+                if(hasError(belt.Learn_Magnitude("A",Convert.ToUInt16(split_magnitude[0]),Convert.ToUInt16(split_magnitude[1])),"Learn_Magnitude()"))
+                {
+                    //Handle Error
+                }
+                //Reset button visability to original states
+                RhythmTest.Show();
+                RhythmBack.Show();
+                RhythmLearn.Show();
+                RhythmTestStop.Hide();
+            }            
+        }
+        private void RhythmTestStop_Click(object sender, EventArgs e)
+        {
+            //This sets wait = 0, breaking from the while loop prematurely in RhythmTest_Click().
+            wait -= wait;
         }
         //Changes the PatternBox, called only upon changes in the ComboBox
         private void RhythmComboBox_SelectedIndexChanged(object sender, EventArgs e)
