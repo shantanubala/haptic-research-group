@@ -186,6 +186,7 @@ namespace Haptic_Belt_Library
         public string[] Vibrate_Motor(string motor_number, string rhythm_string, string magnitude_string, string rhythm_cycles)
         {
             string[] return_values = new string[2];
+            byte[] send_values = new byte[2];
             return_values[1] = "";
 
             if (Serial_Port.IsOpen)
@@ -352,14 +353,13 @@ namespace Haptic_Belt_Library
                         break;
                 }
 
-                byte first_byte = (byte)((mode * 16) + motor);
-                byte second_byte = (byte)((rhythm * 32) + (magnitude * 8) + rhythm_length);
+                send_values[0] = (byte)((mode * 16) + motor);
+                send_values[1] = (byte)((rhythm * 32) + (magnitude * 8) + rhythm_length);
 
                 //Send in binary over Serial_Port FIXME Need to use writeline at the second_byte?
                 try
                 {
-                    Serial_Port.Write(first_byte);
-                    Serial_Port.Write(second_byte);
+                    Serial_Port.Write(send_values, 0, 2);
                     //Successful if this point is reached w/o error
                     return_values[0] = "";
                 }
@@ -577,7 +577,7 @@ namespace Haptic_Belt_Library
                             return_values[index, i] = split[i + 1];
                         }
                         //catach split[i+1] OutOfRange Exception
-                        catch (IndexOutOfRangeException e)
+                        catch (IndexOutOfRangeException)
                         {
                             return_values[index, i] = "";
                         }                               
@@ -750,17 +750,17 @@ namespace Haptic_Belt_Library
         public string[] Back()
         {
             string[] return_values = new string[2];
+            byte[] send_values = new byte[2];
             return_values[1] = "";
    
             if (Serial_Port.IsOpen)
             {
-                byte first_byte = 48;
-                byte second_byte = 0;
+                send_values[0] = 48;
+                send_values[1] = 0;
                 //send BACK command through Serial_Port
                 try
                 {
-                    Serial_Port.Write(first_byte);
-                    Serial_Port.Write(second_byte);
+                    Serial_Port.Write(send_values, 0, 2);
                     /*FIXME , do we ge a response here? check for STATUS <error number> [<info>]
                     if (Check_Belt() != 0)
                         return_values[0] = "No response from belt or belt error";
