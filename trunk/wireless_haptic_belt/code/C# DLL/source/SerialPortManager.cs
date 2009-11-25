@@ -127,7 +127,7 @@ namespace HapticDriver
         }
         #endregion
 
-        #region Manager Properties
+        #region Manager Property Accessors
         internal bool IsOpen() {
             return _portOpened;
         }
@@ -335,7 +335,7 @@ namespace HapticDriver
             byte[] dataBuffer;
             string strBuffer = "";
             int byte_count;
-            error_t error = error_t.ESUCCESS;
+            error_t error = error_t.COMPRTREAD;
 
             // Mutual exclusion is used in this method so that it does not get 
             // interrupted by another thread or Event.
@@ -388,6 +388,7 @@ namespace HapticDriver
                         ReturnData(MessageType.INCOMING, dataBuffer);
                     }
                     serialMutex.Unlock(); // release mutex
+                    error = error_t.ESUCCESS;
                 }
                 // Update timer and compare (need to disable during step debug)
                 currentTime = DateTime.Now;

@@ -77,8 +77,8 @@ namespace HapticDriver
                 }
             }
             return_values[0] = magCount.ToString(); // count of defined magnitudes 
-            _belt_error = return_error;
 
+            _dll_error = return_error;
             return return_values;
         }
 
@@ -128,7 +128,7 @@ namespace HapticDriver
                     }
                 }
             }
-            _belt_error = return_error;
+            _dll_error = return_error;
             return return_values;
         }
 
@@ -156,6 +156,7 @@ namespace HapticDriver
             else if (period > Constants.PERIOD_MAX
                 || duty_cycle > period
                 || duty_cycle < Constants.DUTY_CYCLE_MIN) {
+
                 return_error = error_t.EINVM;
             }
             else {
@@ -164,11 +165,9 @@ namespace HapticDriver
 
                 //send this output to the belt
                 try {
-                    change_acmd_mode(acmd_mode_t.ACM_LRN);
-                    if (acmd_mode != acmd_mode_t.ACM_LRN) {
-                        return_error = _belt_error;
-                    }
-                    else {
+                    return_error = change_acmd_mode(acmd_mode_t.ACM_LRN);
+
+                    if (return_error == error_t.ESUCCESS) {
                         // Send command with wait time for belt to respond back.
                         return_error = SerialPortWriteData(instruction, MAX_RESPONSE_TIMEOUT);
 
@@ -182,6 +181,7 @@ namespace HapticDriver
                     return_error = error_t.EXCLRNMAG;
                 }
             }
+            _dll_error = return_error;
             return return_error;
         }
 
@@ -214,6 +214,5 @@ namespace HapticDriver
             }
             return return_error;
         }
-
     }
 }

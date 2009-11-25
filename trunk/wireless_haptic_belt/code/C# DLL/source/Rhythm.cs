@@ -37,6 +37,7 @@ namespace HapticDriver
         /// <param name="query_type">specifies which type of query to execute</param>
         /// <returns> Rhythm "[ID],[hex/binary pattern],[length]"</returns>
         public string[] getRhythm(bool binary, QueryType query_type) {
+            
             string[] return_values = new string[RHY_MAX_NO + 1];
             int rhyCount = 0;
             error_t return_error = error_t.NOTFOUND;
@@ -46,6 +47,7 @@ namespace HapticDriver
 
             // Search and process data
             if (return_error == error_t.ESUCCESS) {
+
                 return_error = error_t.NOTFOUND;
                 for (int index = 1; index < qry_resp.Length; index++) {
                     if (qry_resp[index] != null) {
@@ -81,8 +83,8 @@ namespace HapticDriver
                 }
             }
             return_values[0] = rhyCount.ToString(); // count of defined magnitudes
-            _belt_error = return_error;
-
+            
+            _dll_error = return_error;
             return return_values;
         }
 
@@ -105,6 +107,7 @@ namespace HapticDriver
 
             // Search and process data
             if (return_error == error_t.ESUCCESS) {
+
                 return_error = error_t.NOTFOUND;
                 for (int index = 1; index < qry_resp.Length; index++) {
                     if (qry_resp[index] != null) {
@@ -131,7 +134,7 @@ namespace HapticDriver
                     }
                 }
             }
-            _belt_error = return_error;
+            _dll_error = return_error;
             return return_values; // returns Rhythm "<hex/binary pattern>"
         }
 
@@ -154,6 +157,7 @@ namespace HapticDriver
 
             // Search and process data
             if (return_error == error_t.ESUCCESS) {
+
                 return_error = error_t.NOTFOUND;
                 for (int index = 1; index < qry_resp.Length; index++) {
                     if (qry_resp[index] != null) {
@@ -169,7 +173,7 @@ namespace HapticDriver
                     }
                 }
             }
-            _belt_error = return_error;
+            _dll_error = return_error;
             return return_value; // returns Rhythm "time"
         }
 
@@ -247,11 +251,10 @@ namespace HapticDriver
 
                 //send output to the belt
                 try {
-                    change_acmd_mode(acmd_mode_t.ACM_LRN);
-                    if (acmd_mode != acmd_mode_t.ACM_LRN) {
-                        return_error = _belt_error;
-                    }
-                    else {
+                    return_error = change_acmd_mode(acmd_mode_t.ACM_LRN);
+
+                    if (return_error == error_t.ESUCCESS) {
+
                         // Send command with wait time for belt to respond back.
                         return_error = SerialPortWriteData(instruction, MAX_RESPONSE_TIMEOUT);
 
@@ -265,6 +268,7 @@ namespace HapticDriver
                     return_error = error_t.EXCLRNRHY;
                 }
             }
+            _dll_error = return_error;
             return return_error;
         }
     }
