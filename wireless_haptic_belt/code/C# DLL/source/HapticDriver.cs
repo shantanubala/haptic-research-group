@@ -78,9 +78,10 @@ namespace HapticDriver
         private string[] qry_resp;
 
         // enum for current firmware mode
-        private acmd_mode_t acmd_mode = acmd_mode_t.ACM_LRN;
+        private acmd_mode_t _acmd_mode = acmd_mode_t.ACM_LRN;
         private error_t _belt_error = error_t.EMAX;
-        private mode_t glbl_mode = mode_t.M_LEARN;
+        private error_t _dll_error = error_t.EMAX;
+        private mode_t _glbl_mode = mode_t.M_LEARN;
 
         #region Manager Constructors
         /// <summary>
@@ -162,16 +163,17 @@ namespace HapticDriver
         #endregion
 
         /// <summary>
-        /// Accessor method that returns the Haptic Belt's current error code
+        /// Accessor method that returns the Haptic Belt Hardware's last error code
         /// </summary>
-        public error_t getError() {
+        public error_t getHardwareStatus() {
             return _belt_error;
         }
         /// <summary>
-        /// Accessor method that returns the Haptic Belt's current error code message
+        /// Accessor method that returns the Haptic Belt DLL last error code.  This may
+        /// be a hardware or software error
         /// </summary>
-        public string getErrorMsg() {
-            return "Code: " + (int)_belt_error + " " + Constants.error_t_names[(int)_belt_error];
+        public error_t getSoftwareStatus() {
+            return _dll_error;
         }
         /// <summary>
         /// Accessor method that returns the error code message for a particular error code.
@@ -219,6 +221,7 @@ namespace HapticDriver
             catch {
                 //error = error_t.COMPRTSETUP; // already default
             }
+            _dll_error = error;
             return error;
         }
 
@@ -238,6 +241,7 @@ namespace HapticDriver
                 if (_portInName != _portOutName)
                     error = serialOut.OpenPort();
             }
+            _dll_error = error;
             return error;
         }
 
@@ -252,6 +256,7 @@ namespace HapticDriver
                 if (_portInName != _portOutName)
                     error = serialOut.ClosePort();
             }
+            _dll_error = error;
             return error;
         }
 
@@ -261,12 +266,11 @@ namespace HapticDriver
         private void checkBeltStatus() {
             error_t error = error_t.EMAX;
 
-            // FIXME
             // .NET SerialPort.ReadLine() results in \r\n 
             // BUT YOU CAN ONLY SEE "\n" WHEN DIRECTLY LISTENING TO PORT
             //if (serialIn.MsgInBuffer.Equals("STS 0\r\n") || serialIn.MsgInBuffer.Equals("53 54 53 20 30 0D 0A "))
 
-            if (acmd_mode == acmd_mode_t.ACM_LRN) {
+            if (_acmd_mode == acmd_mode_t.ACM_LRN) {
                 char[] delimiters = new char[] { '\r', '\n', ' ' };
                 string[] split = ByteToAscii(serialIn.DataRecvBuffer()).Split(delimiters);
                 for (int i = 0; i < split.Length; i++) {
@@ -277,7 +281,7 @@ namespace HapticDriver
                 }
             }
             // Otherwise the error code is returned as a hex digit without '\n'
-            else if (acmd_mode == acmd_mode_t.ACM_VIB) {
+            else if (_acmd_mode == acmd_mode_t.ACM_VIB) {
                 error = (error_t)(serialIn.DataRecvBuffer()[0]);
             }
             else { ; }//do nothing
@@ -301,20 +305,23 @@ namespace HapticDriver
             error_t error = error_t.COMPRTWRITE;
 
             if (!port_setup)
-                error = error_t.COMPRTWRITE;
+                return error_t.COMPRTWRITE;
             else if (!serialOut.IsOpen())
-                error = error_t.COMPRTNOTOPEN;
+                return error_t.COMPRTNOTOPEN;
             else {
-                serialOut.WriteData(dataString);
-
+                error = serialOut.WriteData(dataString);
+                if (error != error_t.ESUCCESS) {
+                    return error;
+                }
                 //get response from belt
                 error = serialIn.ReceiveData(SerialPortManager.DataType.Text, responseTimeout);
+                if (error != error_t.ESUCCESS) {
+                    return error;
+                }
                 checkBeltStatus();
-            }
-            if (error != error_t.ESUCCESS)
-                return error;
-            else
+                _dll_error = return_error;
                 return _belt_error;
+            }
         }
 
         /// <summary>
@@ -328,47 +335,50 @@ namespace HapticDriver
             error_t error = error_t.COMPRTWRITE;
 
             if (!port_setup)
-                error = error_t.COMPRTWRITE;
+                return error_t.COMPRTWRITE;
             else if (!serialOut.IsOpen())
-                error = error_t.COMPRTNOTOPEN;
+                return error_t.COMPRTNOTOPEN;
             else {
-                serialOut.WriteData(data);
-
+                error = serialOut.WriteData(data);
+                if (error != error_t.ESUCCESS) {
+                    return error;
+                }
                 //get response from belt
                 error = serialIn.ReceiveData(SerialPortManager.DataType.Hex, responseTimeout);
+                if (error != error_t.ESUCCESS) {
+                    return error;
+                }
                 checkBeltStatus();
-            }
-            if (error != error_t.ESUCCESS)
-                return error;
-            else
                 return _belt_error;
+            }
         }
 
         /*
          * Method switches the global mode
          */
-        private void change_glbl_mode(mode_t mode) {
+        private error_t change_glbl_mode(mode_t mode) {
             error_t return_error = error_t.EMAX;
 
-            if (glbl_mode == mode) {
+            if (_glbl_mode == mode) {
                 // already in requested mode, do nothing and no loss of performance
             }
-            else if (glbl_mode == mode_t.M_LEARN) {
+            else if (_glbl_mode == mode_t.M_LEARN) {
                 //switch to activate command mode
                 return_error = SerialPortWriteData("BGN\n", MAX_RESPONSE_TIMEOUT);
 
                 if (return_error == error_t.ESUCCESS)
-                    glbl_mode = mode_t.M_ACTIVE;
+                    _glbl_mode = mode_t.M_ACTIVE;
             }
-            else { //if (glbl_mode == mode_t.M_ACTIVE)
+            else { //if (_glbl_mode == mode_t.M_ACTIVE)
                 // back to learning mode
                 byte[] returnState = { 0x30, 0x30 }; //should send Hex 0x30 0x30 = mode 0
                 return_error = SerialPortWriteData(returnState, MAX_RESPONSE_TIMEOUT);
 
                 if (return_error == error_t.ESUCCESS)
-                    glbl_mode = mode_t.M_LEARN;
+                    _glbl_mode = mode_t.M_LEARN;
             }
-            _belt_error = return_error;
+            _dll_error = return_error;
+            return return_error;
         }
 
         /*
@@ -376,32 +386,39 @@ namespace HapticDriver
          * as the firmware mode is changed.  The application and the 
          * firmware modes must stay synchronized.
          */
-        private void change_acmd_mode(acmd_mode_t mode) {
-            if (acmd_mode == mode) {
+        private error_t change_acmd_mode(acmd_mode_t mode) {
+            error_t return_error = error_t.EMAX;
+
+            if (_acmd_mode == mode) {
                 _belt_error = error_t.ESUCCESS; // already in requested mode
+                return_error = _belt_error;
             }
             else if (mode == acmd_mode_t.ACM_LRN) {
                 //return to learning mode
-                change_glbl_mode(mode_t.M_LEARN);
-                if (_belt_error == error_t.ESUCCESS) {
-                    acmd_mode = mode;
+                return_error = change_glbl_mode(mode_t.M_LEARN);
+                if (return_error == error_t.ESUCCESS) {
+                    _acmd_mode = mode;
                 }
             }
             else { //(mode == acmd_mode_t.ACM_VIB || acmd_mode_t.ACM_SPT || acmd_mode_t.ACM_GCL)
-                change_glbl_mode(mode_t.M_ACTIVE);
-                if (_belt_error == error_t.ESUCCESS) {
-                    acmd_mode = mode;
+                return_error = change_glbl_mode(mode_t.M_ACTIVE);
+                if (return_error == error_t.ESUCCESS) {
+                    _acmd_mode = mode;
                 }
             }
+            _dll_error = return_error;
+            return return_error;
         }
 
         /// <summary>
-        /// Reset haptic belt and driver to the default states
+        /// Reset haptic belt and driver to the default states if any erroneous 
+        /// states occur in DLL or belt.  This is an attempt to regain control
+        /// to a known state.
         /// </summary>
         /// <returns>error code resulting from the reset</returns>
         public error_t ResetHapticBelt() {
-            change_acmd_mode(acmd_mode_t.ACM_LRN);
-            return _belt_error;
+            _dll_error = change_acmd_mode(acmd_mode_t.ACM_LRN);
+            return _dll_error; 
         }
 
         /// <summary>
@@ -428,11 +445,10 @@ namespace HapticDriver
                 // This equates to hex command < 01 36 >
 
                 try {
-                    change_acmd_mode(cmd_mode);
-                    if (acmd_mode != cmd_mode) {
-                        return_error = _belt_error;
-                    }
-                    else {
+                    return_error = change_acmd_mode(cmd_mode);
+
+                    if (return_error == error_t.ESUCCESS) 
+                    {
                         mode = (byte)cmd_mode;
 
                         // Send mode first, it is the LSB of the first byte in firmware struct active_command_t
@@ -460,6 +476,7 @@ namespace HapticDriver
                     return_error = error_t.EXCVIBCMD;
                 }
             }
+            _dll_error = return_error;
             return return_error;
         }
 
@@ -508,15 +525,13 @@ namespace HapticDriver
             error_t return_error = error_t.EMAX;
 
             if (motor_number < 0) {
-                // do nothing
-            }
-            else if (serialOut.IsOpen()) {
-                // sending rhythm_cycles = 0 stops motor
-                return_error = (error_t)Vibrate_Motor(motor_number, 0x0, 0x0, 0x0);
+                return_error = error_t.ENOMOTOR;
             }
             else {
-                return_error = _belt_error;
+                // sending rhythm_cycles = 0 stops motor
+                return_error = Vibrate_Motor(motor_number, 0x0, 0x0, 0x0);
             }
+            _dll_error = return_error;
             return return_error;
         }
 
@@ -526,17 +541,19 @@ namespace HapticDriver
         /// <returns>error code resulting from Stop Vibrate command</returns>
         public error_t StopAll() {
             error_t return_error = error_t.EMAX;
+            int motorCount = this.getMotors(QueryType.PREVIOUS);
 
             // Assumes that QRY has already occured in order to activate motors
-            if (serialOut.IsOpen() && this.getMotors(QueryType.PREVIOUS) != 0) {
-                for (byte i = 0; i < this.getMotors(QueryType.PREVIOUS); i++) {
+            if (motorCount != 0) {
+                for (byte i = 0; i < motorCount; i++) {
                     // sending rhythm_cycles = 0 stops motor
-                    return_error = (error_t)Vibrate_Motor(i, 0x0, 0x0, 0x0);
+                    return_error = Vibrate_Motor(i, 0x0, 0x0, 0x0);
                 }
             }
             else {
                 return_error = _belt_error;
             }
+            _dll_error = return_error;
             return return_error;
         }
 
@@ -557,11 +574,9 @@ namespace HapticDriver
 
             //Send the QRY command if ports are setup
             try {
-                change_acmd_mode(acmd_mode_t.ACM_LRN);
-                if (acmd_mode != acmd_mode_t.ACM_LRN) {
-                    return_error = _belt_error;
-                }
-                else {
+                return_error = change_acmd_mode(acmd_mode_t.ACM_LRN);
+
+                if (return_error == error_t.ESUCCESS) {
                     // Send command with wait time for belt to respond back.
                     return_error = SerialPortWriteData(typeMsg, timeout);
 
@@ -600,6 +615,7 @@ namespace HapticDriver
                 qry_resp[0] = "0";
                 return_error = error_t.EXCQRYCMD;
             }
+            _dll_error = return_error;
             return return_error;
         }
 
@@ -614,6 +630,7 @@ namespace HapticDriver
             else // No query - DLL data structure already populated from recent QRY
                 return_error = error_t.ESUCCESS;
 
+            _dll_error = return_error;
             return return_error;
         }
 
@@ -653,7 +670,8 @@ namespace HapticDriver
         /// This function returns the firmware version from the specified QRY operation
         /// </summary>
         public string getVersion(QueryType query_type) {
-            string return_value = "0.0";
+            
+            string return_value = "";
             error_t return_error = error_t.NOTFOUND;
 
             // Query configuration data from belt
@@ -661,6 +679,7 @@ namespace HapticDriver
 
             // Search and process data
             if (return_error == error_t.ESUCCESS) {
+
                 return_error = error_t.NOTFOUND;
                 try {
                     for (int index = 1; index < qry_resp.Length; index++) {
@@ -680,7 +699,7 @@ namespace HapticDriver
                     return_error = error_t.EXCDATASEARCH;
                 }
             }
-            _belt_error = return_error;
+            _dll_error = return_error;
             return return_value;
         }
 
@@ -696,6 +715,7 @@ namespace HapticDriver
 
             // Search and process data
             if (return_error == error_t.ESUCCESS) {
+
                 return_error = error_t.NOTFOUND;
                 try { //Convert.ToInt16 can cause exception
                     for (int index = 1; index < qry_resp.Length; index++) {
@@ -716,7 +736,7 @@ namespace HapticDriver
                     return_error = error_t.EXCDATASEARCH;
                 }
             }
-            _belt_error = return_error;
+            _dll_error = return_error;
             return return_values;
         }
 
@@ -728,11 +748,9 @@ namespace HapticDriver
             error_t return_error = error_t.EMAX;
 
             try {
-                change_acmd_mode(acmd_mode_t.ACM_LRN);
-                if (acmd_mode != acmd_mode_t.ACM_LRN) {
-                    return_error = _belt_error;
-                }
-                else {
+                return_error = change_acmd_mode(acmd_mode_t.ACM_LRN);
+
+                if (return_error == error_t.ESUCCESS) {
                     // Send command with wait time for belt to respond back.
                     return_error = SerialPortWriteData("ZAP 1 2 3\n", MAX_RESPONSE_TIMEOUT); // requires 3 arguments
                 }
@@ -741,6 +759,7 @@ namespace HapticDriver
                 qry_resp[0] = "0";
                 return_error = error_t.EXCZAPCMD;
             }
+            _dll_error = return_error;
             return return_error;
         }
     }

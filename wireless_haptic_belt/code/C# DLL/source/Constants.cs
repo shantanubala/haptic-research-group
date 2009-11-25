@@ -152,6 +152,8 @@ namespace HapticDriver
         COMPRTSETUP,
         /// <summary>Com port write data error</summary> 
         COMPRTWRITE,
+        /// <summary>Com port read data error</summary> 
+        COMPRTREAD,
         /// <summary>Com port read data timeout</summary> 
         COMPRTREADTIME,
         /// <summary>Invalid rhythm ID</summary> 
@@ -275,6 +277,7 @@ namespace HapticDriver
         private const string comprtclsprev = "Com port previously closed";
         private const string comprtsetup = "Com port setup error";
         private const string comprtwrite = "Com port write data error";
+        private const string comprtread = "Com port read data error";
         private const string comprtreadtime = "Com port read data timeout";
         private const string invrhyid = "Invalid rhythm ID";
         private const string invrhypathex = "Rhythm pattern not a list of hex values";
@@ -325,6 +328,7 @@ namespace HapticDriver
             comprtclsprev,
             comprtsetup,
             comprtwrite,
+            comprtread,
             comprtreadtime,
             invrhyid,
             invrhypathex,
