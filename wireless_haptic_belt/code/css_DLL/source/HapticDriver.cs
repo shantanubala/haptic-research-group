@@ -1,4 +1,4 @@
-﻿/*****************************************************************************
+/*****************************************************************************
  * FILE:   HapticDriver.cs
  * AUTHOR: Daniel Moberly (Daniel.Moberly@gmail.com)
  *         Kris Blair (Kristopher.Blair@asu.edu)
@@ -305,23 +305,22 @@ namespace HapticDriver
             error_t error = error_t.COMPRTWRITE;
 
             if (!port_setup)
-                return error_t.COMPRTWRITE;
+                error = error_t.COMPRTSETUP;
             else if (!serialOut.IsOpen())
-                return error_t.COMPRTNOTOPEN;
+                error = error_t.COMPRTNOTOPEN;
             else {
                 error = serialOut.WriteData(dataString);
-                if (error != error_t.ESUCCESS) {
-                    return error;
+                if (error == error_t.ESUCCESS) {
+                    //get response from belt
+                    error = serialIn.ReceiveData(SerialPortManager.DataType.Text, responseTimeout);
+                    if (error == error_t.ESUCCESS) {
+                        checkBeltStatus();
+                        error = _belt_error;
+                    }
                 }
-                //get response from belt
-                error = serialIn.ReceiveData(SerialPortManager.DataType.Text, responseTimeout);
-                if (error != error_t.ESUCCESS) {
-                    return error;
-                }
-                checkBeltStatus();
-                _dll_error = return_error;
-                return _belt_error;
             }
+            _dll_error = error;
+            return error;
         }
 
         /// <summary>
@@ -335,22 +334,22 @@ namespace HapticDriver
             error_t error = error_t.COMPRTWRITE;
 
             if (!port_setup)
-                return error_t.COMPRTWRITE;
+                error = error_t.COMPRTSETUP;
             else if (!serialOut.IsOpen())
-                return error_t.COMPRTNOTOPEN;
+                error = error_t.COMPRTNOTOPEN;
             else {
                 error = serialOut.WriteData(data);
-                if (error != error_t.ESUCCESS) {
-                    return error;
+                if (error == error_t.ESUCCESS) {
+                    //get response from belt
+                    error = serialIn.ReceiveData(SerialPortManager.DataType.Hex, responseTimeout);
+                    if (error == error_t.ESUCCESS) {
+                        checkBeltStatus();
+                        error = _belt_error;
+                    }
                 }
-                //get response from belt
-                error = serialIn.ReceiveData(SerialPortManager.DataType.Hex, responseTimeout);
-                if (error != error_t.ESUCCESS) {
-                    return error;
-                }
-                checkBeltStatus();
-                return _belt_error;
             }
+            _dll_error = error;
+            return error;
         }
 
         /*
