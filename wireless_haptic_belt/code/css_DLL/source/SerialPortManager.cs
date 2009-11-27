@@ -178,7 +178,7 @@ namespace HapticDriver
 
                 error = error_t.ESUCCESS;
                 ReturnData(MessageType.OUTGOING, (byte)error); // overhead to convert message
-                
+
             }
             // Saved for debug purposes
             //catch (FormatException ex) {
@@ -192,7 +192,7 @@ namespace HapticDriver
         }
         internal error_t WriteData(byte[] msg) {
             error_t error = error_t.COMPRTWRITE;
-            
+
             //*** _transType == TransmissionType.Hex ***//
 
             try {
@@ -209,7 +209,7 @@ namespace HapticDriver
                 //record message
                 error = error_t.ESUCCESS;
                 ReturnData(MessageType.OUTGOING, (byte)error);
-                
+
             }
             //// Saved for debug purposes
             //catch (FormatException ex) {
@@ -228,7 +228,12 @@ namespace HapticDriver
             error_t error = error_t.COMPRTNOTOPEN;
             try {
                 //first check if the port is already open, if its open then close it
-                if (comPort.IsOpen == true) comPort.Close();
+                if (comPort.IsOpen == true) {
+                    comPort.Close();
+                    comPort.Dispose();
+                }
+                // New instantiation of COM port
+                comPort = new SerialPort();
 
                 //set the properties of our SerialPort Object
                 comPort.BaudRate = int.Parse(_baudRate);
@@ -268,6 +273,10 @@ namespace HapticDriver
                 //first check if the port is already open, if its open then close it
                 if (comPort.IsOpen == true) {
                     comPort.Close();
+                    comPort.Dispose();
+                    //comPort.DiscardInBuffer();
+                    //comPort.DiscardOutBuffer();
+                    
                     _portOpened = false; //false means success in operation
                     error = error_t.ESUCCESS;
 
@@ -276,10 +285,11 @@ namespace HapticDriver
                 }
                 else
                     error = error_t.COMPRTCLSPREV;
-                    ReturnData(MessageType.WARNING, (byte)error);
+                ReturnData(MessageType.WARNING, (byte)error);
 
                 // Help with garbage
                 this.DataReceivedFxn = null;
+                System.Threading.Thread.Sleep(50);
             }
             // Saved for debug purposes
             //catch (FormatException ex) {
@@ -341,64 +351,74 @@ namespace HapticDriver
             // interrupted by another thread or Event.
             // Uses serialMutex.GetLock() and serialMutex.Unlock();
 
-            // Timer
+            // Timer for read timeout
             DateTime startTime = DateTime.Now;
             DateTime currentTime = DateTime.Now;
             TimeSpan duration = startTime - startTime;
 
+            //set current COM port timeout
+            comPort.ReadTimeout = timeout;
+
             //Loop
             bool _continue = true;
-            while (_continue) {
-                if (type == DataType.Text) {
-                    // NOTE: ReadLine() does not read hex digits as input.
-                    // Also while this method does not return the NewLine value, 
-                    // the NewLine value is removed from the input buffer. By default, 
-                    // the ReadLine method will block until a line is received.
-                    // Method also results in "\r" inserted at the end.
-                    serialMutex.GetLock();
-                    string line = comPort.ReadLine();
-                    serialMutex.Unlock();
+            try {
+                while (_continue) {
+                    if (type == DataType.Text) {
+                        // NOTE: ReadLine() does not read hex digits as input.
+                        // Also while this method does not return the NewLine value, 
+                        // the NewLine value is removed from the input buffer. By default, 
+                        // the ReadLine method will block until a line is received.
+                        // Method also results in "\r" inserted at the end.
+                        serialMutex.GetLock();
+                        string line = comPort.ReadLine();
+                        serialMutex.Unlock();
 
-                    // add to buffer while replacing the stripped NewLine character
-                    strBuffer += line + "\n";
+                        // add to buffer while replacing the stripped NewLine character
+                        strBuffer += line + "\n";
 
-                    // check for STS response line (means end of transmission)
-                    if (line.Substring(0, 3) == "STS")
-                        _continue = false;
-                }
-                else { //type = DataType.Hex
-                    serialMutex.GetLock();
-                    if (comPort.BytesToRead > 0) {
-                        byte_count = comPort.BytesToRead;
-
-                        //create a byte array to hold the awaiting data
-                        dataBuffer = new byte[byte_count];
-
-                        //read the data and store it
-                        comPort.Read(dataBuffer, 0, byte_count);
-
-                        // check for more data
-                        if (comPort.BytesToRead > 0)
-                            _append_msg = true;
-                        else {
-                            _append_msg = false;
-                            _continue = false; // exit
+                        // check for STS response line (means end of transmission)
+                        if (line.Substring(0, 3) == "STS") {
+                            _continue = false;
+                            error = error_t.ESUCCESS;
                         }
-                        //store the data in a buffer available to the Driver
-                        ReturnData(MessageType.INCOMING, dataBuffer);
                     }
-                    serialMutex.Unlock(); // release mutex
-                    error = error_t.ESUCCESS;
-                }
-                // Update timer and compare (need to disable during step debug)
-                currentTime = DateTime.Now;
-                duration = currentTime - startTime;
-                if (duration.Milliseconds > timeout) {
-                    error = error_t.COMPRTREADTIME;
-                    _continue = false;
-                }
-            } // END OF LOOP
-            
+                    else { //type = DataType.Hex
+                        serialMutex.GetLock();
+                        if (comPort.BytesToRead > 0) {
+                            byte_count = comPort.BytesToRead;
+
+                            //create a byte array to hold the awaiting data
+                            dataBuffer = new byte[byte_count];
+
+                            //read the data and store it
+                            comPort.Read(dataBuffer, 0, byte_count);
+
+                            // check for more data
+                            if (comPort.BytesToRead > 0)
+                                _append_msg = true;
+                            else {
+                                _append_msg = false;
+                                _continue = false; // exit
+                            }
+                            //store the data in a buffer available to the Driver
+                            ReturnData(MessageType.INCOMING, dataBuffer);
+                        }
+                        serialMutex.Unlock(); // release mutex
+                        error = error_t.ESUCCESS;
+                    }
+                    // Update timer and compare (need to disable during step debug)
+                    currentTime = DateTime.Now;
+                    duration = currentTime - startTime;
+                    if (duration.Milliseconds > timeout) {
+                        error = error_t.COMPRTREADTIME;
+                        _continue = false;
+                    }
+                } // END OF LOOP
+            }
+            catch (TimeoutException) {
+                error = error_t.COMPRTREADTIME;
+                serialMutex.Unlock();
+            }
             //store the text data in a buffer available to the Driver
             if (type == DataType.Text) {
                 dataBuffer = HapticBelt.AsciiToByte(strBuffer);

@@ -236,7 +236,7 @@ namespace Haptikos
             // 
             this.labelStatusMsg.Location = new System.Drawing.Point(46, 201);
             this.labelStatusMsg.Name = "labelStatusMsg";
-            this.labelStatusMsg.Size = new System.Drawing.Size(190, 41);
+            this.labelStatusMsg.Size = new System.Drawing.Size(190, 55);
             this.labelStatusMsg.TabIndex = 21;
             this.labelStatusMsg.Text = "status label";
             // 
@@ -246,7 +246,8 @@ namespace Haptikos
             this.tabControl1.Location = new System.Drawing.Point(0, -2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(239, 270);
+            this.tabControl1.Size = new System.Drawing.Size(239, 284);
+            this.tabControl1.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
             this.tabControl1.TabIndex = 4;
             // 
             // tabPageMain
@@ -269,7 +270,7 @@ namespace Haptikos
             this.tabPageMain.Controls.Add(this.labelStatus);
             this.tabPageMain.Location = new System.Drawing.Point(4, 22);
             this.tabPageMain.Name = "tabPageMain";
-            this.tabPageMain.Size = new System.Drawing.Size(231, 244);
+            this.tabPageMain.Size = new System.Drawing.Size(231, 258);
             this.tabPageMain.TabIndex = 0;
             this.tabPageMain.Text = "Haptics Main";
             // 
@@ -375,7 +376,7 @@ namespace Haptikos
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(240, 267);
+            this.ClientSize = new System.Drawing.Size(240, 285);
             this.Controls.Add(this.tabControl1);
             this.Menu = this.mainMenu1;
             this.Name = "MainForm";

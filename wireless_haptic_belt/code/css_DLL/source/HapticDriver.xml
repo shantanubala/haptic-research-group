@@ -144,6 +144,10 @@
         <member name="F:HapticDriver.error_t.EXCDATASEARCH">
             <summary>Exception occured - searching for requested data</summary> 
         </member>
+        <member name="F:HapticDriver.error_t.ELOWPOWER">
+            <summary>A Possible low-power condition occured on the device,
+             please disconnect, reset the belt, reconnect and query all</summary> 
+        </member>
         <member name="F:HapticDriver.error_t.NOTFOUND">
             <summary>Requested data not found</summary> 
         </member>
@@ -311,7 +315,7 @@
             Accessor method that returns the Haptic Belt Hardware's last error code
             </summary>
         </member>
-        <member name="M:HapticDriver.HapticBelt.getSoftwareStatus">
+        <member name="M:HapticDriver.HapticBelt.getStatus">
             <summary>
             Accessor method that returns the Haptic Belt DLL last error code.  This may
             be a hardware or software error
