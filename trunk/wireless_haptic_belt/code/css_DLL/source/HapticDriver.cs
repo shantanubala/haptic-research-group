@@ -172,7 +172,7 @@ namespace HapticDriver
         /// Accessor method that returns the Haptic Belt DLL last error code.  This may
         /// be a hardware or software error
         /// </summary>
-        public error_t getSoftwareStatus() {
+        public error_t getStatus() {
             return _dll_error;
         }
         /// <summary>
@@ -240,6 +240,12 @@ namespace HapticDriver
                 error = serialIn.OpenPort();
                 if (_portInName != _portOutName)
                     error = serialOut.OpenPort();
+                
+                // Send  Use HEX 0x0A for newline to signal to belt "End of Transmission"
+                // In case the belt is in an unknown byte count or state
+                // expect COM port read timeout since nothing should be returned
+                byte[] test = { 0x0A }; // == '\n'                
+                SerialPortWriteData(test, 10); 
             }
             _dll_error = error;
             return error;
@@ -256,21 +262,33 @@ namespace HapticDriver
                 if (_portInName != _portOutName)
                     error = serialOut.ClosePort();
             }
+            // Reset mode variables & state machine
+            _glbl_mode = mode_t.M_LEARN;
+            _acmd_mode = acmd_mode_t.ACM_LRN;
+
             _dll_error = error;
             return error;
         }
 
         /*
+        * Wrapper used to get status from belt after each send or receive
+        * using the global variable for acmd mode
+        */
+        private void checkBeltStatus() {
+            checkBeltStatus(_acmd_mode);
+        }
+
+        /*
          * Function is used to get status from belt after each send or receive 
          */
-        private void checkBeltStatus() {
+        private void checkBeltStatus(acmd_mode_t acmd_mode) {
             error_t error = error_t.EMAX;
 
             // .NET SerialPort.ReadLine() results in \r\n 
             // BUT YOU CAN ONLY SEE "\n" WHEN DIRECTLY LISTENING TO PORT
             //if (serialIn.MsgInBuffer.Equals("STS 0\r\n") || serialIn.MsgInBuffer.Equals("53 54 53 20 30 0D 0A "))
 
-            if (_acmd_mode == acmd_mode_t.ACM_LRN) {
+            if (acmd_mode == acmd_mode_t.ACM_LRN) {
                 char[] delimiters = new char[] { '\r', '\n', ' ' };
                 string[] split = ByteToAscii(serialIn.DataRecvBuffer()).Split(delimiters);
                 for (int i = 0; i < split.Length; i++) {
@@ -281,7 +299,7 @@ namespace HapticDriver
                 }
             }
             // Otherwise the error code is returned as a hex digit without '\n'
-            else if (_acmd_mode == acmd_mode_t.ACM_VIB) {
+            else if (acmd_mode == acmd_mode_t.ACM_VIB) {
                 error = (error_t)(serialIn.DataRecvBuffer()[0]);
             }
             else { ; }//do nothing
@@ -360,8 +378,10 @@ namespace HapticDriver
 
             if (_glbl_mode == mode) {
                 // already in requested mode, do nothing and no loss of performance
+                _belt_error = error_t.ESUCCESS; // already in requested mode
+                return_error = _belt_error;
             }
-            else if (_glbl_mode == mode_t.M_LEARN) {
+            else if (mode == mode_t.M_ACTIVE) {
                 //switch to activate command mode
                 return_error = SerialPortWriteData("BGN\n", MAX_RESPONSE_TIMEOUT);
 
@@ -372,6 +392,18 @@ namespace HapticDriver
                 // back to learning mode
                 byte[] returnState = { 0x30, 0x30 }; //should send Hex 0x30 0x30 = mode 0
                 return_error = SerialPortWriteData(returnState, MAX_RESPONSE_TIMEOUT);
+
+                // BROWN OUT HANDLING - Error from sending 0x30 0x30 can return odd 
+                // error code if belt is currently in ACM.LRN 
+                if (return_error > error_t.NOTFOUND) {
+                    return_error = SerialPortWriteData("\n", MAX_RESPONSE_TIMEOUT);
+
+                    checkBeltStatus(acmd_mode_t.ACM_LRN);
+                    return_error = _belt_error;
+                    if (return_error == error_t.EBADCMD)
+                        // set to success for expected behavior
+                        return_error = error_t.ESUCCESS;
+                }
 
                 if (return_error == error_t.ESUCCESS)
                     _glbl_mode = mode_t.M_LEARN;
@@ -416,8 +448,15 @@ namespace HapticDriver
         /// </summary>
         /// <returns>error code resulting from the reset</returns>
         public error_t ResetHapticBelt() {
+            //Reset Belt's mode
             _dll_error = change_acmd_mode(acmd_mode_t.ACM_LRN);
-            return _dll_error; 
+
+            //Reset Com Ports
+            _dll_error = ClosePorts();
+            System.Threading.Thread.Sleep(100);
+            _dll_error = OpenPorts();
+
+            return _dll_error;
         }
 
         /// <summary>
@@ -446,8 +485,7 @@ namespace HapticDriver
                 try {
                     return_error = change_acmd_mode(cmd_mode);
 
-                    if (return_error == error_t.ESUCCESS) 
-                    {
+                    if (return_error == error_t.ESUCCESS) {
                         mode = (byte)cmd_mode;
 
                         // Send mode first, it is the LSB of the first byte in firmware struct active_command_t
@@ -459,16 +497,19 @@ namespace HapticDriver
 
                         return_error = SerialPortWriteData(command_byte, MAX_RESPONSE_TIMEOUT);
 
-                        // TODO - not implemented yet.  Reasonable risk that this will
-                        // not occur when main controller is running on battery.
-                        //
-                        //// Handle brown-out condition by change firmware state 
-                        //// and resend command.
-                        //if (return_error == error_t.EBADCMD) {
-                        //    //serialOut.WriteData("BGN\n", 75); //switch to activate command mode
-                        //    SerialPortWriteData(command_byte, MAX_RESPONSE_TIMEOUT); // resend command
-                        //    return_error = belt_error;
-                        //}
+                        // BROWN OUT HANDLING - Error from sending msg can return odd 
+                        // error code if belt is currently in ACM.LRN.  Reasonable risk that 
+                        // this will not occur when main controller is running on battery.
+                        // error = 0xFC = 252 is from brown out condition
+                        if (return_error > error_t.NOTFOUND) {
+
+                            return_error = ResetHapticBelt();//error_t.ELOWPOWER;
+
+                            // proceed for expected behavior of readtimeout
+                            if (return_error == error_t.ESUCCESS)
+                                //Try again with recursive call
+                                return_error = Vibrate_Motor(cmd_mode, motor, rhythm, magnitude, rhythm_cycles);
+                        }
                     }
                 }
                 catch {
@@ -669,7 +710,7 @@ namespace HapticDriver
         /// This function returns the firmware version from the specified QRY operation
         /// </summary>
         public string getVersion(QueryType query_type) {
-            
+
             string return_value = "";
             error_t return_error = error_t.NOTFOUND;
 

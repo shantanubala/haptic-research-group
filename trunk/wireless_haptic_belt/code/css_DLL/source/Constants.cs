@@ -192,6 +192,9 @@ namespace HapticDriver
         EXCWIRELESS,
         /// <summary>Exception occured - searching for requested data</summary> 
         EXCDATASEARCH,
+        /// <summary>A Possible low-power condition occured on the device,
+        ///  please disconnect, reset the belt, reconnect and query all</summary> 
+        ELOWPOWER,
         /// <summary>Requested data not found</summary> 
         NOTFOUND
     };
@@ -297,6 +300,7 @@ namespace HapticDriver
         private const string execomprtcls = "Exception occured - closing serial com port";
         private const string excwireless = "Error sending command over wireless";
         private const string excdatasearch = "Exception occured - searching for requested data";
+        private const string elowpower = "Possible low-power condition occured on the device please reset the belt and reconnect.";
         private const string notfound = "Requested data not found";
 
         internal static string[] error_t_names = {
@@ -348,6 +352,7 @@ namespace HapticDriver
             execomprtcls,
             excwireless,
             excdatasearch,
+            elowpower, 
             notfound
         };
 

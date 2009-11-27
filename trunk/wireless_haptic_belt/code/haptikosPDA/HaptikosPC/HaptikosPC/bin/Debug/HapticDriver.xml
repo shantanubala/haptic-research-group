@@ -84,6 +84,9 @@
         <member name="F:HapticDriver.error_t.COMPRTWRITE">
             <summary>Com port write data error</summary> 
         </member>
+        <member name="F:HapticDriver.error_t.COMPRTREAD">
+            <summary>Com port read data error</summary> 
+        </member>
         <member name="F:HapticDriver.error_t.COMPRTREADTIME">
             <summary>Com port read data timeout</summary> 
         </member>
@@ -140,6 +143,10 @@
         </member>
         <member name="F:HapticDriver.error_t.EXCDATASEARCH">
             <summary>Exception occured - searching for requested data</summary> 
+        </member>
+        <member name="F:HapticDriver.error_t.ELOWPOWER">
+            <summary>A Possible low-power condition occured on the device,
+             please disconnect, reset the belt, reconnect and query all</summary> 
         </member>
         <member name="F:HapticDriver.error_t.NOTFOUND">
             <summary>Requested data not found</summary> 
@@ -303,14 +310,15 @@
             from the outgoing serial COM port
             </summary>
         </member>
-        <member name="M:HapticDriver.HapticBelt.getError">
+        <member name="M:HapticDriver.HapticBelt.getHardwareStatus">
             <summary>
-            Accessor method that returns the Haptic Belt's current error code
+            Accessor method that returns the Haptic Belt Hardware's last error code
             </summary>
         </member>
-        <member name="M:HapticDriver.HapticBelt.getErrorMsg">
+        <member name="M:HapticDriver.HapticBelt.getStatus">
             <summary>
-            Accessor method that returns the Haptic Belt's current error code message
+            Accessor method that returns the Haptic Belt DLL last error code.  This may
+            be a hardware or software error
             </summary>
         </member>
         <member name="M:HapticDriver.HapticBelt.getErrorMsg(HapticDriver.error_t)">
@@ -361,7 +369,9 @@
         </member>
         <member name="M:HapticDriver.HapticBelt.ResetHapticBelt">
             <summary>
-            Reset haptic belt and driver to the default states
+            Reset haptic belt and driver to the default states if any erroneous 
+            states occur in DLL or belt.  This is an attempt to regain control
+            to a known state.
             </summary>
             <returns>error code resulting from the reset</returns>
         </member>

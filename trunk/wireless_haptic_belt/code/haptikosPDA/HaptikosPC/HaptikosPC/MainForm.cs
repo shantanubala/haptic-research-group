@@ -459,8 +459,8 @@ namespace Haptikos
             try {
                 String version = wirelessBelt.getVersion(QueryType.SINGLE);
 
-                if (wirelessBelt.getError() != error_t.ESUCCESS)
-                    labelStatusMsg.Text = wirelessBelt.getErrorMsg(wirelessBelt.getError());
+                if (wirelessBelt.getStatus() != error_t.ESUCCESS)
+                    labelStatusMsg.Text = wirelessBelt.getErrorMsg(wirelessBelt.getStatus());
                 else {
                     // Reset Combo Boxes
                     ResetAllComboBoxes();
@@ -480,8 +480,8 @@ namespace Haptikos
             try {
                 String[] motor = { wirelessBelt.getMotors(QueryType.SINGLE).ToString() }; // brackets reqd for string array
 
-                if (wirelessBelt.getError() != error_t.ESUCCESS)
-                    labelStatusMsg.Text = wirelessBelt.getErrorMsg(wirelessBelt.getError());
+                if (wirelessBelt.getStatus() != error_t.ESUCCESS)
+                    labelStatusMsg.Text = wirelessBelt.getErrorMsg(wirelessBelt.getStatus());
                 else {
                     // Reset Combo Boxes
                     ResetAllComboBoxes();
@@ -502,8 +502,8 @@ namespace Haptikos
             try {
                 String[] rhythm = wirelessBelt.getRhythm(false, QueryType.SINGLE);
 
-                if (wirelessBelt.getError() != error_t.ESUCCESS)
-                    labelStatusMsg.Text = wirelessBelt.getErrorMsg(wirelessBelt.getError());
+                if (wirelessBelt.getStatus() != error_t.ESUCCESS)
+                    labelStatusMsg.Text = wirelessBelt.getErrorMsg(wirelessBelt.getStatus());
                 else {
                     // Reset Combo Boxes
                     ResetAllComboBoxes();
@@ -523,8 +523,8 @@ namespace Haptikos
             try {
                String[] magnitude = wirelessBelt.getMagnitude(false, QueryType.SINGLE);
 
-               if (wirelessBelt.getError() != error_t.ESUCCESS)
-                    labelStatusMsg.Text = wirelessBelt.getErrorMsg(wirelessBelt.getError());
+               if (wirelessBelt.getStatus() != error_t.ESUCCESS)
+                   labelStatusMsg.Text = wirelessBelt.getErrorMsg(wirelessBelt.getStatus());
                 else {
                     // Reset Combo Boxes
                     ResetAllComboBoxes();
