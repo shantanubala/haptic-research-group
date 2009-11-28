@@ -43,7 +43,8 @@ typedef struct {
 
 	// whether the belt is in menu mode, and which menu it is displaying
 	uint8_t in_menu:1,
-		echo:1;
+		echo:1,
+		fuel_gauge:1;
 	menu_step_t menustep;
 } globals_t;
 
