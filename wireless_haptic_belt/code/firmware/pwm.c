@@ -1,20 +1,20 @@
-/*****************************************************************************
- * FILE:   pwm.c
- * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
- * DESCR:  Low-level pwm functions for the ATtiny48.
- * LOG:    20090429 - initial version
+/*************************************************************************//**
+ * \file   pwm.c
+ * \brief  Low-level pwm functions for the ATtiny48.
+ * \author Jon Lindsay (Jonathan.Lindsay@asu.edu)
+ * \date   20090429 - initial version
  ****************************************************************************/
 
 #include<avr/io.h>
 
 #include"pwm.h"
 
-#define PWMCS_MASK (_BV(CS02) | _BV(CS01) | _BV(CS00))	// clock source mask
-#define PWMCS_1024 ( _BV(CS12) | _BV(CS10) )	// clock divider = 1024
-#define PWMCS_256 ( _BV(CS12) )			// clock divider = 256
-#define PWMCS_64 ( _BV(CS11) | _BV(CS10) )	// clock divider = 64
-#define PWMCS_8 ( _BV(CS11) )			// clock divider = 8
-#define PWMCS_1 ( _BV(CS10) )			// no clock divider
+#define PWMCS_MASK (_BV(CS02) | _BV(CS01) | _BV(CS00))	///<Clock source mask
+#define PWMCS_1024 ( _BV(CS12) | _BV(CS10) )	///<Clock divider = 1024
+#define PWMCS_256 ( _BV(CS12) )			///<Clock divider = 256
+#define PWMCS_64 ( _BV(CS11) | _BV(CS10) )	///<Clock divider = 64
+#define PWMCS_8 ( _BV(CS11) )			///<Clock divider = 8
+#define PWMCS_1 ( _BV(CS10) )			///<No clock divider
 
 void pwm_init( void )
 {

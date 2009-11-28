@@ -1,8 +1,8 @@
-/*****************************************************************************
- * FILE:   error.h
- * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
- * DESCR:  Type definitions and function declarations for error handling.
- * LOG:    20090501 - initial version
+/*************************************************************************//**
+ * \file   error.h
+ * \brief  Type definitions and function declarations for error handling.
+ * \author Jon Lindsay (Jonathan.Lindsay@asu.edu)
+ * \date   20090501 - initial version
  ****************************************************************************/
 
 #ifndef ERROR_H
@@ -14,32 +14,40 @@ extern "C" {
 #endif
 */
 
-// error number definitions--must match the string table in error.c
-// in error descriptions, L = learning mode, O = operational mode,
-// P = controlling PC, M = main belt controller, V = vibrator controller
+/// Status codes returned by firmware functions that can fail
+/** The information in parentheses indicates the belt modes and communication
+ *  paths in which a particular error may occur (not an exhaustive list).
+ *  L = learning mode, O = operational (vibrate) mode, P = the PC that
+ *  controls the belt via the serial link, M = the main belt controller
+ *  (Funnel), V = vibration module controller (ATtiny).
+ *
+ *  There must be exactly one error code defined here for each string listed
+ *  in the error_names table in error.c, and the strings and enum values must
+ *  appear in the same order.
+ */
 typedef enum {
 	// symbol	error type (belt mode, command source->destination)
-	ESUCCESS,	// no error
-	EBADCMD,	// command not recognized		(L/O, P->M)
-	ETOOBIG,	// command too long			(L, M->V)
-	EARG,		// invalid argument			(L, P->M/M->V)
-	ENOR,		// requested rhythm not defined		(O, P->M/M->V)
-	ENOM,		// requested magnitude not defined	(O, P->M/M->V)
-	ENOS,		// spatio-temporal pattern not defined	(O, P->M/M->V)
-	ENOMOTOR,	// requested motor not present on belt	(O, P->M)
-	EINVR,		// invalid rhythm definition		(L, P->M/M->V)
-	EINVM,		// invalid magnitude definition		(L, P->M/M->V)
-	EINVS,		// invalid spatio-temporal definition	(L, P->M)
-	EBADVC,		// vibrator command not recognized	(L/O, M->V)
-	EBUS,		// I2C communication failed		(L/O, M->V)
-	EBUSOF,		// I2C transmit overflow		(L/O, M->V)
-	EBUSAN,		// I2C address not acknowledged		(L/O, M->V)
-	EBUSDN,		// I2C data not acknowledged		(L/O, M->V)
-	EMISSING,	// command not implemented yet		(L, P->M/M->V)
-	EMAX		// invalid error number
+	ESUCCESS,	///< Operation succeeded (no error)
+	EBADCMD,	///< Command not recognized		(L/O, P->M)
+	ETOOBIG,	///< Command too long			(L, M->V)
+	EARG,		///< Invalid argument			(L, P->M/M->V)
+	ENOR,		///< Requested rhythm not defined	(O, P->M/M->V)
+	ENOM,		///< Requested magnitude not defined	(O, P->M/M->V)
+	ENOS,		///< Spatio-temporal pattern not defined (O, P->M/M->V)
+	ENOMOTOR,	///< Requested motor not present on belt (O, P->M)
+	EINVR,		///< Invalid rhythm definition		(L, P->M/M->V)
+	EINVM,		///< Invalid magnitude definition	(L, P->M/M->V)
+	EINVS,		///< Invalid spatio-temporal definition	(L, P->M)
+	EBADVC,		///< Vibrator command not recognized	(L/O, M->V)
+	EBUS,		///< TWI communication failed		(L/O, M->V)
+	EBUSOF,		///< TWI transmit overflow		(L/O, M->V)
+	EBUSAN,		///< TWI address not acknowledged	(L/O, M->V)
+	EBUSDN,		///< TWI data not acknowledged		(L/O, M->V)
+	EMISSING,	///< Command not implemented yet	(L, P->M/M->V)
+	EMAX		///< Invalid/unknown error number
 } error_t;
 
-// return a human-readable error string for the given error number
+/// Return a human-readable status string for the given status code
 const char* errstr( error_t num );
 
 /*

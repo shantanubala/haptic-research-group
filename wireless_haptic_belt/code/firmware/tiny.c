@@ -1,8 +1,8 @@
-/*****************************************************************************
- * FILE:   tiny.c
- * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
- * DESCR:  Main code for the ATtiny48.
- * LOG:    20090714 - last edit jjrosent 
+/*************************************************************************//**
+ * \file   tiny.c
+ * \brief  Main code for the ATtiny48.
+ * \author Jon Lindsay (Jonathan.Lindsay@asu.edu)
+ * \date   20090714 - last edit jjrosent 
  ****************************************************************************/
 
 #include<string.h>
@@ -21,10 +21,11 @@
 
 //#include"debug.h"
 
-// these are loaded at startup via LRN commands from the main controller
+/// ATtiny globals, loaded at startup via LRN commands from the Funnel I/O
 globals_t glbl;
 
-// called every 50ms to handle the next step of the active rhythm
+/// Called every 50ms to handle the next step of the active rhythm
+/** test */
 void rhythm_step( void )
 {
 	rhythm_t *r = glbl.rhythms + glbl.ar;
@@ -54,7 +55,7 @@ void rhythm_step( void )
 	}
 }
 
-// set up the globals for playback of a newly specified rhythm
+/// Set up the globals for playback of a newly specified rhythm
 void vibrate( vibration_t v )
 {
 	magnitude_t *m = glbl.magnitudes + v.magnitude;
@@ -71,7 +72,7 @@ void vibrate( vibration_t v )
 	glbl.ac = v.duration;
 }
 
-// parser for operational mode commands
+/// Parser for activate mode commands
 error_t handle_operate( vibration_t cmd )
 {
 	if( !cmd.duration )
@@ -86,7 +87,7 @@ error_t handle_operate( vibration_t cmd )
 	return ESUCCESS;
 }
 
-// handle a command received from the main controller over TWI (callback)
+/// Handle a command received from the main controller over TWI (callback)
 error_t receive_command( char *cmd, int len )
 {
 	if( len == sizeof(vibration_t) )
@@ -95,6 +96,7 @@ error_t receive_command( char *cmd, int len )
 	return handle_learn( cmd );
 }
 
+/// Top-level ATtiny initialization. Set up PWM, TWI, and timers; loop forever
 int main( void )
 {
 	// make sure all rhythms/magnitudes are initially undefined

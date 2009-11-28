@@ -18,6 +18,13 @@ ATtiny48/88, so avrdude.conf was taken from the latest avrdude source and
 modified slightly to work with the Ubuntu avrdude version. This should not be
 necessary if a recent version of avrdude is used.
 
+BUILDING THE DOCUMENTATION
+
+Install Doxygen and Graphviz, then run the builddoc script in this directory.
+HTML documentation will appear in doc/funnel for the Funnel I/O side and
+doc/tiny for the ATtiny48 side. This is primarily useful to get call graphs
+and caller graphs for all the functions in the code.
+
 BUILDING THE ATTINY48 CODE
 
 Install the AVR toolchain and related tools: avr-gcc, avr-libc, avrdude, and

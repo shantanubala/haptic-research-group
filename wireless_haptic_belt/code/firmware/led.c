@@ -1,8 +1,8 @@
-/*****************************************************************************
- * FILE:   led.c
- * AUTHOR: Jacob Rosenthal (Jacob.Rosenthal@asu.edu)
- * DESCR:  Functions to aid with debugging.
- * LOG:    20090714 - initial version
+/*************************************************************************//**
+ * \file   led.c
+ * \brief  Functions to aid with debugging.
+ * \author Jacob Rosenthal (Jacob.Rosenthal@asu.edu)
+ * \date   20090714 - initial version
  ****************************************************************************/
 #include"led.h"
 #include <avr/sfr_defs.h>

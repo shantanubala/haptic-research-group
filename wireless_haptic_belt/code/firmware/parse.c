@@ -1,8 +1,8 @@
-/*****************************************************************************
- * FILE:   parse.c
- * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
- * DESCR:  Command parser for learning mode (main controller and tinys).
- * LOG:    20090430 - initial version
+/*************************************************************************//**
+ * \file   parse.c
+ * \brief  Command parser for learning mode (main controller and tinys).
+ * \author Jon Lindsay (Jonathan.Lindsay@asu.edu)
+ * \date   20090430 - initial version
  ****************************************************************************/
 
 #include<stdlib.h>
@@ -24,8 +24,9 @@ int8_t htoi( char digit )
 	return -1;
 }
 
-// parse the given arguments as a rhythm specification: <ID> <PATTERN> <BITS>
-// if successful, store the rhythm into the given location
+/** Parse \a argv as a rhythm specification: \<ID> \<PATTERN> \<BITS>. If
+ *  successful, store the rhythm into memory pointed to by \a into.
+ */
 error_t parse_rhythm( int argc, const char *const *argv, rhythm_t *into )
 {
 	uint8_t bits;
@@ -59,8 +60,9 @@ error_t parse_rhythm( int argc, const char *const *argv, rhythm_t *into )
 	return ESUCCESS;
 }
 
-// parse the given arguments as a magnitude specification: <ID> <PERIOD> <DUTY>
-// if successful, store the magnitude into the given location
+/** Parse \a argv as a magnitude specification: \<ID> \<PERIOD> \<DUTY>. If
+ *  successful, store the magnitude into memory pointed to by \a into.
+ */
 error_t parse_magnitude( int argc, const char *const *argv, magnitude_t *into )
 {
 	uint16_t period, duty;
@@ -82,8 +84,29 @@ error_t parse_magnitude( int argc, const char *const *argv, magnitude_t *into )
 	return ESUCCESS;
 }
 
-// main parser for learning mode commands
-// modifies the line argument in place
+/** \param table
+ *	Tree that specifies the set of valid commands.
+ *  \param line
+ *	The command line to be parsed. Its contents will be modified in place.
+ *
+ *  The parser begins by iterating through \a table, looking for an entry with
+ *  a \a str member that matches the first word of \a line. If such an entry
+ *  is found, the parser iterates through the array pointed to by the \a next
+ *  field of that entry, attempting to match the second word of \a line to the
+ *  \a str field of each entry in that array. This continues until either no
+ *  entry matches the next word in \a line, or the next word matches an entry
+ *  whose \a next field is NULL.
+ *
+ *  \retval EBADCMD
+ *	Invalid command; the next word did not match any parse_step_t entry.
+ *  \retval ETOOBIG
+ *	Too many words in \a line.
+ *  \retval x
+ *	Where \a x is any status code that can be returned by the callback
+ *	function specified by the \a func field of the parse_step_t entry that
+ *	terminated the parse (the \a str field matched the next word of
+ *	\a line, but the \a next field was NULL).
+ */
 error_t parse( const parse_step_t *table, char *line )
 {
 	static const char **argv, *words[ PARSE_MAX_WORDS+1 ];

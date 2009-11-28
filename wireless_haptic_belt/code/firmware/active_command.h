@@ -1,8 +1,8 @@
-/*****************************************************************************
- * FILE:   active_command.h
- * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
- * DESCR:  Active mode command definition.
- * LOG:    20090510 - initial version
+/*************************************************************************//**
+ * \file   active_command.h
+ * \brief  Active mode command definition.
+ * \author Jon Lindsay (Jonathan.Lindsay@asu.edu)
+ * \date   20090510 - initial version
  ****************************************************************************/
 
 #ifndef ACTIVE_COMMAND_H
@@ -10,19 +10,23 @@
 
 #include "vibration.h"
 
-// active mode command
+/// Active mode command
+/** Commands are 16 bits each, big endian. Format is
+ *	ttttmmmmRRRMMddd
+ *  where t = type, m = motor, R = rhythm, M = magnitude, d = duration.
+ */
 typedef struct {
-	uint8_t motor:4,
-		mode:4;
-	vibration_t v;
+	uint8_t motor:4,	///<Motor number, 0-15
+		mode:4;		///<Command type, see acmd_mode_t
+	vibration_t v;		///<Rhythm, magnitude, and duration
 } active_command_t;
 
-// values for the mode field of an active mode command
+/// Values for the mode (command type) field of an active mode command
 typedef enum {
-	ACM_VIB,	// activate a motor
-	ACM_SPT,	// play back a spatio-temporal pattern
-	ACM_GCL,	// send a command to all motors (general call)
-	ACM_LRN		// return to learning mode
+	ACM_VIB,	///<Activate a motor
+	ACM_SPT,	///<Play back a spatio-temporal pattern
+	ACM_GCL,	///<Send a command to all motors (TWI general call)
+	ACM_LRN		///<Return to learning mode
 } acmd_mode_t;
 
 #endif

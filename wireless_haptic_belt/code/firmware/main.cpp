@@ -1,8 +1,8 @@
-/*****************************************************************************
- * FILE:   main.c
- * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
- * DESCR:  Main code for the Funnel I/O.
- * LOG:    20090510 - initial version
+/*************************************************************************//**
+ * \file   main.cpp
+ * \brief  Main firmware code for the Funnel I/O.
+ * \author Jon Lindsay (Jonathan.Lindsay@asu.edu)
+ * \date   20090510 - initial version
  ****************************************************************************/
 
 #include <Wire.h>
@@ -30,10 +30,10 @@
 #include "error.c"
 #include "parse.c"
 
-// how long to wait for a status response from a motor, in ms
+/// Time to wait for a status response from a motor, in ms
 #define TWI_TIMEOUT 100
 
-// how long to wait for vibrator modules to stabilize
+/// Time to wait for vibrator modules to stabilize, in ms
 #define TINY_WAIT 1000
 
 /// Fuel gauge TWI address
@@ -42,16 +42,18 @@
 /// Support motor slave addresses between 0 and this number, exclusive
 #define MAX_TWI_ADDR 0x7f
 
-// offsets into the EEPROM of the magnitudes and rhythms
+/// Offset of magnitude storage in the EEPROM
 #define EE_MAG ((magnitude_t*)0)
+/// Offset of rhythm storage in the EEPROM
 #define EE_RHY ((rhythm_t*)(EE_MAG + MAX_MAGNITUDE))
 
-// Funnel globals, defined in globals_main.h
+/// Funnel globals, defined in globals_main.h
 globals_t glbl;
 
+/// Print a string from program space over the serial link
 void print_flash( const prog_char* );
 
-// read a chunk of data from the EEPROM
+/// Read a chunk of data from the EEPROM
 // only because arduino is broken and the avr-libc eeprom_*() don't work
 static inline void eeprom_read( void* into, void* from, size_t len )
 {
@@ -60,7 +62,7 @@ static inline void eeprom_read( void* into, void* from, size_t len )
 		*((uint8_t*)into + i) = EEPROM.read( (size_t)from + i );
 }
 
-// write a chunk of data to the EEPROM
+/// Write a chunk of data to the EEPROM
 static inline void eeprom_write( void* into, void* from, size_t len )
 {
 	size_t i;
@@ -68,7 +70,7 @@ static inline void eeprom_write( void* into, void* from, size_t len )
 		EEPROM.write( (size_t)into+i, *((uint8_t*)from+i) );
 }
 
-// zero a chunk of the EEPROM
+/// Zero a chunk of the EEPROM
 static inline void eeprom_zero( void* start, void* end )
 {
 	while( start < end ) {
@@ -78,7 +80,7 @@ static inline void eeprom_zero( void* start, void* end )
 	}
 }
 
-// convert an unsigned byte to two hex digits plus null terminator
+/// Convert an unsigned byte to two ASCII hex digits plus null terminator
 void itoh( char *into, uint8_t val )
 {
 	into[0] = val >> 4;
@@ -88,7 +90,7 @@ void itoh( char *into, uint8_t val )
 	into[2] = '\0';
 }
 
-// send the command in the global command buffer to the specified motor
+/// Send the command in the global command buffer to the specified motor
 // if motor is specified as -1, send command to all motors via a general call
 error_t send_command( int8_t motor )
 {
@@ -135,7 +137,7 @@ error_t send_command( int8_t motor )
 	return EBUS;
 }
 
-// send a command to each attached motor in turn
+/// Send a command to each attached motor in turn
 // mark any motor that returns an error
 // FIXME: do something when an error occurs
 error_t send_command_all( void )
@@ -156,7 +158,7 @@ error_t send_command_all( void )
 	return ESUCCESS;
 }
 
-// detect which motors are present on the bus
+/// Detect the addresses of all motors present on the TWI bus
 uint8_t detect_motors( void )
 {
 	uint8_t i, j = 0;
@@ -202,7 +204,7 @@ uint8_t detect_motors( void )
 	return j;
 }
 
-// generate an ASCII representation of a rhythm
+/// Generate an ASCII representation of a rhythm
 error_t rtos( char *into, uint8_t which )
 {
 	rhythm_t rhy;
@@ -225,7 +227,7 @@ error_t rtos( char *into, uint8_t which )
 	return ESUCCESS;
 }
 
-// generate an ASCII representation of a magnitude
+/// Generate an ASCII representation of a magnitude
 error_t mtos( char *into, uint8_t which )
 {
 	magnitude_t mag;
@@ -246,8 +248,8 @@ error_t mtos( char *into, uint8_t which )
 	return ESUCCESS;
 }
 
-// load all rhythms and magnitudes from EEPROM and relay them to a specific
-// motor, or to all motors if motor is specified as -1
+/// Load all rhythms and magnitudes from EEPROM and relay them to a motor
+// if motor is specified as -1, send to all motors
 void teach_motor( uint8_t motor )
 {
 	uint8_t i;
@@ -276,9 +278,11 @@ void teach_motor( uint8_t motor )
 	}
 }
 
-// read a single character from the serial link
-// busy wait until a character arrives, and convert '\r' to '\n'
-// in menu mode, echo the character back
+/// Read a single character from the serial link
+/** Busy wait until a character arrives. Convert '\\r' to '\\n'. If \a echo is
+ *  non-zero, echo the character back over the serial link, converting '\\r'
+ *  to "\r\n" in the echo only.
+ */
 static inline char read_char( uint8_t echo )
 {
 	char ch;
@@ -294,13 +298,14 @@ static inline char read_char( uint8_t echo )
 	return ch=='\r'? '\n' : ch;
 }
 
+/// Print an error_t status value to the serial link, in the form "STS x\n"
 static inline void print_status( error_t status )
 {
 	Serial.print( "STS " );
 	Serial.println( status, DEC );
 }
 
-// read a line of text from serial link into global ascii command buffer
+/// Read a line of text from serial link into the global ASCII command buffer
 void read_line( void )
 {
 	uint8_t i;
@@ -326,7 +331,7 @@ void read_line( void )
 	glbl.cmd[i] = '\0';
 }
 
-// read two raw bytes from serial link into global activate command buffer
+/// Read two raw bytes from serial link into global activate command buffer
 void read_active( void )
 {
 	uint8_t i = 0;
@@ -336,7 +341,7 @@ void read_active( void )
 			*((uint8_t*)&glbl.acmd + i++) = Serial.read();
 }
 
-// read four hex digits from serial link into global activate command buffer
+/// Same as read_active(), but read 4 ASCII hex digits instead of 2 raw bytes
 void read_active_hex( void )
 {
 	uint8_t *into = (uint8_t*)&glbl.acmd, i = 0;
@@ -346,6 +351,8 @@ void read_active_hex( void )
 }
 
 // command handlers
+
+/// Handle the LRN RHY command. Stores a rhythm in EEPROM and teaches motors.
 error_t learn_rhythm( int argc, const char *const *argv )
 {
 	rhythm_t rhy;
@@ -364,6 +371,7 @@ error_t learn_rhythm( int argc, const char *const *argv )
 	return ret;
 }
 
+/// Handle the LRN MAG command. Stores magnitude in EEPROM and teaches motors.
 error_t learn_magnitude( int argc, const char *const *argv )
 {
 	magnitude_t mag;
@@ -388,6 +396,7 @@ error_t learn_spatio( int argc, const char *const *argv )
 error_t learn_address( int argc, const char *const *argv )
 { return EMISSING; }
 
+/// Common work shared by query_rhythm() / query_magnitude()
 error_t query_generic( int argc, const char *const *argv,
 	uint8_t max, error_t (*func)( char*, uint8_t )
 ) {
@@ -415,15 +424,18 @@ error_t query_generic( int argc, const char *const *argv,
 	return ESUCCESS;
 }
 
+/// Handle the QRY RHY command. Prints all stored rhythms to the serial link.
 error_t query_rhythm( int argc, const char *const *argv )
 { return query_generic( argc, argv, MAX_RHYTHM, rtos ); }
 
+/// Handle the QRY MAG command. Prints all stored magnitudes to serial link.
 error_t query_magnitude( int argc, const char *const *argv )
 { return query_generic( argc, argv, MAX_MAGNITUDE, mtos ); }
 
 error_t query_spatio( int argc, const char *const *argv )
 { return EMISSING; }
 
+/// Handle the QRY MTR command. Prints the number of attached motors.
 error_t query_motors( int argc, const char *const *argv )
 {
 	uint8_t num_motors, old_num;
@@ -447,6 +459,7 @@ error_t query_motors( int argc, const char *const *argv )
 	return ESUCCESS;
 }
 
+/// Handle the QRY VER command. Prints contents of FUNNEL_VER.
 error_t query_version( int argc, const char *const *argv )
 {
 	if( argc ) return EARG;
@@ -474,6 +487,7 @@ error_t query_battery( int argc, const char *const *argv )
 	return ESUCCESS;
 }
 
+/// Handle the QRY ALL command. Issues QRY VER,MTR,RHY,MAG,BAT.
 error_t query_all( int argc, const char *const *argv )
 {
 	if( argc ) return EARG;
@@ -487,9 +501,11 @@ error_t query_all( int argc, const char *const *argv )
 	return ESUCCESS;
 }
 
+/// TST command, tries rhythm/magnitude without learning. Not implemented.
 error_t test( int argc, const char *const *argv )
 { return EMISSING; }
 
+/// Handle the BGN command. Switches from learning mode to activate mode.
 error_t begin( int argc, const char *const *argv )
 {
 	if( argc ) return EARG;
@@ -499,6 +515,7 @@ error_t begin( int argc, const char *const *argv )
 	return ESUCCESS;
 }
 
+/// Handle the ZAP command. Erases all rhythms and magnitudes from EEPROM.
 error_t erase_all_learned( int argc, const char *const *argv )
 {
 	if( argc != 3 ) return EARG;
@@ -509,7 +526,11 @@ error_t erase_all_learned( int argc, const char *const *argv )
 }
 
 // parse table definitions
-static const parse_step_t pt_learn[] PROGMEM = {
+// PROGMEM is supposed to come *after* the variable name, but then doxygen
+// can't figure it out
+
+/// Table of recognized learn commands. Hit after a LRN word is parsed.
+static PROGMEM const parse_step_t pt_learn[] = {
 	{ "RHY", NULL, learn_rhythm },
 	{ "MAG", NULL, learn_magnitude },
 	{ "SPT", NULL, learn_spatio },
@@ -517,7 +538,8 @@ static const parse_step_t pt_learn[] PROGMEM = {
 	{ "", NULL, NULL }
 };
 
-static const parse_step_t pt_query[] PROGMEM = {
+/// Table of recognized query commands. Hit after a QRY word is parsed.
+static PROGMEM const parse_step_t pt_query[] = {
 	{ "RHY", NULL, query_rhythm },
 	{ "MAG", NULL, query_magnitude },
 	{ "SPT", NULL, query_spatio },
@@ -528,7 +550,8 @@ static const parse_step_t pt_query[] PROGMEM = {
 	{ "", NULL, NULL }
 };
 
-static const parse_step_t pt_top[] PROGMEM = {
+/// Top-level parse table. Used to recognize the first word of a command.
+static PROGMEM const parse_step_t pt_top[] = {
 	{ "LRN", pt_learn, NULL },
 	{ "QRY", pt_query, NULL },
 	{ "TST", NULL, test },
@@ -537,8 +560,12 @@ static const parse_step_t pt_top[] PROGMEM = {
 	{ "", NULL, NULL }
 };
 
-// try very hard to make a particular motor vibrate even if the hardware
-// is flaky (unreliable I2C or power connections)
+/// Try very hard to make a particular motor vibrate even with flaky hardware
+/** Retransmits an activate command if the initial transmission results in
+ *  status of unrecognized rhythm/magnitude/spatio-temporal. Usual/expected
+ *  reason for such a status is that the power connection was temporarily
+ *  lost, due to unreliable cable connectors.
+ */
 static error_t reliable_activate( void )
 {
 	// try to send the activate command
@@ -574,6 +601,7 @@ static error_t reliable_activate( void )
 	}
 }
 
+/// Handle a command in activate mode
 error_t parse_active( void )
 {
 	switch( glbl.acmd.mode ) {
@@ -586,6 +614,7 @@ error_t parse_active( void )
 	}
 }
 
+/// Handle a command in learning mode
 error_t handle_learn( void )
 {
 	char cpy[ sizeof(glbl.cmd) ];
@@ -598,7 +627,10 @@ error_t handle_learn( void )
 }
 
 // menu tables
-static const char menu_str_top[] PROGMEM =
+// again, PROGMEM really belongs after the variable name
+
+/// Top-level menu options. Printed when the user first enters the debug menu.
+static PROGMEM const char menu_str_top[] =
 	"0. Exit menu\n\r"
 	"1. Query commands\n\r"
 	"2. Learn commands\n\r"
@@ -606,7 +638,8 @@ static const char menu_str_top[] PROGMEM =
 	"4. Raw command entry\n\r"
 ;
 
-static const char menu_str_qry[] PROGMEM =
+/// Query menu options.
+static PROGMEM const char menu_str_qry[] =
 	"0. Return to main menu\n\r"
 	"1. Query belt version\n\r"
 	"2. Query number of motors present\n\r"
@@ -616,14 +649,16 @@ static const char menu_str_qry[] PROGMEM =
 	"6. Query all belt information\n\r"
 ;
 
-static const char menu_str_lrn[] PROGMEM =
+/// Learn menu options.
+static PROGMEM const char menu_str_lrn[] =
 	"0. Return to main menu\n\r"
 	"1. Learn rhythm\n\r"
 	"2. Learn magnitude\n\r"
 	"3. Forget all rhythms and magnitudes\n\r"
 ;
 
-static const char menu_str_lrn_rhy[] PROGMEM =
+/// Instructions for the learn rhythm menu.
+static PROGMEM const char menu_str_lrn_rhy[] =
 	"Enter rhythm ID, pattern, and number of bits, then press ENTER.\n\r"
 	"Press ENTER on a blank line when finished.\n\r"
 	"\n\r"
@@ -641,7 +676,8 @@ static const char menu_str_lrn_rhy[] PROGMEM =
 	"ms OFF, and finally ON for the last 100 ms.\n\r"
 ;
 
-static const char menu_str_lrn_mag[] PROGMEM =
+/// Instructions for the learn magnitude menu.
+static PROGMEM const char menu_str_lrn_mag[] =
 	"Enter magnitude ID, period, and pulse width, in microseconds,\n\r"
 	"then press ENTER. Press ENTER on a blank line when finished.\n\r"
 	"\n\r"
@@ -652,14 +688,16 @@ static const char menu_str_lrn_mag[] PROGMEM =
 	"period with 25% duty cycle.\n\r"
 ;
 
-static const char menu_str_forget[] PROGMEM =
+/// Confirmation prompt for the erase rhythms/magnitudes menu option.
+static PROGMEM const char menu_str_forget[] =
 	"All defined rhythms and magnitudes will be erased from EEPROM.\n\r"
 	"Continue?\n\r"
 	"0. No\n\r"
 	"1. Yes\n\r"
 ;
 
-static const char menu_str_act[] PROGMEM =
+/// Instructions for the activate motor menu.
+static PROGMEM const char menu_str_act[] =
 	"Enter motor, rhythm, magnitude, and duration, then press ENTER.\n\r"
 	"Press ENTER on a blank line when finished.\n\r"
 	"\n\r"
@@ -668,13 +706,21 @@ static const char menu_str_act[] PROGMEM =
 ;
 
 // menu handlers
+
+/// Issue the QRY VER command from the debug menu
 error_t menu_qry_ver( void ) { return query_version(0, NULL); }
+/// Issue the QRY MTR command from the debug menu
 error_t menu_qry_mtr( void ) { return query_motors(0, NULL); }
+/// Issue the QRY RHY command from the debug menu
 error_t menu_qry_rhy( void ) { return query_rhythm(0, NULL); }
+/// Issue the QRY MAG command from the debug menu
 error_t menu_qry_mag( void ) { return query_magnitude(0, NULL); }
 /// Issue the QRY BAT command from the debug menu
 error_t menu_qry_bat( void ) { return query_battery(0, NULL); }
+/// Issue the QRY ALL command from the debug menu
 error_t menu_qry_all( void ) { return query_all(0, NULL); }
+
+/// Common work shared by menu_lrn_rhy() / menu_lrn_mag()
 void menu_lrn_generic( const char *prepend )
 {
 	while(1) {
@@ -694,19 +740,24 @@ void menu_lrn_generic( const char *prepend )
 		print_flash( errstr(handle_learn()) );
 	}
 }
+
+/// Issue the LRN RHY command from the debug menu
 error_t menu_lrn_rhy( void )
 {
 	print_flash( menu_str_lrn_rhy );
 	menu_lrn_generic( "RHY " );
 	return ESUCCESS;
 }
+/// Issue the LRN MAG command from the debug menu
 error_t menu_lrn_mag( void )
 {
 	print_flash( menu_str_lrn_mag );
 	menu_lrn_generic( "MAG " );
 	return ESUCCESS;
 }
+/// Issue the ZAP command from the debug menu
 error_t menu_lrn_forget( void ) { return erase_all_learned(3, NULL); }
+
 #define ARG( _dst_, _base_, _max_ ) \
 	val = glbl.cmd[ i++ ] - _base_; \
 	if( val >= _max_ ) { \
@@ -714,6 +765,7 @@ error_t menu_lrn_forget( void ) { return erase_all_learned(3, NULL); }
 		continue; \
 	} \
 	_dst_ = val;
+/// Activate a motor from the debug menu
 error_t menu_act( void )
 {
 	print_flash( menu_str_act );
@@ -744,17 +796,25 @@ error_t menu_act( void )
 	return ESUCCESS;
 }
 #undef ARG
+/** \brief Enter raw command mode. Exits the menu, turns on serial echo, and
+ *  interprets activate mode commands as ASCII hex quads rather than 2 raw
+ *  bytes. See read_active_hex().
+ */
 error_t menu_raw( void ) { glbl.echo = 1; glbl.in_menu = 0; return ESUCCESS; }
+/** \brief Exits the debug menu to normal command mode (echo off, activate
+ *  commands read as 2 raw bytes). See read_active().
+ */
 error_t menu_exit( void ) { glbl.in_menu = glbl.echo = 0; return ESUCCESS; }
 
 // "forward declarations" of menu steps not yet defined
-extern const menu_step_t menu_choices_top[] PROGMEM;
-extern const menu_step_t menu_choices_lrn[] PROGMEM;
+extern PROGMEM const menu_step_t menu_choices_top[];
+extern PROGMEM const menu_step_t menu_choices_lrn[];
 
-// special value to mark the end of a set of menu choices
+/// Special value to mark the end of a set of menu choices
 error_t menu_end( void ) { return EMAX; }
 
-static const menu_step_t menu_choices_qry[] PROGMEM = {
+/// Query menu function table. Specifies a handler for each query menu choice.
+static PROGMEM const menu_step_t menu_choices_qry[] = {
 	{ menu_str_top, menu_choices_top, NULL },
 	{ NULL, NULL, menu_qry_ver },
 	{ NULL, NULL, menu_qry_mtr },
@@ -765,13 +825,15 @@ static const menu_step_t menu_choices_qry[] PROGMEM = {
 	{ NULL, NULL, menu_end }
 };
 
-static const menu_step_t menu_choices_forget[] PROGMEM = {
+/// Forget menu function table. Handles the erase confirmation prompt.
+static PROGMEM const menu_step_t menu_choices_forget[] = {
 	{ menu_str_lrn, menu_choices_lrn, NULL },
 	{ menu_str_lrn, menu_choices_lrn, menu_lrn_forget },
 	{ NULL, NULL, menu_end }
 };
 
-const menu_step_t menu_choices_lrn[] PROGMEM = {
+/// Learn menu function table. Specifies a handler for each learn menu choice.
+PROGMEM const menu_step_t menu_choices_lrn[] = {
 	{ menu_str_top, menu_choices_top, NULL },
 	{ NULL, NULL, menu_lrn_rhy },
 	{ NULL, NULL, menu_lrn_mag },
@@ -779,7 +841,8 @@ const menu_step_t menu_choices_lrn[] PROGMEM = {
 	{ NULL, NULL, menu_end }
 };
 
-const menu_step_t menu_choices_top[] PROGMEM = {
+/// Top-level menu table. Specifies handler/submenu for each menu choice.
+PROGMEM const menu_step_t menu_choices_top[] = {
 	{ NULL, NULL, menu_exit },
 	{ menu_str_qry, menu_choices_qry, NULL },
 	{ menu_str_lrn, menu_choices_lrn, NULL },
@@ -788,11 +851,28 @@ const menu_step_t menu_choices_top[] PROGMEM = {
 	{ NULL, NULL, menu_end }
 };
 
-static const menu_step_t menu_top[] PROGMEM = {
+/// Starting point for handle_menu()
+static PROGMEM const menu_step_t menu_top[] = {
 	{ menu_str_top, menu_choices_top, NULL },
 	{ NULL, NULL, menu_end }
 };
 
+/// Display the debug menu and handle all menu navigation/function calls.
+/** The idea here is to provide a generic set of tables that handle_menu() can
+ *  traverse. Menu options that should be displayed to the user are specified
+ *  in menu_str_*, while the actual callback functions for each menu choice
+ *  are specified in menu_choices_*.
+ *
+ *  Each entry in a menu_choices_* array counts as one menu option, and can
+ *  specify a callback function and/or a submenu table (another
+ *  menu_choices_*).
+ *
+ *  handle_menu() assigns numbers to each entry it finds in a menu_choices_*,
+ *  in the order they are defined. It then reads a number from the serial
+ *  link, indexes the menu_choices_* table by that number, calls the callback
+ *  function for that entry if specified, and moves to the submenu, if
+ *  specified.
+ */
 void handle_menu( void )
 {
 	menu_step_t step;
@@ -849,6 +929,7 @@ void handle_menu( void )
 	glbl.cmd[0] = '\0';
 }
 
+/// Top-level firmware initialization function
 void setup( void )
 {
 	unsigned long start;
@@ -885,6 +966,7 @@ void setup( void )
 	DBGN( "...done" );
 }
 
+/// Main firmware execution loop
 void loop( void )
 {
 	error_t status;

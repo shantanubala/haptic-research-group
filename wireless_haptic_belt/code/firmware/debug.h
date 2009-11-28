@@ -1,14 +1,17 @@
-/*****************************************************************************
- * FILE:   debug.h
- * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
- * DESCR:  Function declarations to aid with debugging.
- * LOG:    20090421 - initial version
+/*************************************************************************//**
+ * \file   debug.h
+ * \brief  Function declarations to aid with debugging.
+ * \author Jon Lindsay (Jonathan.Lindsay@asu.edu)
+ * \date   20090421 - initial version
  ****************************************************************************/
 
 #ifndef DEBUG_H
 #define DEBUG_H
 
-void dumpbyte( uint8_t byte );	// dump a byte onto the motor
-void delay( uint16_t ms );	// busy wait with ms granularity (1MHz clock)
+/// Busy-wait with millisecond granularity. Assumes CPU is clocked at 1 MHz.
+void delay( uint16_t ms );
+
+/// Dump a byte onto the motor
+void dumpbyte( uint8_t byte );
 
 #endif
