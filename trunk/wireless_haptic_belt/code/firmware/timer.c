@@ -1,8 +1,8 @@
-/*****************************************************************************
- * FILE:   timer.c
- * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
- * DESCR:  Low-level timer functions for the ATtiny48.
- * LOG:    20090418 - initial version
+/*************************************************************************//**
+ * \file   timer.c
+ * \brief  Low-level timer functions for the ATtiny48.
+ * \author Jon Lindsay (Jonathan.Lindsay@asu.edu)
+ * \date   20090418 - initial version
  ****************************************************************************/
 
 #include<avr/interrupt.h>
@@ -10,17 +10,17 @@
 
 #include"timer.h"
 
-#define TCS_MASK ( _BV(CS02) | _BV(CS01) | _BV(CS00) )	// clock source mask
-#define TCS_1024 ( _BV(CS02) | _BV(CS00) )	// clock divider = 1024
-#define TCS_256 ( _BV(CS02) )			// clock divider = 256
-#define TCS_64 ( _BV(CS01) | _BV(CS00) )	// clock divider = 64
-#define TCS_8 ( _BV(CS01) )			// clock divider = 8
-#define TCS_1 ( _BV(CS00) )			// no clock divider
+#define TCS_MASK ( _BV(CS02) | _BV(CS01) | _BV(CS00) )	///<Clock source mask
+#define TCS_1024 ( _BV(CS02) | _BV(CS00) )	///<Clock divider = 1024
+#define TCS_256 ( _BV(CS02) )			///<Clock divider = 256
+#define TCS_64 ( _BV(CS01) | _BV(CS00) )	///<Clock divider = 64
+#define TCS_8 ( _BV(CS01) )			///<Clock divider = 8
+#define TCS_1 ( _BV(CS00) )			///<No clock divider
 
-// function to call when a timer interrupt occurs
+/// Function to call when a timer interrupt occurs
 static timer_func_t timer_callback = NULL;
 
-// actual interrupt handler for the timer interrupt
+/// Actual interrupt handler for the timer interrupt
 ISR( TIMER0_COMPA_vect )
 {
 	if( timer_callback != NULL )

@@ -1,8 +1,8 @@
-/*****************************************************************************
- * FILE:   globals_main.h
- * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
- * DESCR:  Structure for global items on the Funnel, defined in main.c.
- * LOG:    20090510 - initial version
+/*************************************************************************//**
+ * \file   globals_main.h
+ * \brief  Structure for global items on the Funnel, defined in main.c.
+ * \author Jon Lindsay (Jonathan.Lindsay@asu.edu)
+ * \date   20090510 - initial version
  ****************************************************************************/
 
 #ifndef GLOBALS_H
@@ -12,42 +12,49 @@
 #include"parse.h"
 #include"menu.h"
 
-// current version of the funnel firmware--must be an ASCII decimal number
+/// Current version of the funnel firmware--must be an ASCII decimal number
 #define FUNNEL_VER "0"
 
-// expected version of the motor modules
+/// Expected version of the motor modules
 #define TINY_VER 0
 
-// maximum number of motors the firmware can support
+/** \brief Maximum number of motors the firmware can support.
+ *  Careful--increasing this requires a change in the active command format!
+ */
 #define MAX_MOTORS 16
 
-// possible belt operation modes
+/// Possible belt operation modes
 typedef enum {
-	M_LEARN,	// learning mode: ASCII commands
-	M_ACTIVE	// active mode: raw byte stream
+	M_LEARN,	///<Learning mode: ASCII commands. See parse_step_t
+	M_ACTIVE	///<Active mode: raw byte stream. See active_command_t
 } mode_t;
 
+/// Globals used on the Funnel I/O board
 typedef struct {
-	// common buffer used to receive commands over serial, send commands
-	// over TWI, and send responses over serial
+	/** \brief Common buffer used to receive commands over serial, send
+	 *  commands over TWI, and send responses over serial.
+	 */
 	char cmd[ PARSE_MAX_LEN ];
 
-	// used to receive active mode commands over serial and relay over TWI
+	/// Used to receive active commands over serial and relay over TWI
 	active_command_t acmd;
 
-	// mapping of motor numbers to TWI addresses
+	/// Mapping of motor numbers to TWI addresses, with flag for TWI error
 	struct { uint8_t addr:7, err:1; } mtrs[ MAX_MOTORS+1 ];
 
-	// current belt mode
+	/// Current belt mode
 	mode_t mode;
 
-	// whether the belt is in menu mode, and which menu it is displaying
-	uint8_t in_menu:1,
-		echo:1,
-		fuel_gauge:1;
+	// various global flags
+	uint8_t in_menu:1,	///<Set to 1 if user is in the debug menu
+		echo:1,		///<If 1, echo all serial input back to user
+		fuel_gauge:1;	///<Set to 1 when the fuel gauge IC is present
+
+	/// (Sub)menu currently being displayed to the user
 	menu_step_t menustep;
 } globals_t;
 
+/// Globals available to all Funnel I/O code
 extern globals_t glbl;
 
 #endif

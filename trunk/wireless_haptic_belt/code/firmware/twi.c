@@ -1,8 +1,8 @@
-/*****************************************************************************
- * FILE:   twi.c
- * AUTHOR: Jon Lindsay (Jonathan.Lindsay@asu.edu)
- * DESCR:  Low-level TWI functions for the ATtiny48.
- * LOG:    20090714 - last edit jjrosent 
+/*************************************************************************//**
+ * \file   twi.c
+ * \brief  Low-level TWI functions for the ATtiny48.
+ * \author Jon Lindsay (Jonathan.Lindsay@asu.edu)
+ * \date   20090714 - last edit jjrosent 
  ****************************************************************************/
 
 #include<stdlib.h>	// for NULL
@@ -16,16 +16,18 @@
 
 //#include"debug.h"
 
+/// Input port mask for the TWI slave address switchbank
 #define TWI_ADDR_MASK ( _BV(PORTD5) | _BV(PORTD4) | _BV(PORTD3) | \
 		_BV(PORTD2) | _BV(PORTD1) | _BV(PORTD0) )
 
+/// Function to be called when data has been completely received over TWI
 static twi_func_t twi_callback = NULL;
 
 void twi_error ( void ) {
 	set_led(ELED,1);
 }
 
-// interrupt handler for all things TWI
+/// Interrupt handler for all things TWI
 ISR( TWI_vect )
 {
 	static char buf[ PARSE_MAX_LEN ];
