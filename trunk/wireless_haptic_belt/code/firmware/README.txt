@@ -38,9 +38,10 @@ The steps are:
  - Create a new Arduino sketch (start the GUI, type something in the sketch,
    save the sketch and make note of the sketch directory, exit the GUI)
  - Symlink (or copy if your OS does not support symlinks) active_command.h,
-   error.*, globals_main.h, magnitude.h, main.cpp, menu.h, parse.*, rhythm.h,
-   vibration.h, and wire_err.h from this directory into the new sketch
-   directory (the one that contains the .pde file that was created by Arduino)
+   debug_main.*, error.*, fuelgauge.*, globals_main.h, magnitude.h, main.cpp,
+   menu.h, parse.*, rhythm.h, vibration.h, and wire_err.h from this directory
+   into the new sketch directory (the one that contains the .pde file that
+   was created by Arduino)
  - Overwrite the .pde file created by Arduino with main.cpp (delete the .pde
    and rename main.cpp to match the .pde name--the .pde filename must match
    the name of the sketch directory)
@@ -62,6 +63,6 @@ not be deleted at every recompilation).
 
 Although the Arduino documentation indicates that *.c files in the sketch
 directory will be compiled separately into object files and then linked as
-necessary, the linking step appears to be broken in arduino-0015. To work
+necessary, this does not appear to work as advertised in arduino-0015. To work
 around this, a few C files shared by the ATtiny48 and the Funnel I/O had to be
-#included into main.cpp, to avoid linking errors.
+#included into main.cpp.

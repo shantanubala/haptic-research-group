@@ -20,6 +20,9 @@
 #include "wire_err.h"
 #include "globals_main.h"
 #include "menu.h"
+#include "fuelgauge.h"
+
+#include "debug_main.h"
 
 // because arduino is broken...
 // if the headers are wrapped with extern "C" to make it so these don't need
@@ -33,28 +36,15 @@
 // how long to wait for vibrator modules to stabilize
 #define TINY_WAIT 1000
 
-// support slave addresses between 0 and this number, exclusive
-#define MAX_TWI_ADDR 128
+/// Fuel gauge TWI address
+#define FG_TWI_ADDR 0x7f
+
+/// Support motor slave addresses between 0 and this number, exclusive
+#define MAX_TWI_ADDR 0x7f
 
 // offsets into the EEPROM of the magnitudes and rhythms
 #define EE_MAG ((magnitude_t*)0)
 #define EE_RHY ((rhythm_t*)(EE_MAG + MAX_MAGNITUDE))
-
-// if DEBUG is defined, compile in detailed runtime status messages
-//#define DEBUG
-#ifdef DEBUG
-#	define DBGC( ... ) Serial.print( __VA_ARGS__ )
-#	define DBGCN( ... ) Serial.println( __VA_ARGS__ )
-#	define DBG( ... ) \
-		do{ Serial.print("DBG "); Serial.print(__VA_ARGS__); }while(0)
-#	define DBGN( ... ) \
-		do{Serial.print("DBG ");Serial.println(__VA_ARGS__);}while(0)
-#else
-#	define DBG( ... )
-#	define DBGN( ... )
-#	define DBGC( ... )
-#	define DBGCN( ... )
-#endif
 
 // Funnel globals, defined in globals_main.h
 globals_t glbl;
@@ -173,20 +163,29 @@ uint8_t detect_motors( void )
 
 	// send a command on every address
 	// if the command is ACKed, then a motor is present
+	DBG( "dm:" );
 	for( i=1; i<MAX_TWI_ADDR && j<MAX_MOTORS; ++i ) {
 		wire_err_t ret;
 
+		DBGC( i, HEX );
 		Wire.beginTransmission(i);
 		Wire.send(0);
 		ret = (wire_err_t)Wire.endTransmission();
 
 		if( ret != WE_ANACK ) {
 			glbl.mtrs[j].addr = i;
-			if( ret != WE_SUCCESS )
+			if( ret != WE_SUCCESS ) {
+				DBGC("/");
 				glbl.mtrs[j].err = 1;
+			}else {
+				DBGC("+");
+			}
 			++j;
+		}else {
+			DBGC("-");
 		}
 	}
+	DBGCN("");
 	for( i=j; i<=MAX_MOTORS; ++i )
 		glbl.mtrs[i].addr = 0;
 
@@ -253,7 +252,7 @@ void teach_motor( uint8_t motor )
 {
 	uint8_t i;
 
-	DBGN( "teaching rhythms" );
+	DBGN( "rhy" );
 	strcpy( glbl.cmd, "LRN " );
 	for( i=0; i<MAX_RHYTHM; ++i ) {
 		if( rtos(glbl.cmd+4, i) != ESUCCESS )
@@ -265,7 +264,7 @@ void teach_motor( uint8_t motor )
 			send_command( motor );
 	}
 
-	DBGN( "teaching magnitudes" );
+	DBGN( "mag" );
 	for( i=0; i<MAX_MAGNITUDE; ++i ) {
 		if( mtos(glbl.cmd+4, i) != ESUCCESS )
 			continue;
@@ -457,6 +456,24 @@ error_t query_version( int argc, const char *const *argv )
 	return ESUCCESS;
 }
 
+/// Handle the QRY BAT command. Prints percent battery remaining, in decimal.
+error_t query_battery( int argc, const char *const *argv )
+{
+	int32_t bat;
+
+	if( argc ) return EARG;
+	if( !glbl.fuel_gauge ) return EMISSING;
+
+	bat = fg_get( FGR_RARC );
+	if( FGG_STATUS(bat) != ESUCCESS )
+		return FGG_STATUS( bat );
+
+	Serial.print( "RSP BAT " );
+	Serial.println( bat, DEC );
+
+	return ESUCCESS;
+}
+
 error_t query_all( int argc, const char *const *argv )
 {
 	if( argc ) return EARG;
@@ -465,6 +482,7 @@ error_t query_all( int argc, const char *const *argv )
 	query_motors( 0, NULL );
 	query_rhythm( 0, NULL );
 	query_magnitude( 0, NULL );
+	query_battery( 0, NULL );
 
 	return ESUCCESS;
 }
@@ -505,6 +523,7 @@ static const parse_step_t pt_query[] PROGMEM = {
 	{ "SPT", NULL, query_spatio },
 	{ "MTR", NULL, query_motors },
 	{ "VER", NULL, query_version },
+	{ "BAT", NULL, query_battery },
 	{ "ALL", NULL, query_all },
 	{ "", NULL, NULL }
 };
@@ -593,7 +612,8 @@ static const char menu_str_qry[] PROGMEM =
 	"2. Query number of motors present\n\r"
 	"3. Query defined rhythms\n\r"
 	"4. Query defined magnitudes\n\r"
-	"5. Query all belt configuration\n\r"
+	"5. Query remaining battery\n\r"
+	"6. Query all belt information\n\r"
 ;
 
 static const char menu_str_lrn[] PROGMEM =
@@ -652,6 +672,8 @@ error_t menu_qry_ver( void ) { return query_version(0, NULL); }
 error_t menu_qry_mtr( void ) { return query_motors(0, NULL); }
 error_t menu_qry_rhy( void ) { return query_rhythm(0, NULL); }
 error_t menu_qry_mag( void ) { return query_magnitude(0, NULL); }
+/// Issue the QRY BAT command from the debug menu
+error_t menu_qry_bat( void ) { return query_battery(0, NULL); }
 error_t menu_qry_all( void ) { return query_all(0, NULL); }
 void menu_lrn_generic( const char *prepend )
 {
@@ -738,6 +760,7 @@ static const menu_step_t menu_choices_qry[] PROGMEM = {
 	{ NULL, NULL, menu_qry_mtr },
 	{ NULL, NULL, menu_qry_rhy },
 	{ NULL, NULL, menu_qry_mag },
+	{ NULL, NULL, menu_qry_bat },
 	{ NULL, NULL, menu_qry_all },
 	{ NULL, NULL, menu_end }
 };
@@ -835,16 +858,31 @@ void setup( void )
 
 	memset( &glbl, 0, sizeof(glbl) );
 
+#ifdef DEBUG
+	for( start=millis(); millis()-start < 3000; );
+#endif
+
 	// wait for vibrator microprocessor to stabilize for detection function
+	DBGN( "stabilize" );
 	for( start=millis(); millis()-start < TINY_WAIT; )
 		;
 
-	detect_motors();	// determine which motors are present on bus
+	// set up the fuel gauge before probing for motors, so that it can be
+	// moved off of the factory address and out of the motor address space
+	glbl.fuel_gauge = fg_init( 0x7f ) == ESUCCESS;
+//	DBGN( fg_get(FGR_TEMP), HEX );
 
+	detect_motors();	// determine which motors are present on bus
 	teach_motor(-1);	// relay rhythms/magnitudes to attached motors
 
 	// initialize the menu to the top level
 	memcpy_P( &glbl.menustep, menu_top, sizeof(glbl.menustep) );
+
+//	uint16_t cap;
+//	ret = fg_get_multi( FGR_TEMP, &cap, sizeof(cap) );
+//	DBG( ret, DEC ); DBGC(" "); DBGCN( cap, DEC );
+
+	DBGN( "...done" );
 }
 
 void loop( void )
@@ -889,6 +927,9 @@ void loop( void )
 		}
 	}
 }
+
+// arduino is a joke.
+unsigned long mswrap() { return millis(); }
 
 /*Author: Kristopher Blair (Haptic-Research-Group)
  *Date: April 22nd, 2009
