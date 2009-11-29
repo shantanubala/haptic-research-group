@@ -32,82 +32,67 @@ namespace HapticGUI
         //Note that we must use TimeSpan, so that we can replace the original Magnitude upon completion
         private void MagTest_Click(object sender, EventArgs e)
         {
-            if (pairs != 0)
+            //Hide Rhythm Buttons so no interference will occur
+            MagTest.Hide();
+            MagBack.Hide();
+            MagLearn.Hide();
+
+            //Set pattern to full on, 64 1's in binary, or 16 F's in hex
+            String pattern = "FFFFFFFFFFFFFFFF";
+
+            //Learn Rhythm to temp spot "H"
+            if (hasError(belt.Learn_Rhythm("H", pattern, 64, false), "Learn_Rhythm()"))
             {
-                DateTime start;
-                DateTime now;
-                String hold_magnitude;
-                String[] split_magnitude = new String[2];
-                //Hide Rhythm Buttons so no interference will occur
-                MagTest.Hide();
-                MagBack.Hide();
-                MagLearn.Hide();
-
-                //Set pattern to full on, 64 1's in binary, or 16 F's in hex
-                String pattern = "FFFFFFFFFFFFFFFF";
-
-                //Learn Rhythm to temp spot "H"
-                if (hasError(belt.Learn_Rhythm("H", pattern, 64, false), "Learn_Rhythm()"))
-                {
-                    //Handle Error
-                }
-                //Store the current Magnitude
-                hold_magnitude = belt.getMagnitude("A", true, QueryType.SINGLE);
-                if (hasError(belt.getError(), "getMagnitude()"))
-                {
-                    //Handle Error
-                }
-                //Learn a the test Magnitude setting
-                if (hasError(belt.Learn_Magnitude(MagComboBox.SelectedItem.ToString(), Convert.ToUInt16(Period.Value), Convert.ToUInt16(DutyCycle.Value)), "Learn Magnitude()"))
-                {
-                    //Handle Error
-                }
-                //Vibrate all available motors on belt with test Rhythm and 100% Magnitude and 7 cycles
-                for (int i = 0; i < 16; i++)
-                {
-                    //Ignore the error of a motor not being found
-                    error_t[] ignore = { error_t.ENOMOTOR };
-                    if (hasError(belt.Vibrate_Motor(i, "H", "A", 7), "Vibrate_Motor()", ignore))
-                    {
-                        //Handle Error
-                    }
-                }
-                //Wait for motors to finish vibrating or user to click "Stop" on RhythmTestStop Button
-                MagTestStop.Show();
-
-                //Note: 1 Tick in Timespan(long ticks) = 100ns. Thus 1ms = 10000 ticks.
-                //Timespan wait = new TimeSpan(Rhythm Length(ms)*10000(ticks/ms)*cycles)
-                wait = new TimeSpan(Convert.ToInt16(pattern[1]) * 10000 * 7);
-                start = DateTime.Now;
-                now = DateTime.Now;
-                while (now - start < wait)
-                {
-                    //This function allows user clicks to still register while in this while loop
-                    Application.DoEvents();
-                    now = DateTime.Now;
-                }
-                //Issue a stop command to all motors on the belt
-                if (hasError(belt.StopAll(), "belt.StopAll()"))
-                {
-                    //Handle Error
-                }
-                //Reset original state of magnitude "A"
-                split_magnitude = hold_magnitude.Split(',');
-                if (hasError(belt.Learn_Magnitude("A", Convert.ToUInt16(split_magnitude[0]), Convert.ToUInt16(split_magnitude[1])), "Learn_Magnitude()"))
-                {
-                    //Handle Error
-                }
-                //Reset button visability to original states
-                MagTest.Show();
-                MagBack.Show();
-                MagLearn.Show();
-                MagTestStop.Hide();
+                //Handle Error
             }
+            //Store the current Magnitude
+            hold_magnitude = belt.getMagnitude("A", true, QueryType.SINGLE);
+            if (hasError(belt.getError(), "getMagnitude()"))
+            {
+                //Handle Error
+            }
+            //Learn a the test Magnitude setting
+            if (hasError(belt.Learn_Magnitude(MagComboBox.SelectedItem.ToString(), Convert.ToUInt16(Period.Value), Convert.ToUInt16(DutyCycle.Value)), "Learn Magnitude()"))
+            {
+                //Handle Error
+            }
+            //Get motor count
+            _motorcount = belt.getMotors(QueryType.SINGLE);
+            if (hasError(belt.getError(), "getMotors()"))
+            {
+                //Handle Error
+            }
+            //Vibrate all available motors on belt with test Rhythm and 100% Magnitude indefinately
+            for (int i = 0; i < _motorcount; i++)
+            {
+                if (hasError(belt.Vibrate_Motor(i, "H", "A", 7), "Vibrate_Motor()"))
+                {
+                    //Handle Error
+                }
+            }
+            //Wait for motors to finish vibrating or user to click "Stop" on MagTestStop Button
+            MagTestStop.Show();
+        
         }
         private void MagTestStop_Click(object sender, EventArgs e)
         {
-            //This sets wait = 0, breaking from the while loop prematurely in RhythmTest_Click().
-            wait -= wait;
+            String[] split_magnitude = new String[2];
+            //Issue a stop command to all motors on the belt
+            if (hasError(belt.StopAll(), "belt.StopAll()"))
+            {
+                //Handle Error
+            }
+            //Reset original state of magnitude "A"
+            split_magnitude = hold_magnitude.Split(',');
+            if (hasError(belt.Learn_Magnitude("A", Convert.ToUInt16(split_magnitude[0]), Convert.ToUInt16(split_magnitude[1])), "Learn_Magnitude()"))
+            {
+                //Handle Error
+            }
+            //Reset button visability to original states
+            MagTest.Show();
+            MagBack.Show();
+            MagLearn.Show();
+            MagTestStop.Hide();
         }
         //Calls Library function to learn Magnitude based on user values
         private void MagLearn_Click(object sender, EventArgs e)
@@ -118,10 +103,15 @@ namespace HapticGUI
                 //Handle Error
             }
         }
-        //Duty Cycle can be at most the value of Period, we must uphold this here
+        //Duty Cycle < Period, we must uphold this truth here, as well as update percentage
         private void Period_ValueChanged(object sender, EventArgs e)
         {
-            Change_Maximum_DutyCycle();         
+            Change_Period();         
+        }
+        //A change in duty cycle relates to a change in the percentage, update percentage
+        private void DutyCycle_ValueChanged(object sender, EventArgs e)
+        {
+            Percentage.Value = (DutyCycle.Value / Period.Value) * 100;
         }
         //Converts the percentage entered into a DutyCyle value
         private void Percentage_ValueChanged(object sender, EventArgs e)
@@ -132,13 +122,14 @@ namespace HapticGUI
         private void MagOption_CheckedChanged(object sender, EventArgs e)
         {
             if (MagOption.Checked)
-            {
                 Show_Options();
-            }
             else
-            {
                 Hide_Options();
-            }
         }
+        //Updates visable duty cycle, period and percentage box based on which mag is selected
+        private void MagComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Populate_Magnitude(MagComboBox.SelectedItem.ToString());
+        }  
     }
 }

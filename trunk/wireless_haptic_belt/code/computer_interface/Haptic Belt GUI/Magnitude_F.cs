@@ -16,21 +16,29 @@ namespace HapticGUI
         {
             String[] splitMag = new String[2];
             splitMag = belt.getMagnitude(sel,true,QueryType.SINGLE).Split(',');
-            if(hasError(belt.getError(),"getMagnitude()"))
+            if (hasError(belt.getError(), "getMagnitude()"))
             {
                 //Handle Error
             }
-            Period.Value = Convert.ToInt32(splitMag[0]);
-            DutyCycle.Value = Convert.ToInt32(splitMag[1]);
-            Percentage.Value = (DutyCycle.Value / Period.Value) * 100;
+            else
+            {
+                Period.Value = Convert.ToInt32(splitMag[0]);
+                DutyCycle.Value = Convert.ToInt32(splitMag[1]);
+                Percentage.Value = (DutyCycle.Value / Period.Value) * 100;
+            }
         }
-        //Upholds the truth DutyCycle must be <= Period at all times
-        private void Change_Maximum_DutyCycle()
+        //Upholds the truth DutyCycle must be <= Period at all times, and update percentage
+        private void Change_Period()
         {
             //make sure user cant enter a duty cycle > period 
             if (Period.Value < DutyCycle.Value)
             {
                 DutyCycle.Value = Period.Value;
+                Percentage.Value = 100;
+            }
+            else
+            {
+                Percentage.Value = (DutyCycle.Value / Period.Value) * 100;
             }
             DutyCycle.Maximum = Period.Value;
         }
@@ -43,22 +51,16 @@ namespace HapticGUI
             Period.Show();
             PeriodLabel.Show();
             PeriodDefaultLabel.Show();
-            //Hide Percentage
-            Percentage.Hide();
-            PercentLabel.Hide();
         }
         //Hides Advanced Options Content
         private void Hide_Options()
         {
-            //Hide advanced options
+            //Hide advanced options (duty cycle and period)
             DutyCycle.Hide();
             DutyLabel.Hide();
             Period.Hide();
             PeriodLabel.Hide();
             PeriodDefaultLabel.Hide();
-            //Show Percentage
-            Percentage.Show();
-            PercentLabel.Show();
         }
     }
 }

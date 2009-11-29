@@ -22,14 +22,14 @@ namespace HapticGUI
         private void Add_Pair(int on, int off)
         {
             //Check for non multiples of 50ms, or on = off = 0
-            if (on % 50 != 0 || off % 50 != 0 || (off == 0 && on == 0))
+            if (off == 0 && on == 0)
             {
-                //display value error
+                //Do Nothing
             }
             //Rhythm Time cannot exceed 3200ms
-            else if ((on + off + total_duration) > 3200)
+            else if (on + off + total_duration > 3200)
             {
-                //display duration error
+                dispError("Rhythm length cannot exceed 3200ms"); 
             }
             else
             {
@@ -47,14 +47,14 @@ namespace HapticGUI
             if(index > -1)
             {
                 //Check for non multiples of 50ms, or on = off = 0
-                if (on % 50 != 0 || off % 50 != 0 || (off == 0 && on == 0))
+                if (off == 0 && on == 0)
                 {
-                    //display value error
+                    //Do Nothing
                 }
                 //Rhythm Time cannot exceed 3200ms
                 else if ((on + off + total_duration) > 3200)
                 {
-                    //display duration error
+                    dispError("Rhythm length cannot exceed 3200ms"); 
                 }
                 else
                 {
@@ -80,15 +80,15 @@ namespace HapticGUI
             {
                 String[] splitPair = new String[2];
                 splitPair = rhythmItems[index].Split(',');
-                //Check for non multiples of 50ms, or on = off = 0
-                if (on % 50 != 0 || off % 50 != 0 || (off == 0 && on == 0))
+                //Check for on = off = 0
+                if (off == 0 && on == 0)
                 {
-                    //display value error
+                    //Do nothing
                 }
                 //Rhythm Time cannot exceed 3200ms, compares difference in values against limit
                 else if ((on + off + total_duration - Convert.ToInt32(splitPair[0]) - Convert.ToInt32(splitPair[1])) > 3200)
                 {
-                    //display duration error
+                    dispError("Rhythm length cannot exceed 3200ms");                                                                                                                                                                                                                                                            
                 }
                 else
                 {
@@ -144,12 +144,9 @@ namespace HapticGUI
             String currChar = "";
             String prevChar = "";
 
-            response = belt.getError();
-
-            if (response == error_t.ESUCCESS)
+            if (hasError(belt.getError(), "getRhythmPattern()"))
             {
-                ErrorLocation.Text = "Error Location: " + "Calling getRhythmPattern()";
-                ErrorStatus.Text = belt.getErrorMsg(response);
+                //Handle Error
             }
             else
             {
@@ -200,9 +197,6 @@ namespace HapticGUI
          */
         private void Paint_Rythm()
         {
-            RhythmGraphics = RhythmPaint.CreateGraphics();
-            //Start painting with a clean work area
-            RhythmGraphics.Clear(Color.LightGray);
             //Create array for breaking up the pairs (on,off)
             String[] splitPair = new String[2];
             int right_x = 0;
@@ -211,6 +205,11 @@ namespace HapticGUI
             int on = -1; 
             int off = -1; 
             Pen pen = new Pen(Color.Black);
+
+            RhythmGraphics = RhythmPaint.CreateGraphics();
+            //Start painting with a clean work area
+            RhythmGraphics.Clear(BackColor);
+
             for (int i = 0; i < pairs; i++)
             {
                 //splits into array on and off times
@@ -222,7 +221,7 @@ namespace HapticGUI
                 //paint off to on edge
                 if (i != 0)
                 {
-                    //Special cases where a line should be drawn *off to on edge*
+                    //Special case where a line should be drawn (off to on edge)
                     if ((off > 0 && on > 0) || (on == 0 && off == 0))
                         RhythmGraphics.DrawLine(pen, new Point(left_x, 36), new Point(left_x, 4));
                     //paint left brace if selected (covers off to on edge)
@@ -241,7 +240,8 @@ namespace HapticGUI
                 else
                 {
                     pen = new Pen(Color.Blue);
-                    RhythmGraphics.DrawLine(pen, new Point(left_x, 40), new Point(left_x, 0));
+                    RhythmGraphics.DrawLine(pen, new Point(0, 40), new Point(0, 0));
+                    RhythmGraphics.DrawLine(pen, new Point(256, 40), new Point(256, 0));
                     pen = new Pen(Color.Black);
                 }
                 //Get off value (must be after off to on edge painting)
@@ -260,8 +260,6 @@ namespace HapticGUI
                 //done painting off cycle, swap vars
                 left_x = right_x;
             }
-            pen = new Pen(Color.Blue);
-            RhythmGraphics.DrawLine(pen, new Point(right_x, 40), new Point(right_x, 0));
             //set rhythm time
             RhythmTime.Text = total_duration.ToString() + "ms";
         }

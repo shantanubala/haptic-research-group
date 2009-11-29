@@ -52,10 +52,6 @@ namespace HapticGUI
         {
             if (pairs != 0)
             {
-                DateTime start;
-                DateTime now;
-                String hold_magnitude;
-                String[] split_magnitude = new String[2];
                 //Hide Rhythm Buttons so no interference will occur
                 RhythmTest.Hide();
                 RhythmBack.Hide();
@@ -81,52 +77,43 @@ namespace HapticGUI
                 {
                     //Handle Error
                 }
-                //Vibrate all available motors on belt with test Rhythm and 100% Magnitude and 7 cycles
-                for(int i = 0; i < 16; i++)
+                //Get motor count
+                _motorcount = belt.getMotors(QueryType.SINGLE);
+                if (hasError(belt.getError(), "getMotors()"))
                 {
-                    //Ignore the error of a motor not being found
-                    error_t[] ignore = {error_t.ENOMOTOR};
-                    if(hasError(belt.Vibrate_Motor(i,"H","A",7),"Vibrate_Motor()",ignore))
+                    //Handle Error
+                }
+                //Vibrate all available motors on belt with test Rhythm and 100% Magnitude indefinately
+                for(int i = 0; i < _motorcount; i++)
+                {
+                    if(hasError(belt.Vibrate_Motor(i,"H","A",7),"Vibrate_Motor()"))
                     {
                         //Handle Error
                     }
                 }
                 //Wait for motors to finish vibrating or user to click "Stop" on RhythmTestStop Button
                 RhythmTestStop.Show();
-                
-                //Note: 1 Tick in Timespan(long ticks) = 100ns. Thus 1ms = 10000 ticks.
-                //Timespan wait = new TimeSpan(Rhythm Length(ms)*10000(ticks/ms)*cycles)
-                wait = new TimeSpan(Convert.ToInt16(pattern[1])*10000*7);
-                start = DateTime.Now;
-                now = DateTime.Now;
-                while (now - start < wait)
-                {
-                    //This function allows user clicks to still register while in this while loop
-                    Application.DoEvents();
-                    now = DateTime.Now;
-                }
-                //Issue a stop command to all motors on the belt
-                if(hasError(belt.StopAll(), "belt.StopAll()"))
-                {
-                    //Handle Error
-                }
-                //Reset original state of magnitude "A"
-                split_magnitude = hold_magnitude.Split(',');
-                if(hasError(belt.Learn_Magnitude("A",Convert.ToUInt16(split_magnitude[0]),Convert.ToUInt16(split_magnitude[1])),"Learn_Magnitude()"))
-                {
-                    //Handle Error
-                }
-                //Reset button visability to original states
-                RhythmTest.Show();
-                RhythmBack.Show();
-                RhythmLearn.Show();
-                RhythmTestStop.Hide();
             }            
         }
         private void RhythmTestStop_Click(object sender, EventArgs e)
         {
-            //This sets wait = 0, breaking from the while loop prematurely in RhythmTest_Click().
-            wait -= wait;
+            String[] split_magnitude = new String[2];
+            //Issue a stop command to all motors on the belt
+            if (hasError(belt.StopAll(), "belt.StopAll()"))
+            {
+                //Handle Error
+            }
+            //Reset original state of magnitude "A"
+            split_magnitude = hold_magnitude.Split(',');
+            if (hasError(belt.Learn_Magnitude("A", Convert.ToUInt16(split_magnitude[0]), Convert.ToUInt16(split_magnitude[1])), "Learn_Magnitude()"))
+            {
+                //Handle Error
+            }
+            //Reset button visability to original states
+            RhythmTest.Show();
+            RhythmBack.Show();
+            RhythmLearn.Show();
+            RhythmTestStop.Hide();
         }
         //Changes the PatternBox, called only upon changes in the ComboBox
         private void RhythmComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -136,7 +123,7 @@ namespace HapticGUI
             Paint_Rythm();
         }
         //When a change occurs, we want to place markers around selected pattern
-        private void RhythmPattern_SelectedIndexChanged(object sender, EventArgs e)
+        private void RhythmPatternList_SelectedIndexChanged(object sender, EventArgs e)
         {
             Paint_Rythm();
         }  
@@ -175,6 +162,18 @@ namespace HapticGUI
         {
             Delete_Pair(RhythmPatternList.SelectedIndex);
             Paint_Rythm();
+        }
+        //Forces user to enter a value that is divisible by 50
+        private void RhythmOn_ValueChanged(object sender, EventArgs e)
+        {
+            if (RhythmOn.Value % 50 != 0)
+                RhythmOn.Value = Convert.ToInt32(RhythmOn.Value) / 50 * 50;
+        }
+        //Forces user to enter a value that is divisible by 50
+        private void RhythmOff_ValueChanged(object sender, EventArgs e)
+        {
+            if (RhythmOff.Value % 50 != 0)
+                RhythmOff.Value = Convert.ToInt32(RhythmOff.Value) / 50 * 50;
         }
     }
 }

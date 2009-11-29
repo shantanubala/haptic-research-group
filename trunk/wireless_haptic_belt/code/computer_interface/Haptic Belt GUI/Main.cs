@@ -28,8 +28,8 @@ namespace HapticGUI
         HapticBelt belt = new HapticBelt(); //Library functionality
         error_t response = new error_t(); //Return array for all Library calls
         Boolean COM_Available = false; //represents availablity of a COM port
-        Boolean Port_Open = false; //represents if a port has been initialized
-        TimeSpan wait; //Used for timing in the Testing functions
+        Boolean Port_Open = true; //represents if a port has been initialized
+        String hold_magnitude; //Variable to hold belt magnitude while testing
 
         public GUI()
         {
@@ -133,25 +133,13 @@ namespace HapticGUI
                 ErrorStatus.Text = belt.getErrorMsg(response);
                 return true;
             }
-        }    
-        //Same as hasError, except has a specificed ignore array of errors
-        private bool hasError(error_t error, String errorLOC, error_t[] ignoreList)
-        {
-            if (error == error_t.ESUCCESS)
-                return false;
-            else
-            {
-                //Check all errors to ignore 
-                for(int i = 0; i < ignoreList.Length; i++)
-                {
-                    if(error == ignoreList[i])
-                        return false;
-                }
-                ErrorLocation.Text = "Error Location: " + errorLOC;
-                ErrorStatus.Text = belt.getErrorMsg(response);
-                return true;
-            }
         }
+        private void dispError(String errorLOC)
+        {
+           ErrorLocation.Text = "Error Location: " + errorLOC;
+           ErrorStatus.Text = belt.getErrorMsg(response);     
+        }   
+        
         //Check for a particular error
         private bool hasError(error_t error, String errorLOC, error_t check)
         {
@@ -163,6 +151,6 @@ namespace HapticGUI
                 ErrorStatus.Text = belt.getErrorMsg(response);
                 return true;
             }
-        }
+        }      
     }
 }
