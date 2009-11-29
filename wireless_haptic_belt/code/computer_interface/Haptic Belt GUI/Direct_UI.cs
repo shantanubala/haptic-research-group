@@ -16,22 +16,32 @@ namespace HapticGUI
         //otherwise we stay in Select Mode.
         private void Show_Direct_Mode()
         {
-            //Must be done before start, if error occurs go back
-            if (Populate_AvailibleList() > 0)
-            {
-                //Send belt start command
-                if (hasError(belt.StartHapticBelt(),"StartHapticBelt.()"))
-                {
-                    //Handle Error
-                }
-                DirectPanel.Show();
-                //Load Saved Sets later?
-            }
-            else
-            {
-                Show_Select_Mode();
-            }
+            //Must be done before start we allow user control.
+            Initialize_DirectMode();
+
+            DirectPanel.Show();
+            
+            //Load Saved Sets later?
         }
+        //Triggers stop button and goes back to Menu
+        private void Hide_Direct_Mode()
+        {
+            //Stop All Motors before going back
+            StopMotors();
+
+            DirectPanel.Hide();
+        }
+//Button Events: Save and Load
+        private void DirectLoad_Click(object sender, EventArgs e)
+        {
+            //TODO
+        }
+
+        private void DirectSave_Click(object sender, EventArgs e)
+        {
+            //TODO
+        } 
+ //Button Events: Motors: Add, Delete, Clear, Activate
         //Adds a new activation to selected set, based on comboBox parameters
         private void DirectAddMotor_Click(object sender, EventArgs e)
         {
@@ -47,44 +57,82 @@ namespace HapticGUI
         {
             Clear_Activation();
         }
-        //Triggers stop button and goes back to Menu
+        //Activate a single motor from AddedList
+        private void DirectActivateMotor_Click(object sender, EventArgs e)
+        {
+            Activate_Motor();
+        }
+//Button Events: Sets: Add, Delete, Clear, Activate 
+        //Adds a new set to the selected group
+        private void DirectAddSet_Click(object sender, EventArgs e)
+        {
+            Add_Set();
+        }
+
+        private void DirectDeleteSet_Click(object sender, EventArgs e)
+        {
+            Delete_Set();
+        }
+
+        private void DirectClearSet_Click(object sender, EventArgs e)
+        {
+            Clear_Set();
+        }
+
+        //Activates all motors in a set from a selected group
+        private void DirectActivateSet_Click(object sender, EventArgs e)
+        {
+            Activate_Set();
+        }
+
+//Button Events: Groups: Add, Delete, Clear, Activate    
+        private void DirectAddGroup_Click(object sender, EventArgs e)
+        {
+            Add_Group();
+        }
+
+        private void DirectDeleteGroup_Click(object sender, EventArgs e)
+        {
+            Delete_Group();
+        }
+
+        private void DirectClearGroup_Click(object sender, EventArgs e)
+        {
+            Clear_Group();
+        }
+
+        private void DirectActivateGroup_Click(object sender, EventArgs e)
+        {
+            Activate_Group();
+        }      
+//Other Button Events
+        //Go back to menu
         private void DirectBack_Click(object sender, EventArgs e)
         {
-            //Stop All Motors before going back
-            if (hasError(belt.StopAll(), "StopAll()"))
-            {
-                //Handle Error
-            }
-            //Go back to menu
-            if (hasError(belt.ResetHapticBelt(),"ResetHapticBelt()"))
-            {
-                //Handle Error
-            }
+            Hide_Direct_Mode();
         }
         //Stops all motors from vibrating
         private void DirectStop_Click(object sender, EventArgs e)
         {
-            //Stop All Motors
-            if (hasError(belt.StopAll(),"StopAll()"))
-            {
-                //Handle Error
-            }
+            StopMotors();
         }
         //Renames a set with any characters in the Text Field.
-        private void RenameSet_Click(object sender, EventArgs e)
+        private void DirectRenameSet_Click(object sender, EventArgs e)
         {
-            if (SetList.SelectedIndex > -1)
-            {
-                SetList.Items.Insert(SetList.SelectedIndex, RenameSetField.Text);
-                SetList.Items.RemoveAt(SetList.SelectedIndex);
-            }
+            RenameSet(); 
         }
-        //Activates all motors in a set
-        private void DirectActivate_Click(object sender, EventArgs e)
+        //Renames a set with any characters in the DirectRenameField (text field).
+        private void DirectRenameGroup_Click(object sender, EventArgs e)
         {
-            Activate_Set();
+            RenameGroup();
         }
-        //Refreshes AvailableList and AddedList with new set contents
+//Selected Index Changed Events
+        //Refreshes SetList, Available List and Added List according to the selected group
+        private void GroupList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Change_Group();
+        }
+        //Refreshes AvailableList and AddedList with according to the selected set
         private void SetList_SelectedIndexChanged(object sender, EventArgs e)
         {
             Change_Set();

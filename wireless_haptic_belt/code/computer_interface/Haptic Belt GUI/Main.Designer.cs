@@ -44,6 +44,7 @@ namespace HapticGUI
             this.COMComboBox = new System.Windows.Forms.ComboBox();
             this.SelectPortLabel = new System.Windows.Forms.Label();
             this.MagPanel = new System.Windows.Forms.Panel();
+            this.MagTestStop = new System.Windows.Forms.Button();
             this.DutyLabel = new System.Windows.Forms.Label();
             this.DutyCycle = new System.Windows.Forms.NumericUpDown();
             this.Period = new System.Windows.Forms.NumericUpDown();
@@ -73,15 +74,30 @@ namespace HapticGUI
             this.RhythmOn = new System.Windows.Forms.NumericUpDown();
             this.RhythmLabel = new System.Windows.Forms.Label();
             this.DirectPanel = new System.Windows.Forms.Panel();
+            this.DirectSave = new System.Windows.Forms.Button();
+            this.DirectLoad = new System.Windows.Forms.Button();
+            this.DirectRenameLabel = new System.Windows.Forms.Label();
+            this.DirectActivateMotor = new System.Windows.Forms.Button();
+            this.DirectActivateGroup = new System.Windows.Forms.Button();
+            this.DirectGroupLabel = new System.Windows.Forms.Label();
+            this.DirectAddGroup = new System.Windows.Forms.Button();
+            this.DirectDeleteGroup = new System.Windows.Forms.Button();
+            this.DirectClearGroup = new System.Windows.Forms.Button();
+            this.DirectClearSet = new System.Windows.Forms.Button();
+            this.DirectDeleteSet = new System.Windows.Forms.Button();
+            this.DirectAddSet = new System.Windows.Forms.Button();
+            this.GroupList = new System.Windows.Forms.ListBox();
+            this.DirectRenameGroup = new System.Windows.Forms.Button();
             this.DirectBack = new System.Windows.Forms.Button();
-            this.RenameSetField = new System.Windows.Forms.TextBox();
-            this.RenameSet = new System.Windows.Forms.Button();
+            this.DirectRenameField = new System.Windows.Forms.TextBox();
+            this.DirectRenameSet = new System.Windows.Forms.Button();
             this.DirectStop = new System.Windows.Forms.Button();
+            this.DirectSetLabel = new System.Windows.Forms.Label();
             this.AddedCycleLabel = new System.Windows.Forms.Label();
             this.AddedMagLabel = new System.Windows.Forms.Label();
             this.AddedRhythmLabel = new System.Windows.Forms.Label();
             this.DirectClearMotor = new System.Windows.Forms.Button();
-            this.DirectActivate = new System.Windows.Forms.Button();
+            this.DirectActivateSet = new System.Windows.Forms.Button();
             this.DirectDeleteMotor = new System.Windows.Forms.Button();
             this.DirectAddMotor = new System.Windows.Forms.Button();
             this.DirectCyclesLabel = new System.Windows.Forms.Label();
@@ -90,15 +106,12 @@ namespace HapticGUI
             this.DirectCyclesBox = new System.Windows.Forms.ComboBox();
             this.DirectMagBox = new System.Windows.Forms.ComboBox();
             this.DirectRhythmBox = new System.Windows.Forms.ComboBox();
-            this.DirectSetLabel = new System.Windows.Forms.Label();
-            this.DirectAddedLabel = new System.Windows.Forms.Label();
-            this.DirectAvailableLabel = new System.Windows.Forms.Label();
+            this.DirectMotorLabel = new System.Windows.Forms.Label();
             this.SetList = new System.Windows.Forms.ListBox();
             this.AddedList = new System.Windows.Forms.ListBox();
             this.AvailableList = new System.Windows.Forms.ListBox();
             this.ErrorStatus = new System.Windows.Forms.Label();
             this.ErrorLocation = new System.Windows.Forms.Label();
-            this.MagTestStop = new System.Windows.Forms.Button();
             this.MainPanel.SuspendLayout();
             this.MagPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DutyCycle)).BeginInit();
@@ -120,7 +133,7 @@ namespace HapticGUI
             this.ModeComboBox.Location = new System.Drawing.Point(99, 16);
             this.ModeComboBox.Name = "ModeComboBox";
             this.ModeComboBox.Size = new System.Drawing.Size(156, 21);
-            this.ModeComboBox.TabIndex = 0;
+            this.ModeComboBox.TabIndex = 1;
             this.ModeComboBox.Text = "Rhythm Mode";
             // 
             // SelectModeLabel
@@ -138,7 +151,7 @@ namespace HapticGUI
             this.ModeGo.Location = new System.Drawing.Point(180, 222);
             this.ModeGo.Name = "ModeGo";
             this.ModeGo.Size = new System.Drawing.Size(75, 23);
-            this.ModeGo.TabIndex = 2;
+            this.ModeGo.TabIndex = 7;
             this.ModeGo.Text = "Go";
             this.ModeGo.UseVisualStyleBackColor = true;
             this.ModeGo.Click += new System.EventHandler(this.ModeGo_Click);
@@ -148,7 +161,7 @@ namespace HapticGUI
             this.Exit.Location = new System.Drawing.Point(16, 222);
             this.Exit.Name = "Exit";
             this.Exit.Size = new System.Drawing.Size(75, 23);
-            this.Exit.TabIndex = 3;
+            this.Exit.TabIndex = 6;
             this.Exit.Text = "Exit";
             this.Exit.UseVisualStyleBackColor = true;
             this.Exit.Click += new System.EventHandler(this.Exit_Click);
@@ -165,7 +178,7 @@ namespace HapticGUI
             this.RhythmComboBox.Location = new System.Drawing.Point(95, 16);
             this.RhythmComboBox.Name = "RhythmComboBox";
             this.RhythmComboBox.Size = new System.Drawing.Size(78, 21);
-            this.RhythmComboBox.TabIndex = 15;
+            this.RhythmComboBox.TabIndex = 1;
             this.RhythmComboBox.Text = "A";
             // 
             // RhythmLearn
@@ -173,7 +186,7 @@ namespace HapticGUI
             this.RhythmLearn.Location = new System.Drawing.Point(180, 222);
             this.RhythmLearn.Name = "RhythmLearn";
             this.RhythmLearn.Size = new System.Drawing.Size(75, 23);
-            this.RhythmLearn.TabIndex = 18;
+            this.RhythmLearn.TabIndex = 12;
             this.RhythmLearn.Text = "Learn";
             this.RhythmLearn.UseVisualStyleBackColor = true;
             this.RhythmLearn.Click += new System.EventHandler(this.RhythmLearn_Click);
@@ -183,7 +196,7 @@ namespace HapticGUI
             this.RhythmBack.Location = new System.Drawing.Point(16, 222);
             this.RhythmBack.Name = "RhythmBack";
             this.RhythmBack.Size = new System.Drawing.Size(75, 23);
-            this.RhythmBack.TabIndex = 19;
+            this.RhythmBack.TabIndex = 10;
             this.RhythmBack.Text = "Back";
             this.RhythmBack.UseVisualStyleBackColor = true;
             this.RhythmBack.Click += new System.EventHandler(this.RhythmBack_Click);
@@ -193,7 +206,7 @@ namespace HapticGUI
             this.RhythmTest.Location = new System.Drawing.Point(98, 222);
             this.RhythmTest.Name = "RhythmTest";
             this.RhythmTest.Size = new System.Drawing.Size(75, 23);
-            this.RhythmTest.TabIndex = 20;
+            this.RhythmTest.TabIndex = 11;
             this.RhythmTest.Text = "Test";
             this.RhythmTest.UseVisualStyleBackColor = true;
             this.RhythmTest.Click += new System.EventHandler(this.RhythmTest_Click);
@@ -204,7 +217,8 @@ namespace HapticGUI
             this.RhythmPatternList.Location = new System.Drawing.Point(77, 74);
             this.RhythmPatternList.Name = "RhythmPatternList";
             this.RhythmPatternList.Size = new System.Drawing.Size(97, 95);
-            this.RhythmPatternList.TabIndex = 23;
+            this.RhythmPatternList.TabIndex = 4;
+            this.RhythmPatternList.SelectedIndexChanged += new System.EventHandler(this.RhythmPatternList_SelectedIndexChanged);
             // 
             // MainPanel
             // 
@@ -217,7 +231,7 @@ namespace HapticGUI
             this.MainPanel.Controls.Add(this.ModeGo);
             this.MainPanel.Controls.Add(this.ModeComboBox);
             this.MainPanel.Controls.Add(this.SelectModeLabel);
-            this.MainPanel.Location = new System.Drawing.Point(12, 279);
+            this.MainPanel.Location = new System.Drawing.Point(13, 35);
             this.MainPanel.Name = "MainPanel";
             this.MainPanel.Size = new System.Drawing.Size(270, 248);
             this.MainPanel.TabIndex = 25;
@@ -227,7 +241,7 @@ namespace HapticGUI
             this.ClosePort.Location = new System.Drawing.Point(180, 102);
             this.ClosePort.Name = "ClosePort";
             this.ClosePort.Size = new System.Drawing.Size(75, 21);
-            this.ClosePort.TabIndex = 8;
+            this.ClosePort.TabIndex = 5;
             this.ClosePort.Text = "Close";
             this.ClosePort.UseVisualStyleBackColor = true;
             this.ClosePort.Visible = false;
@@ -238,7 +252,7 @@ namespace HapticGUI
             this.OpenPort.Location = new System.Drawing.Point(180, 74);
             this.OpenPort.Name = "OpenPort";
             this.OpenPort.Size = new System.Drawing.Size(75, 21);
-            this.OpenPort.TabIndex = 7;
+            this.OpenPort.TabIndex = 4;
             this.OpenPort.Text = "Open";
             this.OpenPort.UseVisualStyleBackColor = true;
             this.OpenPort.Click += new System.EventHandler(this.OpenPort_Click);
@@ -248,7 +262,7 @@ namespace HapticGUI
             this.RefreshPorts.Location = new System.Drawing.Point(180, 47);
             this.RefreshPorts.Name = "RefreshPorts";
             this.RefreshPorts.Size = new System.Drawing.Size(75, 21);
-            this.RefreshPorts.TabIndex = 6;
+            this.RefreshPorts.TabIndex = 3;
             this.RefreshPorts.Text = "Refresh";
             this.RefreshPorts.UseVisualStyleBackColor = true;
             this.RefreshPorts.Click += new System.EventHandler(this.RefreshPorts_Click);
@@ -259,7 +273,7 @@ namespace HapticGUI
             this.COMComboBox.Location = new System.Drawing.Point(99, 47);
             this.COMComboBox.Name = "COMComboBox";
             this.COMComboBox.Size = new System.Drawing.Size(75, 21);
-            this.COMComboBox.TabIndex = 5;
+            this.COMComboBox.TabIndex = 2;
             // 
             // SelectPortLabel
             // 
@@ -286,20 +300,31 @@ namespace HapticGUI
             this.MagPanel.Controls.Add(this.MagLearn);
             this.MagPanel.Controls.Add(this.MagComboBox);
             this.MagPanel.Controls.Add(this.MagSelLabel);
-            this.MagPanel.Location = new System.Drawing.Point(333, 279);
+            this.MagPanel.Location = new System.Drawing.Point(13, 35);
             this.MagPanel.Name = "MagPanel";
             this.MagPanel.Size = new System.Drawing.Size(270, 248);
             this.MagPanel.TabIndex = 26;
             this.MagPanel.Visible = false;
+            // 
+            // MagTestStop
+            // 
+            this.MagTestStop.Location = new System.Drawing.Point(98, 222);
+            this.MagTestStop.Name = "MagTestStop";
+            this.MagTestStop.Size = new System.Drawing.Size(75, 23);
+            this.MagTestStop.TabIndex = 37;
+            this.MagTestStop.Text = "Stop";
+            this.MagTestStop.UseVisualStyleBackColor = true;
+            this.MagTestStop.Visible = false;
+            this.MagTestStop.Click += new System.EventHandler(this.MagTestStop_Click);
             // 
             // DutyLabel
             // 
             this.DutyLabel.AutoSize = true;
             this.DutyLabel.Location = new System.Drawing.Point(28, 128);
             this.DutyLabel.Name = "DutyLabel";
-            this.DutyLabel.Size = new System.Drawing.Size(77, 13);
+            this.DutyLabel.Size = new System.Drawing.Size(75, 13);
             this.DutyLabel.TabIndex = 14;
-            this.DutyLabel.Text = "Duty Cycle(ms)";
+            this.DutyLabel.Text = "Duty Cycle(us)";
             this.DutyLabel.Visible = false;
             // 
             // DutyCycle
@@ -314,12 +339,18 @@ namespace HapticGUI
             this.DutyCycle.Size = new System.Drawing.Size(66, 20);
             this.DutyCycle.TabIndex = 13;
             this.DutyCycle.Visible = false;
+            this.DutyCycle.ValueChanged += new System.EventHandler(this.DutyCycle_ValueChanged);
             // 
             // Period
             // 
             this.Period.Location = new System.Drawing.Point(108, 100);
             this.Period.Maximum = new decimal(new int[] {
-            50000,
+            2000,
+            0,
+            0,
+            0});
+            this.Period.Minimum = new decimal(new int[] {
+            1,
             0,
             0,
             0});
@@ -339,9 +370,9 @@ namespace HapticGUI
             this.PeriodLabel.AutoSize = true;
             this.PeriodLabel.Location = new System.Drawing.Point(46, 102);
             this.PeriodLabel.Name = "PeriodLabel";
-            this.PeriodLabel.Size = new System.Drawing.Size(56, 13);
+            this.PeriodLabel.Size = new System.Drawing.Size(54, 13);
             this.PeriodLabel.TabIndex = 11;
-            this.PeriodLabel.Text = "Period(ms)";
+            this.PeriodLabel.Text = "Period(us)";
             this.PeriodLabel.Visible = false;
             // 
             // PeriodDefaultLabel
@@ -425,6 +456,7 @@ namespace HapticGUI
             this.MagComboBox.Size = new System.Drawing.Size(65, 21);
             this.MagComboBox.TabIndex = 0;
             this.MagComboBox.Text = "A";
+            this.MagComboBox.SelectedIndexChanged += new System.EventHandler(this.MagComboBox_SelectedIndexChanged);
             // 
             // MagSelLabel
             // 
@@ -441,6 +473,7 @@ namespace HapticGUI
             this.RhythmPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.RhythmPanel.Controls.Add(this.RhythmTestStop);
             this.RhythmPanel.Controls.Add(this.RhythmTime);
+            this.RhythmPanel.Controls.Add(this.RhythmLearn);
             this.RhythmPanel.Controls.Add(this.TimeLabel);
             this.RhythmPanel.Controls.Add(this.RhythmClear);
             this.RhythmPanel.Controls.Add(this.RhythmPaint);
@@ -456,9 +489,8 @@ namespace HapticGUI
             this.RhythmPanel.Controls.Add(this.RhythmBack);
             this.RhythmPanel.Controls.Add(this.RhythmLabel);
             this.RhythmPanel.Controls.Add(this.RhythmComboBox);
-            this.RhythmPanel.Controls.Add(this.RhythmLearn);
             this.RhythmPanel.Controls.Add(this.RhythmPatternList);
-            this.RhythmPanel.Location = new System.Drawing.Point(333, 12);
+            this.RhythmPanel.Location = new System.Drawing.Point(13, 35);
             this.RhythmPanel.Name = "RhythmPanel";
             this.RhythmPanel.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.RhythmPanel.Size = new System.Drawing.Size(270, 248);
@@ -467,10 +499,10 @@ namespace HapticGUI
             // 
             // RhythmTestStop
             // 
-            this.RhythmTestStop.Location = new System.Drawing.Point(97, 222);
+            this.RhythmTestStop.Location = new System.Drawing.Point(98, 222);
             this.RhythmTestStop.Name = "RhythmTestStop";
             this.RhythmTestStop.Size = new System.Drawing.Size(75, 23);
-            this.RhythmTestStop.TabIndex = 36;
+            this.RhythmTestStop.TabIndex = 13;
             this.RhythmTestStop.Text = "Stop";
             this.RhythmTestStop.UseVisualStyleBackColor = true;
             this.RhythmTestStop.Visible = false;
@@ -498,9 +530,10 @@ namespace HapticGUI
             this.RhythmClear.Location = new System.Drawing.Point(180, 149);
             this.RhythmClear.Name = "RhythmClear";
             this.RhythmClear.Size = new System.Drawing.Size(75, 20);
-            this.RhythmClear.TabIndex = 33;
+            this.RhythmClear.TabIndex = 9;
             this.RhythmClear.Text = "Clear";
             this.RhythmClear.UseVisualStyleBackColor = true;
+            this.RhythmClear.Click += new System.EventHandler(this.RhythmClear_Click);
             // 
             // RhythmPaint
             // 
@@ -514,36 +547,40 @@ namespace HapticGUI
             this.RhythmDelete.Location = new System.Drawing.Point(180, 129);
             this.RhythmDelete.Name = "RhythmDelete";
             this.RhythmDelete.Size = new System.Drawing.Size(75, 20);
-            this.RhythmDelete.TabIndex = 31;
+            this.RhythmDelete.TabIndex = 8;
             this.RhythmDelete.Text = "Delete";
             this.RhythmDelete.UseVisualStyleBackColor = true;
+            this.RhythmDelete.Click += new System.EventHandler(this.RhythmDelete_Click);
             // 
             // RhythmReplace
             // 
             this.RhythmReplace.Location = new System.Drawing.Point(180, 90);
             this.RhythmReplace.Name = "RhythmReplace";
             this.RhythmReplace.Size = new System.Drawing.Size(75, 20);
-            this.RhythmReplace.TabIndex = 30;
+            this.RhythmReplace.TabIndex = 7;
             this.RhythmReplace.Text = "Replace";
             this.RhythmReplace.UseVisualStyleBackColor = true;
+            this.RhythmReplace.Click += new System.EventHandler(this.RhythmReplace_Click);
             // 
             // RhythmInsert
             // 
             this.RhythmInsert.Location = new System.Drawing.Point(180, 70);
             this.RhythmInsert.Name = "RhythmInsert";
             this.RhythmInsert.Size = new System.Drawing.Size(75, 20);
-            this.RhythmInsert.TabIndex = 29;
+            this.RhythmInsert.TabIndex = 6;
             this.RhythmInsert.Text = "Insert";
             this.RhythmInsert.UseVisualStyleBackColor = true;
+            this.RhythmInsert.Click += new System.EventHandler(this.RhythmInsert_Click);
             // 
             // RhythmAdd
             // 
             this.RhythmAdd.Location = new System.Drawing.Point(180, 50);
             this.RhythmAdd.Name = "RhythmAdd";
             this.RhythmAdd.Size = new System.Drawing.Size(75, 20);
-            this.RhythmAdd.TabIndex = 28;
+            this.RhythmAdd.TabIndex = 5;
             this.RhythmAdd.Text = "Add";
             this.RhythmAdd.UseVisualStyleBackColor = true;
+            this.RhythmAdd.Click += new System.EventHandler(this.RhythmAdd_Click);
             // 
             // RhythmOffLabel
             // 
@@ -580,7 +617,8 @@ namespace HapticGUI
             0});
             this.RhythmOff.Name = "RhythmOff";
             this.RhythmOff.Size = new System.Drawing.Size(48, 20);
-            this.RhythmOff.TabIndex = 25;
+            this.RhythmOff.TabIndex = 3;
+            this.RhythmOff.ValueChanged += new System.EventHandler(this.RhythmOff_ValueChanged);
             // 
             // RhythmOn
             // 
@@ -597,7 +635,8 @@ namespace HapticGUI
             0});
             this.RhythmOn.Name = "RhythmOn";
             this.RhythmOn.Size = new System.Drawing.Size(48, 20);
-            this.RhythmOn.TabIndex = 24;
+            this.RhythmOn.TabIndex = 2;
+            this.RhythmOn.ValueChanged += new System.EventHandler(this.RhythmOn_ValueChanged);
             // 
             // RhythmLabel
             // 
@@ -611,15 +650,30 @@ namespace HapticGUI
             // 
             // DirectPanel
             // 
+            this.DirectPanel.Controls.Add(this.DirectSave);
+            this.DirectPanel.Controls.Add(this.DirectLoad);
+            this.DirectPanel.Controls.Add(this.DirectRenameLabel);
+            this.DirectPanel.Controls.Add(this.DirectActivateMotor);
+            this.DirectPanel.Controls.Add(this.DirectActivateGroup);
+            this.DirectPanel.Controls.Add(this.DirectGroupLabel);
+            this.DirectPanel.Controls.Add(this.DirectAddGroup);
+            this.DirectPanel.Controls.Add(this.DirectDeleteGroup);
+            this.DirectPanel.Controls.Add(this.DirectClearGroup);
+            this.DirectPanel.Controls.Add(this.DirectClearSet);
+            this.DirectPanel.Controls.Add(this.DirectDeleteSet);
+            this.DirectPanel.Controls.Add(this.DirectAddSet);
+            this.DirectPanel.Controls.Add(this.GroupList);
+            this.DirectPanel.Controls.Add(this.DirectRenameGroup);
             this.DirectPanel.Controls.Add(this.DirectBack);
-            this.DirectPanel.Controls.Add(this.RenameSetField);
-            this.DirectPanel.Controls.Add(this.RenameSet);
+            this.DirectPanel.Controls.Add(this.DirectRenameField);
+            this.DirectPanel.Controls.Add(this.DirectRenameSet);
             this.DirectPanel.Controls.Add(this.DirectStop);
+            this.DirectPanel.Controls.Add(this.DirectSetLabel);
             this.DirectPanel.Controls.Add(this.AddedCycleLabel);
             this.DirectPanel.Controls.Add(this.AddedMagLabel);
             this.DirectPanel.Controls.Add(this.AddedRhythmLabel);
             this.DirectPanel.Controls.Add(this.DirectClearMotor);
-            this.DirectPanel.Controls.Add(this.DirectActivate);
+            this.DirectPanel.Controls.Add(this.DirectActivateSet);
             this.DirectPanel.Controls.Add(this.DirectDeleteMotor);
             this.DirectPanel.Controls.Add(this.DirectAddMotor);
             this.DirectPanel.Controls.Add(this.DirectCyclesLabel);
@@ -628,17 +682,153 @@ namespace HapticGUI
             this.DirectPanel.Controls.Add(this.DirectCyclesBox);
             this.DirectPanel.Controls.Add(this.DirectMagBox);
             this.DirectPanel.Controls.Add(this.DirectRhythmBox);
-            this.DirectPanel.Controls.Add(this.DirectSetLabel);
-            this.DirectPanel.Controls.Add(this.DirectAddedLabel);
-            this.DirectPanel.Controls.Add(this.DirectAvailableLabel);
+            this.DirectPanel.Controls.Add(this.DirectMotorLabel);
             this.DirectPanel.Controls.Add(this.SetList);
             this.DirectPanel.Controls.Add(this.AddedList);
             this.DirectPanel.Controls.Add(this.AvailableList);
-            this.DirectPanel.Location = new System.Drawing.Point(12, 12);
+            this.DirectPanel.Location = new System.Drawing.Point(13, 35);
             this.DirectPanel.Name = "DirectPanel";
-            this.DirectPanel.Size = new System.Drawing.Size(270, 248);
+            this.DirectPanel.Size = new System.Drawing.Size(561, 248);
             this.DirectPanel.TabIndex = 27;
             this.DirectPanel.Visible = false;
+            // 
+            // DirectSave
+            // 
+            this.DirectSave.Location = new System.Drawing.Point(470, 45);
+            this.DirectSave.Name = "DirectSave";
+            this.DirectSave.Size = new System.Drawing.Size(75, 23);
+            this.DirectSave.TabIndex = 39;
+            this.DirectSave.Text = "Save";
+            this.DirectSave.UseVisualStyleBackColor = true;
+            this.DirectSave.Click += new System.EventHandler(this.DirectSave_Click);
+            // 
+            // DirectLoad
+            // 
+            this.DirectLoad.Location = new System.Drawing.Point(470, 14);
+            this.DirectLoad.Name = "DirectLoad";
+            this.DirectLoad.Size = new System.Drawing.Size(75, 23);
+            this.DirectLoad.TabIndex = 38;
+            this.DirectLoad.Text = "Load";
+            this.DirectLoad.UseVisualStyleBackColor = true;
+            this.DirectLoad.Click += new System.EventHandler(this.DirectLoad_Click);
+            // 
+            // DirectRenameLabel
+            // 
+            this.DirectRenameLabel.AutoSize = true;
+            this.DirectRenameLabel.Location = new System.Drawing.Point(314, 3);
+            this.DirectRenameLabel.Name = "DirectRenameLabel";
+            this.DirectRenameLabel.Size = new System.Drawing.Size(72, 13);
+            this.DirectRenameLabel.TabIndex = 30;
+            this.DirectRenameLabel.Text = "Rename Field";
+            // 
+            // DirectActivateMotor
+            // 
+            this.DirectActivateMotor.Location = new System.Drawing.Point(99, 183);
+            this.DirectActivateMotor.Name = "DirectActivateMotor";
+            this.DirectActivateMotor.Size = new System.Drawing.Size(60, 20);
+            this.DirectActivateMotor.TabIndex = 37;
+            this.DirectActivateMotor.Text = "Activate";
+            this.DirectActivateMotor.UseVisualStyleBackColor = true;
+            this.DirectActivateMotor.Click += new System.EventHandler(this.DirectActivateMotor_Click);
+            // 
+            // DirectActivateGroup
+            // 
+            this.DirectActivateGroup.Location = new System.Drawing.Point(402, 183);
+            this.DirectActivateGroup.Name = "DirectActivateGroup";
+            this.DirectActivateGroup.Size = new System.Drawing.Size(60, 20);
+            this.DirectActivateGroup.TabIndex = 36;
+            this.DirectActivateGroup.Text = "Activate";
+            this.DirectActivateGroup.UseVisualStyleBackColor = true;
+            this.DirectActivateGroup.Click += new System.EventHandler(this.DirectActivateGroup_Click);
+            // 
+            // DirectGroupLabel
+            // 
+            this.DirectGroupLabel.AutoSize = true;
+            this.DirectGroupLabel.Location = new System.Drawing.Point(336, 69);
+            this.DirectGroupLabel.Name = "DirectGroupLabel";
+            this.DirectGroupLabel.Size = new System.Drawing.Size(36, 13);
+            this.DirectGroupLabel.TabIndex = 35;
+            this.DirectGroupLabel.Text = "Group";
+            // 
+            // DirectAddGroup
+            // 
+            this.DirectAddGroup.Location = new System.Drawing.Point(402, 82);
+            this.DirectAddGroup.Name = "DirectAddGroup";
+            this.DirectAddGroup.Size = new System.Drawing.Size(60, 20);
+            this.DirectAddGroup.TabIndex = 34;
+            this.DirectAddGroup.Text = "Add";
+            this.DirectAddGroup.UseVisualStyleBackColor = true;
+            this.DirectAddGroup.Click += new System.EventHandler(this.DirectAddGroup_Click);
+            // 
+            // DirectDeleteGroup
+            // 
+            this.DirectDeleteGroup.Location = new System.Drawing.Point(402, 118);
+            this.DirectDeleteGroup.Name = "DirectDeleteGroup";
+            this.DirectDeleteGroup.Size = new System.Drawing.Size(60, 20);
+            this.DirectDeleteGroup.TabIndex = 33;
+            this.DirectDeleteGroup.Text = "Delete";
+            this.DirectDeleteGroup.UseVisualStyleBackColor = true;
+            this.DirectDeleteGroup.Click += new System.EventHandler(this.DirectDeleteGroup_Click);
+            // 
+            // DirectClearGroup
+            // 
+            this.DirectClearGroup.Location = new System.Drawing.Point(402, 139);
+            this.DirectClearGroup.Name = "DirectClearGroup";
+            this.DirectClearGroup.Size = new System.Drawing.Size(60, 20);
+            this.DirectClearGroup.TabIndex = 32;
+            this.DirectClearGroup.Text = "Clear";
+            this.DirectClearGroup.UseVisualStyleBackColor = true;
+            this.DirectClearGroup.Click += new System.EventHandler(this.DirectClearGroup_Click);
+            // 
+            // DirectClearSet
+            // 
+            this.DirectClearSet.Location = new System.Drawing.Point(250, 139);
+            this.DirectClearSet.Name = "DirectClearSet";
+            this.DirectClearSet.Size = new System.Drawing.Size(60, 20);
+            this.DirectClearSet.TabIndex = 31;
+            this.DirectClearSet.Text = "Clear";
+            this.DirectClearSet.UseVisualStyleBackColor = true;
+            this.DirectClearSet.Click += new System.EventHandler(this.DirectClearSet_Click);
+            // 
+            // DirectDeleteSet
+            // 
+            this.DirectDeleteSet.Location = new System.Drawing.Point(250, 118);
+            this.DirectDeleteSet.Name = "DirectDeleteSet";
+            this.DirectDeleteSet.Size = new System.Drawing.Size(60, 20);
+            this.DirectDeleteSet.TabIndex = 30;
+            this.DirectDeleteSet.Text = "Delete";
+            this.DirectDeleteSet.UseVisualStyleBackColor = true;
+            this.DirectDeleteSet.Click += new System.EventHandler(this.DirectDeleteSet_Click);
+            // 
+            // DirectAddSet
+            // 
+            this.DirectAddSet.Location = new System.Drawing.Point(250, 82);
+            this.DirectAddSet.Name = "DirectAddSet";
+            this.DirectAddSet.Size = new System.Drawing.Size(60, 20);
+            this.DirectAddSet.TabIndex = 29;
+            this.DirectAddSet.Text = "Add";
+            this.DirectAddSet.UseVisualStyleBackColor = true;
+            this.DirectAddSet.Click += new System.EventHandler(this.DirectAddSet_Click);
+            // 
+            // GroupList
+            // 
+            this.GroupList.FormattingEnabled = true;
+            this.GroupList.Location = new System.Drawing.Point(317, 82);
+            this.GroupList.Name = "GroupList";
+            this.GroupList.Size = new System.Drawing.Size(79, 134);
+            this.GroupList.TabIndex = 28;
+            this.GroupList.SelectedIndexChanged += new System.EventHandler(this.GroupList_SelectedIndexChanged);
+            // 
+            // DirectRenameGroup
+            // 
+            this.DirectRenameGroup.Location = new System.Drawing.Point(307, 52);
+            this.DirectRenameGroup.Name = "DirectRenameGroup";
+            this.DirectRenameGroup.Size = new System.Drawing.Size(89, 18);
+            this.DirectRenameGroup.TabIndex = 27;
+            this.DirectRenameGroup.Text = "Rename Group";
+            this.DirectRenameGroup.UseCompatibleTextRendering = true;
+            this.DirectRenameGroup.UseVisualStyleBackColor = true;
+            this.DirectRenameGroup.Click += new System.EventHandler(this.DirectRenameGroup_Click);
             // 
             // DirectBack
             // 
@@ -650,27 +840,29 @@ namespace HapticGUI
             this.DirectBack.UseVisualStyleBackColor = true;
             this.DirectBack.Click += new System.EventHandler(this.DirectBack_Click);
             // 
-            // RenameSetField
+            // DirectRenameField
             // 
-            this.RenameSetField.Location = new System.Drawing.Point(99, 133);
-            this.RenameSetField.MaxLength = 10;
-            this.RenameSetField.Name = "RenameSetField";
-            this.RenameSetField.Size = new System.Drawing.Size(75, 20);
-            this.RenameSetField.TabIndex = 25;
+            this.DirectRenameField.Location = new System.Drawing.Point(307, 16);
+            this.DirectRenameField.MaxLength = 10;
+            this.DirectRenameField.Name = "DirectRenameField";
+            this.DirectRenameField.Size = new System.Drawing.Size(89, 20);
+            this.DirectRenameField.TabIndex = 25;
             // 
-            // RenameSet
+            // DirectRenameSet
             // 
-            this.RenameSet.Location = new System.Drawing.Point(99, 159);
-            this.RenameSet.Name = "RenameSet";
-            this.RenameSet.Size = new System.Drawing.Size(75, 23);
-            this.RenameSet.TabIndex = 24;
-            this.RenameSet.Text = "Rename";
-            this.RenameSet.UseVisualStyleBackColor = true;
-            this.RenameSet.Click += new System.EventHandler(this.RenameSet_Click);
+            this.DirectRenameSet.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DirectRenameSet.Location = new System.Drawing.Point(307, 35);
+            this.DirectRenameSet.Name = "DirectRenameSet";
+            this.DirectRenameSet.Size = new System.Drawing.Size(89, 18);
+            this.DirectRenameSet.TabIndex = 24;
+            this.DirectRenameSet.Text = "Rename Set";
+            this.DirectRenameSet.UseCompatibleTextRendering = true;
+            this.DirectRenameSet.UseVisualStyleBackColor = true;
+            this.DirectRenameSet.Click += new System.EventHandler(this.DirectRenameSet_Click);
             // 
             // DirectStop
             // 
-            this.DirectStop.Location = new System.Drawing.Point(99, 222);
+            this.DirectStop.Location = new System.Drawing.Point(470, 222);
             this.DirectStop.Name = "DirectStop";
             this.DirectStop.Size = new System.Drawing.Size(75, 23);
             this.DirectStop.TabIndex = 23;
@@ -678,10 +870,19 @@ namespace HapticGUI
             this.DirectStop.UseVisualStyleBackColor = true;
             this.DirectStop.Click += new System.EventHandler(this.DirectStop_Click);
             // 
+            // DirectSetLabel
+            // 
+            this.DirectSetLabel.AutoSize = true;
+            this.DirectSetLabel.Location = new System.Drawing.Point(193, 69);
+            this.DirectSetLabel.Name = "DirectSetLabel";
+            this.DirectSetLabel.Size = new System.Drawing.Size(23, 13);
+            this.DirectSetLabel.TabIndex = 5;
+            this.DirectSetLabel.Text = "Set";
+            // 
             // AddedCycleLabel
             // 
             this.AddedCycleLabel.AutoSize = true;
-            this.AddedCycleLabel.Location = new System.Drawing.Point(206, 54);
+            this.AddedCycleLabel.Location = new System.Drawing.Point(246, 43);
             this.AddedCycleLabel.Name = "AddedCycleLabel";
             this.AddedCycleLabel.Size = new System.Drawing.Size(27, 13);
             this.AddedCycleLabel.TabIndex = 22;
@@ -690,7 +891,7 @@ namespace HapticGUI
             // AddedMagLabel
             // 
             this.AddedMagLabel.AutoSize = true;
-            this.AddedMagLabel.Location = new System.Drawing.Point(157, 54);
+            this.AddedMagLabel.Location = new System.Drawing.Point(183, 43);
             this.AddedMagLabel.Name = "AddedMagLabel";
             this.AddedMagLabel.Size = new System.Drawing.Size(27, 13);
             this.AddedMagLabel.TabIndex = 21;
@@ -699,7 +900,7 @@ namespace HapticGUI
             // AddedRhythmLabel
             // 
             this.AddedRhythmLabel.AutoSize = true;
-            this.AddedRhythmLabel.Location = new System.Drawing.Point(106, 54);
+            this.AddedRhythmLabel.Location = new System.Drawing.Point(116, 43);
             this.AddedRhythmLabel.Name = "AddedRhythmLabel";
             this.AddedRhythmLabel.Size = new System.Drawing.Size(27, 13);
             this.AddedRhythmLabel.TabIndex = 20;
@@ -707,29 +908,28 @@ namespace HapticGUI
             // 
             // DirectClearMotor
             // 
-            this.DirectClearMotor.Location = new System.Drawing.Point(180, 95);
+            this.DirectClearMotor.Location = new System.Drawing.Point(99, 139);
             this.DirectClearMotor.Name = "DirectClearMotor";
-            this.DirectClearMotor.Size = new System.Drawing.Size(75, 20);
+            this.DirectClearMotor.Size = new System.Drawing.Size(60, 20);
             this.DirectClearMotor.TabIndex = 19;
             this.DirectClearMotor.Text = "Clear";
             this.DirectClearMotor.UseVisualStyleBackColor = true;
             this.DirectClearMotor.Click += new System.EventHandler(this.DirectClearMotor_Click);
             // 
-            // DirectActivate
+            // DirectActivateSet
             // 
-            this.DirectActivate.Location = new System.Drawing.Point(180, 222);
-            this.DirectActivate.Name = "DirectActivate";
-            this.DirectActivate.Size = new System.Drawing.Size(75, 23);
-            this.DirectActivate.TabIndex = 15;
-            this.DirectActivate.Text = "Activate";
-            this.DirectActivate.UseVisualStyleBackColor = true;
-            this.DirectActivate.Click += new System.EventHandler(this.DirectActivate_Click);
+            this.DirectActivateSet.Location = new System.Drawing.Point(250, 183);
+            this.DirectActivateSet.Name = "DirectActivateSet";
+            this.DirectActivateSet.Size = new System.Drawing.Size(60, 20);
+            this.DirectActivateSet.TabIndex = 15;
+            this.DirectActivateSet.Text = "Activate";
+            this.DirectActivateSet.UseVisualStyleBackColor = true;
             // 
             // DirectDeleteMotor
             // 
-            this.DirectDeleteMotor.Location = new System.Drawing.Point(99, 94);
+            this.DirectDeleteMotor.Location = new System.Drawing.Point(99, 118);
             this.DirectDeleteMotor.Name = "DirectDeleteMotor";
-            this.DirectDeleteMotor.Size = new System.Drawing.Size(75, 20);
+            this.DirectDeleteMotor.Size = new System.Drawing.Size(60, 20);
             this.DirectDeleteMotor.TabIndex = 14;
             this.DirectDeleteMotor.Text = "Delete";
             this.DirectDeleteMotor.UseVisualStyleBackColor = true;
@@ -737,9 +937,9 @@ namespace HapticGUI
             // 
             // DirectAddMotor
             // 
-            this.DirectAddMotor.Location = new System.Drawing.Point(99, 74);
+            this.DirectAddMotor.Location = new System.Drawing.Point(99, 82);
             this.DirectAddMotor.Name = "DirectAddMotor";
-            this.DirectAddMotor.Size = new System.Drawing.Size(75, 20);
+            this.DirectAddMotor.Size = new System.Drawing.Size(60, 20);
             this.DirectAddMotor.TabIndex = 13;
             this.DirectAddMotor.Text = "Add";
             this.DirectAddMotor.UseVisualStyleBackColor = true;
@@ -748,7 +948,7 @@ namespace HapticGUI
             // DirectCyclesLabel
             // 
             this.DirectCyclesLabel.AutoSize = true;
-            this.DirectCyclesLabel.Location = new System.Drawing.Point(207, 18);
+            this.DirectCyclesLabel.Location = new System.Drawing.Point(242, 3);
             this.DirectCyclesLabel.Name = "DirectCyclesLabel";
             this.DirectCyclesLabel.Size = new System.Drawing.Size(38, 13);
             this.DirectCyclesLabel.TabIndex = 12;
@@ -757,7 +957,7 @@ namespace HapticGUI
             // DirectMagLabel
             // 
             this.DirectMagLabel.AutoSize = true;
-            this.DirectMagLabel.Location = new System.Drawing.Point(150, 18);
+            this.DirectMagLabel.Location = new System.Drawing.Point(170, 3);
             this.DirectMagLabel.Name = "DirectMagLabel";
             this.DirectMagLabel.Size = new System.Drawing.Size(57, 13);
             this.DirectMagLabel.TabIndex = 11;
@@ -766,7 +966,7 @@ namespace HapticGUI
             // DirectRhythmLabel
             // 
             this.DirectRhythmLabel.AutoSize = true;
-            this.DirectRhythmLabel.Location = new System.Drawing.Point(106, 18);
+            this.DirectRhythmLabel.Location = new System.Drawing.Point(111, 3);
             this.DirectRhythmLabel.Name = "DirectRhythmLabel";
             this.DirectRhythmLabel.Size = new System.Drawing.Size(43, 13);
             this.DirectRhythmLabel.TabIndex = 10;
@@ -782,8 +982,8 @@ namespace HapticGUI
             "4",
             "5",
             "6",
-            "7"});
-            this.DirectCyclesBox.Location = new System.Drawing.Point(206, 32);
+            "Inf"});
+            this.DirectCyclesBox.Location = new System.Drawing.Point(239, 16);
             this.DirectCyclesBox.Name = "DirectCyclesBox";
             this.DirectCyclesBox.Size = new System.Drawing.Size(45, 21);
             this.DirectCyclesBox.TabIndex = 9;
@@ -797,7 +997,7 @@ namespace HapticGUI
             "B",
             "C",
             "D"});
-            this.DirectMagBox.Location = new System.Drawing.Point(156, 32);
+            this.DirectMagBox.Location = new System.Drawing.Point(176, 16);
             this.DirectMagBox.Name = "DirectMagBox";
             this.DirectMagBox.Size = new System.Drawing.Size(45, 21);
             this.DirectMagBox.TabIndex = 8;
@@ -812,86 +1012,51 @@ namespace HapticGUI
             "C",
             "D",
             "E"});
-            this.DirectRhythmBox.Location = new System.Drawing.Point(106, 32);
+            this.DirectRhythmBox.Location = new System.Drawing.Point(110, 16);
             this.DirectRhythmBox.Name = "DirectRhythmBox";
             this.DirectRhythmBox.Size = new System.Drawing.Size(45, 21);
             this.DirectRhythmBox.TabIndex = 7;
             this.DirectRhythmBox.Text = "A";
             // 
-            // DirectSetLabel
+            // DirectMotorLabel
             // 
-            this.DirectSetLabel.AutoSize = true;
-            this.DirectSetLabel.Location = new System.Drawing.Point(28, 119);
-            this.DirectSetLabel.Name = "DirectSetLabel";
-            this.DirectSetLabel.Size = new System.Drawing.Size(23, 13);
-            this.DirectSetLabel.TabIndex = 5;
-            this.DirectSetLabel.Text = "Set";
-            // 
-            // DirectAddedLabel
-            // 
-            this.DirectAddedLabel.AutoSize = true;
-            this.DirectAddedLabel.Location = new System.Drawing.Point(58, 18);
-            this.DirectAddedLabel.Name = "DirectAddedLabel";
-            this.DirectAddedLabel.Size = new System.Drawing.Size(38, 13);
-            this.DirectAddedLabel.TabIndex = 4;
-            this.DirectAddedLabel.Text = "Added";
-            // 
-            // DirectAvailableLabel
-            // 
-            this.DirectAvailableLabel.AutoSize = true;
-            this.DirectAvailableLabel.Location = new System.Drawing.Point(12, 18);
-            this.DirectAvailableLabel.Name = "DirectAvailableLabel";
-            this.DirectAvailableLabel.Size = new System.Drawing.Size(50, 13);
-            this.DirectAvailableLabel.TabIndex = 3;
-            this.DirectAvailableLabel.Text = "Available";
+            this.DirectMotorLabel.AutoSize = true;
+            this.DirectMotorLabel.Location = new System.Drawing.Point(7, 3);
+            this.DirectMotorLabel.Name = "DirectMotorLabel";
+            this.DirectMotorLabel.Size = new System.Drawing.Size(87, 13);
+            this.DirectMotorLabel.TabIndex = 3;
+            this.DirectMotorLabel.Text = "Available  Added";
             // 
             // SetList
             // 
             this.SetList.FormattingEnabled = true;
-            this.SetList.Items.AddRange(new object[] {
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "10",
-            "11",
-            "12",
-            "13",
-            "14",
-            "15",
-            "16"});
-            this.SetList.Location = new System.Drawing.Point(16, 133);
+            this.SetList.Location = new System.Drawing.Point(165, 82);
             this.SetList.Name = "SetList";
-            this.SetList.Size = new System.Drawing.Size(75, 82);
+            this.SetList.Size = new System.Drawing.Size(79, 134);
             this.SetList.TabIndex = 2;
             this.SetList.SelectedIndexChanged += new System.EventHandler(this.SetList_SelectedIndexChanged);
             // 
             // AddedList
             // 
             this.AddedList.FormattingEnabled = true;
-            this.AddedList.Location = new System.Drawing.Point(55, 33);
+            this.AddedList.Location = new System.Drawing.Point(53, 17);
             this.AddedList.Name = "AddedList";
-            this.AddedList.Size = new System.Drawing.Size(40, 82);
+            this.AddedList.Size = new System.Drawing.Size(40, 199);
             this.AddedList.TabIndex = 1;
             this.AddedList.SelectedIndexChanged += new System.EventHandler(this.AddedList_SelectedIndexChanged);
             // 
             // AvailableList
             // 
             this.AvailableList.FormattingEnabled = true;
-            this.AvailableList.Location = new System.Drawing.Point(16, 33);
+            this.AvailableList.Location = new System.Drawing.Point(13, 17);
             this.AvailableList.Name = "AvailableList";
-            this.AvailableList.Size = new System.Drawing.Size(39, 82);
+            this.AvailableList.Size = new System.Drawing.Size(39, 199);
             this.AvailableList.TabIndex = 0;
             // 
             // ErrorStatus
             // 
             this.ErrorStatus.AutoSize = true;
-            this.ErrorStatus.Location = new System.Drawing.Point(9, 263);
+            this.ErrorStatus.Location = new System.Drawing.Point(12, 19);
             this.ErrorStatus.Name = "ErrorStatus";
             this.ErrorStatus.Size = new System.Drawing.Size(65, 13);
             this.ErrorStatus.TabIndex = 28;
@@ -900,34 +1065,28 @@ namespace HapticGUI
             // ErrorLocation
             // 
             this.ErrorLocation.AutoSize = true;
-            this.ErrorLocation.Location = new System.Drawing.Point(330, 263);
+            this.ErrorLocation.Location = new System.Drawing.Point(12, 4);
             this.ErrorLocation.Name = "ErrorLocation";
             this.ErrorLocation.Size = new System.Drawing.Size(76, 13);
             this.ErrorLocation.TabIndex = 29;
             this.ErrorLocation.Text = "Error Location:";
             // 
-            // MagTestStop
-            // 
-            this.MagTestStop.Location = new System.Drawing.Point(98, 222);
-            this.MagTestStop.Name = "MagTestStop";
-            this.MagTestStop.Size = new System.Drawing.Size(75, 23);
-            this.MagTestStop.TabIndex = 37;
-            this.MagTestStop.Text = "Stop";
-            this.MagTestStop.UseVisualStyleBackColor = true;
-            this.MagTestStop.Visible = false;
-            this.MagTestStop.Click += new System.EventHandler(this.MagTestStop_Click);
-            // 
             // GUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(616, 539);
+            this.AutoSize = true;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.ClientSize = new System.Drawing.Size(585, 289);
             this.Controls.Add(this.ErrorLocation);
             this.Controls.Add(this.ErrorStatus);
             this.Controls.Add(this.DirectPanel);
             this.Controls.Add(this.RhythmPanel);
             this.Controls.Add(this.MagPanel);
             this.Controls.Add(this.MainPanel);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "GUI";
             this.Text = "Haptic Belt GUI";
             this.Load += new System.EventHandler(this.GUI_Load);
@@ -993,8 +1152,7 @@ namespace HapticGUI
         private System.Windows.Forms.ListBox AddedList;
         private System.Windows.Forms.ListBox AvailableList;
         private System.Windows.Forms.Label DirectSetLabel;
-        private System.Windows.Forms.Label DirectAddedLabel;
-        private System.Windows.Forms.Label DirectAvailableLabel;
+        private System.Windows.Forms.Label DirectMotorLabel;
         private System.Windows.Forms.ListBox SetList;
         private System.Windows.Forms.ComboBox DirectCyclesBox;
         private System.Windows.Forms.ComboBox DirectMagBox;
@@ -1004,7 +1162,7 @@ namespace HapticGUI
         private System.Windows.Forms.Label DirectMagLabel;
         private System.Windows.Forms.Button DirectDeleteMotor;
         private System.Windows.Forms.Button DirectAddMotor;
-        private System.Windows.Forms.Button DirectActivate;
+        private System.Windows.Forms.Button DirectActivateSet;
         private System.Windows.Forms.Button DirectClearMotor;
         private System.Windows.Forms.Label AddedCycleLabel;
         private System.Windows.Forms.Label AddedMagLabel;
@@ -1013,8 +1171,8 @@ namespace HapticGUI
         private System.Windows.Forms.ComboBox COMComboBox;
         private System.Windows.Forms.Label SelectPortLabel;
         private System.Windows.Forms.Button RefreshPorts;
-        private System.Windows.Forms.TextBox RenameSetField;
-        private System.Windows.Forms.Button RenameSet;
+        private System.Windows.Forms.TextBox DirectRenameField;
+        private System.Windows.Forms.Button DirectRenameSet;
         private System.Windows.Forms.Button ClosePort;
         private System.Windows.Forms.Button OpenPort;
         private System.Windows.Forms.Label ErrorStatus;
@@ -1022,6 +1180,20 @@ namespace HapticGUI
         private System.Windows.Forms.Button DirectBack;
         private System.Windows.Forms.Button RhythmTestStop;
         private System.Windows.Forms.Button MagTestStop;
+        private System.Windows.Forms.Button DirectRenameGroup;
+        private System.Windows.Forms.ListBox GroupList;
+        private System.Windows.Forms.Button DirectAddSet;
+        private System.Windows.Forms.Label DirectGroupLabel;
+        private System.Windows.Forms.Button DirectAddGroup;
+        private System.Windows.Forms.Button DirectDeleteGroup;
+        private System.Windows.Forms.Button DirectClearGroup;
+        private System.Windows.Forms.Button DirectClearSet;
+        private System.Windows.Forms.Button DirectDeleteSet;
+        private System.Windows.Forms.Button DirectActivateMotor;
+        private System.Windows.Forms.Button DirectActivateGroup;
+        private System.Windows.Forms.Label DirectRenameLabel;
+        private System.Windows.Forms.Button DirectSave;
+        private System.Windows.Forms.Button DirectLoad;
 
     }
 }
