@@ -42,6 +42,10 @@ for the Funnel I/O is a little more involved than building the ATtiny48 code.
 The steps are:
  - Install the Arduino GUI (www.arduino.cc)--the code is known to work on the
    arduino-0015 version
+ - You may need to modify the Arduino preferences file to set the baud rate
+   to 9600.  Change this item: serial.burn_rate=9600.  For more details see
+   (http://www.arduino.cc/en/Guide/Troubleshooting#upload) or 
+   (http://arduino.cc/en/Hacking/Preferences)
  - Create a new Arduino sketch (start the GUI, type something in the sketch,
    save the sketch and make note of the sketch directory, exit the GUI)
  - Symlink (or copy if your OS does not support symlinks) active_command.h,
@@ -58,6 +62,8 @@ The steps are:
  - Choose "Arduino Pro or Pro Mini (8 MHz)" from the Tools -> Board menu
  - Choose the serial port the Funnel is connected to from Tools -> Serial Port
  - Press the Verify button to compile the code, or
+ - Make sure to remove any serial devices on the Funnel (such as a 
+   bluetooth module).
  - Press the Upload button to compile and program the Funnel I/O board
 
 Deleting the twi.o file simply forces Arduino to recompile the TWI code used
