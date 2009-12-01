@@ -144,7 +144,7 @@ namespace HapticGUI
             String currChar = "";
             String prevChar = "";
 
-            if (hasError(belt.getError(), "getRhythmPattern()"))
+            if (hasError(belt.getStatus(), "getRhythmPattern()"))
             {
                 //Handle Error
             }

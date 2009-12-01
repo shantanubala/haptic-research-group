@@ -62,25 +62,23 @@ namespace HapticGUI
         //Allows access to other modes (panels), if a port is open
         private void ModeGo_Click(object sender, EventArgs e)
         {
+            String mode = ModeComboBox.SelectedItem.ToString();
+
             if (Port_Open)
             {
-                String mode = ModeComboBox.SelectedItem.ToString();
+                Hide_Select_Mode();
+
                 if (mode.Equals("Rhythm Mode"))
-                {
-                    Hide_Select_Mode();
                     Show_Rhythm_Mode();
-                }
                 else if (mode.Equals("Magnitude Mode"))
-                {
-                    Hide_Select_Mode();
                     Show_Magnitude_Mode();
-                }
                 else if (mode.Equals("Direct Operation Mode"))
-                {
-                    Hide_Select_Mode();
-                    Show_Direct_Mode();
-                }
+                    Show_Operation_Mode();
+                else
+                    Show_Program_Mode();
             }
+            else if (mode.Equals("Direct Program Mode"))
+                Show_Program_Mode();
         }
         //Calls library to Initialize a port, if none are open, and one is available
         private void OpenPort_Click(object sender, EventArgs e)
@@ -151,6 +149,12 @@ namespace HapticGUI
                 ErrorStatus.Text = belt.getErrorMsg(response);
                 return true;
             }
-        }      
+        }
+
+        private void DirectDelayField_ValueChanged(object sender, EventArgs e)
+        {
+            if(DirectDelayField.Value%50 != 0)
+                DirectDelayField.Value = Convert.ToInt32(DirectDelayField.Value) / 50 * 50;
+        } 
     }
 }

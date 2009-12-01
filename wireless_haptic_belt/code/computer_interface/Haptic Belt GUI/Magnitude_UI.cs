@@ -47,7 +47,7 @@ namespace HapticGUI
             }
             //Store the current Magnitude
             hold_magnitude = belt.getMagnitude("A", true, QueryType.SINGLE);
-            if (hasError(belt.getError(), "getMagnitude()"))
+            if (hasError(belt.getStatus(), "getMagnitude()"))
             {
                 //Handle Error
             }
@@ -58,7 +58,7 @@ namespace HapticGUI
             }
             //Get motor count
             _motorcount = belt.getMotors(QueryType.SINGLE);
-            if (hasError(belt.getError(), "getMotors()"))
+            if (hasError(belt.getStatus(), "getMotors()"))
             {
                 //Handle Error
             }
@@ -122,9 +122,9 @@ namespace HapticGUI
         private void MagOption_CheckedChanged(object sender, EventArgs e)
         {
             if (MagOption.Checked)
-                Show_Options();
+                Add_Options();
             else
-                Hide_Options();
+                Remove_Options();
         }
         //Updates visable duty cycle, period and percentage box based on which mag is selected
         private void MagComboBox_SelectedIndexChanged(object sender, EventArgs e)
