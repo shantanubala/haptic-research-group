@@ -7,6 +7,13 @@ using System.Text;
 using System.Windows.Forms;
 using HapticDriver;
 
+/* Handle's both Direct Program Mode and Direct Operation Mode.
+ * The reason for this is because of the similarities of the two modes.
+ * The only difference between these two modes is the ability to interact
+ * with the belt via the COM port, which Program Mode lacks. The reason
+ * for this mode is to allow the GUI user to program motors and without
+ * having to have the belt connected to the GUI.
+ */
 namespace HapticGUI
 {
     partial class GUI
@@ -14,23 +21,50 @@ namespace HapticGUI
         //Handles all necessary conditions to display this panel
         //if we can Query the belt w/o conflict, we enter this mode
         //otherwise we stay in Select Mode.
-        private void Show_Direct_Mode()
+        private void Show_Operation_Mode()
         {
             //Must be done before start we allow user control.
-            Initialize_DirectMode();
-
+            Initialize_Operation_Mode();
             DirectPanel.Show();
-            
-            //Load Saved Sets later?
         }
-        //Triggers stop button and goes back to Menu
-        private void Hide_Direct_Mode()
+        //Triggers stop button and goes back to Main Menu
+        private void Hide_Operation_Mode()
         {
             //Stop All Motors before going back
             StopMotors();
+            DirectPanel.Hide();
+        }
+        //Enters program mode
+        private void Show_Program_Mode()
+        {
+            //Set proper buttons for this mode since its shared with Operation mode
+            DirectActivateGroup.Hide();
+            DirectActivateSet.Hide();
+            DirectActivateMotor.Hide();
+            DirectStop.Hide();
+            DirectOption.Hide();
+            DirectOptionLabel.Hide();
+            DirectProgramBack.Show();
+
+            Initialize_Program_Mode();
+
+            DirectPanel.Show();
+        }
+        //Goes back to Main Menu
+        private void Hide_Program_Mode()
+        {
+            //Reset buttons back to original states since its shared with Operation Mode
+            DirectActivateGroup.Show();
+            DirectActivateSet.Show();
+            DirectActivateMotor.Show();
+            DirectStop.Show();
+            DirectOption.Show();
+            DirectOptionLabel.Show();
+            DirectProgramBack.Hide();
 
             DirectPanel.Hide();
         }
+
 //Button Events: Save and Load
         private void DirectLoad_Click(object sender, EventArgs e)
         {
@@ -45,7 +79,7 @@ namespace HapticGUI
         //Adds a new activation to selected set, based on comboBox parameters
         private void DirectAddMotor_Click(object sender, EventArgs e)
         {
-            Add_Activation(DirectRhythmBox.SelectedItem.ToString(), DirectMagBox.SelectedItem.ToString(), DirectCyclesBox.SelectedItem.ToString());
+            Add_Activation(DirectRhythmBox.SelectedItem.ToString(), DirectMagBox.SelectedItem.ToString(), DirectCyclesBox.SelectedItem.ToString(), Convert.ToInt16(DirectDelayField.Value));
         }
         //Removes selected activation request from selected set
         private void DirectDeleteMotor_Click(object sender, EventArgs e)
@@ -106,11 +140,18 @@ namespace HapticGUI
             Activate_Group();
         }      
 //Other Button Events
-        //Go back to menu
-        private void DirectBack_Click(object sender, EventArgs e)
+        //Go back to menu from Operation Mode
+        private void DirectOperationBack_Click(object sender, EventArgs e)
         {
-            Hide_Direct_Mode();
+            Hide_Operation_Mode();
+            Show_Select_Mode();
         }
+        //Go back to menu from Program Mode
+        private void DirectProgramBack_Click(object sender, EventArgs e)
+        {
+            Hide_Program_Mode();
+            Show_Select_Mode();
+        } 
         //Stops all motors from vibrating
         private void DirectStop_Click(object sender, EventArgs e)
         {
@@ -119,28 +160,45 @@ namespace HapticGUI
         //Renames a set with any characters in the Text Field.
         private void DirectRenameSet_Click(object sender, EventArgs e)
         {
-            RenameSet(); 
+            Rename_Set(); 
         }
         //Renames a set with any characters in the DirectRenameField (text field).
         private void DirectRenameGroup_Click(object sender, EventArgs e)
         {
-            RenameGroup();
+            Rename_Group();
         }
 //Selected Index Changed Events
         //Refreshes SetList, Available List and Added List according to the selected group
         private void GroupList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Change_Group();
+            if (GroupList.SelectedIndices.Count == 1)
+                Change_Group();
+            else if (GroupList.SelectedIndices.Count == 2)
+                Swap_Groups();
         }
+
         //Refreshes AvailableList and AddedList with according to the selected set
         private void SetList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Change_Set();
+            if (SetList.SelectedIndices.Count == 1)
+                Change_Set();
+            else if (SetList.SelectedIndices.Count == 2)
+                Swap_Sets();
         }
         //Changes the display labels on the GUI
         private void AddedList_SelectedIndexChanged(object sender, EventArgs e)
         {
             Change_Labels();
         }
+        //Limits viewing to available motors only if checked
+        private void DirectOption_CheckedChanged(object sender, EventArgs e)
+        {
+            if (DirectOption.Checked)
+                _viewableMotors = _motorcount;
+            else
+                _viewableMotors = _maxmotors;
+
+            Change_Set();
+        } 
     }
 }

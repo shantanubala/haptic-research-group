@@ -68,7 +68,7 @@ namespace HapticGUI
 
                 //Store the current Magnitude
                 hold_magnitude = belt.getMagnitude("A",true, QueryType.SINGLE);
-                if(hasError(belt.getError(),"getMagnitude()"))
+                if(hasError(belt.getStatus(),"getMagnitude()"))
                 {
                     //Handle Error
                 }
@@ -79,7 +79,7 @@ namespace HapticGUI
                 }
                 //Get motor count
                 _motorcount = belt.getMotors(QueryType.SINGLE);
-                if (hasError(belt.getError(), "getMotors()"))
+                if (hasError(belt.getStatus(), "getMotors()"))
                 {
                     //Handle Error
                 }

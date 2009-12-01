@@ -16,7 +16,7 @@ namespace HapticGUI
         {
             String[] splitMag = new String[2];
             splitMag = belt.getMagnitude(sel,true,QueryType.SINGLE).Split(',');
-            if (hasError(belt.getError(), "getMagnitude()"))
+            if (hasError(belt.getStatus(), "getMagnitude()"))
             {
                 //Handle Error
             }
@@ -43,7 +43,7 @@ namespace HapticGUI
             DutyCycle.Maximum = Period.Value;
         }
         //Show Advanced Options Content
-        private void Show_Options()
+        private void Add_Options()
         {
             //Show advanced options (duty cycle and period)
             DutyCycle.Show();
@@ -53,7 +53,7 @@ namespace HapticGUI
             PeriodDefaultLabel.Show();
         }
         //Hides Advanced Options Content
-        private void Hide_Options()
+        private void Remove_Options()
         {
             //Hide advanced options (duty cycle and period)
             DutyCycle.Hide();
