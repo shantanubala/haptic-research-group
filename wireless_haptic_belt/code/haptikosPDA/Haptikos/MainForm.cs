@@ -11,11 +11,21 @@ using HapticDriver;
 
 namespace Haptikos
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public partial class MainForm : Form
     {
         HapticBelt wirelessBelt;// = new HapticBelt();
 
+        /// <summary>
+        /// Enumeration for data types, used when populating combo-boxes
+        /// </summary>
         public enum dataTypes { MTR, RHY, MAG };
+
+        /// <summary>
+        /// Enumeration for demo types, used when activating various demos
+        /// </summary>
         public enum demoTypes { SCAN, SWEEP, HEARTBEATS };
 
         private string inboundPort = "";
@@ -26,14 +36,13 @@ namespace Haptikos
         private string databits_string = "8";
         private string readTimeout_string = "1000";
 
-        protected UInt16 newDataAvail = 0;
         private string[] magnitude_table;
 
         //Demo elements
         DemoForm demoForm;
         TempSpatForm tempSpatForm;
-        bool stop_demo = false;
-        private string demoMotor = "";
+        //bool stop_demo = false;
+        //private string demoMotor = "";
         private string demoRhy = "";
         private int demoMag = 0;
         private int demoCycles = 0;
@@ -48,14 +57,37 @@ namespace Haptikos
         //Thread demoThread;
 
         // Use delegates to point to the main thread's fucntions
-        //private delegate void _demoThread();
         private delegate void updateText(string s);
-        //private delegate void closeDel();
         private delegate void disconnectDel();
 
+        /// <summary>
+        /// 
+        /// </summary>
         public MainForm() {
             InitializeComponent();
             labelStatusMsg.Text = "Ports not set.";
+
+            //// ********** DEBUG ************
+            //menuDisconnect.Enabled = true;
+            //menuQryVer.Enabled = true;
+            //menuQryMtr.Enabled = true;
+            //menuQryRhy.Enabled = true;
+            //menuQryMag.Enabled = true;
+            //menuQryTempSpat.Enabled = true;
+            //menuSetupRhyMag.Enabled = true;
+            //menuStopAll.Enabled = true;
+            //menuResetBelt.Enabled = true;
+            //txtMess.Enabled = true;
+            //txtLog.Enabled = true;
+            //btnSend.Enabled = true;
+
+            //// Haptic belt Buttons
+            //menuTempSpat.Enabled = true;
+            //menuDemo.Enabled = true;
+            //btnActivate.Enabled = true;
+            //btnQuery.Enabled = true;
+            //btnStop.Enabled = true;
+            //// ********** END DEBUG ************
 
             comboBoxCycles.Items.Add("1");
             comboBoxCycles.Items.Add("2");
@@ -90,8 +122,42 @@ namespace Haptikos
 
         }
 
-        // This function invokes the main thread's UpdateText function
-        // in a loop while waiting for a request to close the application.
+        private void closeMe() {
+            numThreads--;
+            this.Close();
+        }
+
+        private void MainForm_Closing(object sender, CancelEventArgs e) {
+            if (this.numThreads > 0) {
+                //e.Cancel = true; // cancel Close event if there are still threads
+            }
+            else {
+                //e.Cancel = false;
+                wirelessBelt.ClosePorts();
+                error_t response = wirelessBelt.ResetHapticBelt();
+                if (response != error_t.ESUCCESS)
+                    MessageBox.Show(wirelessBelt.getErrorMsg(response)
+                        + "\n\r Application will be closed when you click OK.");
+            }
+            // Once this flag is set the UpdateTxtLog thread will catch
+            // and handle the request to close.
+            // **** THREADS NOT USED
+            this.closeRequested = true;
+            //this.Close();
+        }
+
+        private void mnuClose_Click(object sender, EventArgs e) {
+            // Once this flag is set the UpdateTxtLog thread will catch
+            // and handle the request to close.
+            // **** THREADS NOT USED
+            this.closeRequested = true;
+            closeMe();
+        }
+
+        /// <summary>
+        /// This function invokes the main thread's onDisconnect or 
+        /// closeRequested.
+        /// </summary>
         protected void MainControlThread() {
             do {
                 Thread.Sleep(2000);
@@ -104,12 +170,14 @@ namespace Haptikos
                 this.Invoke(new disconnectDel(onDisconnect));
         }
 
-        // This function invokes the main thread's UpdateText function
-        // in a loop while waiting for a request to close the application.
+        /// <summary>
+        /// This function invokes the main thread's UpdateText function in 
+        /// a loop while waiting for a request to close the application.
+        /// </summary>
         protected void UpdateTxtLog() {
-            if (wirelessBelt.getMsgBufferType() == "Incoming") {
+            if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.INCOMING) {
                 try {
-                    string line = wirelessBelt.getMsgBuffer();
+                    string line = wirelessBelt.getDataRecvBuffer();
                     if (line.CompareTo("quit$$$") == 0) {
                         disconnectRequested = true;
                     }
@@ -124,13 +192,23 @@ namespace Haptikos
         private void onDisconnect() {
             wirelessBelt.ClosePorts();
 
-            mnuDisconnect.Enabled = false;
-            mnuConnect.Enabled = true;
-            mnuSettings.Enabled = true;
+            menuDisconnect.Enabled = false;
+            menuConnect.Enabled = true;
+            menuSettings.Enabled = true;
+            menuQryVer.Enabled = false;
+            menuQryMtr.Enabled = false;
+            menuQryRhy.Enabled = false;
+            menuQryMag.Enabled = false;
+            menuQryTempSpat.Enabled = false;
+            menuSetupRhyMag.Enabled = false;
+            menuStopAll.Enabled = false;
+            menuResetBelt.Enabled = false;
+
             txtMess.Enabled = false;
             btnSend.Enabled = false;
 
-            mnuDemo.Enabled = false;
+            menuTempSpat.Enabled = false;
+            menuDemo.Enabled = false;
             btnActivate.Enabled = false;
             btnQuery.Enabled = false;
             btnStop.Enabled = false;
@@ -139,30 +217,38 @@ namespace Haptikos
         }
 
         private void UpdateText(string s) {
-            txtLog.Text += "them:" + s;
+            txtLog.Text += "them:\r\n" + s;
             txtLog.Select(txtLog.TextLength, 0);
             txtLog.ScrollToCaret();
         }
 
         private void ResetAllComboBoxes() {
+
+            comboBoxMotor.SelectedIndex = -1;
+            comboBoxRhy.SelectedIndex = -1;
+            comboBoxMag.SelectedIndex = -1;
+            comboBoxCycles.SelectedIndex = -1;
+
             comboBoxMotor.Items.Clear();
             comboBoxRhy.Items.Clear();
             comboBoxMag.Items.Clear();
-
         }
 
         private void AddToComboBox(dataTypes queryType, string[] stringArray, ComboBox comboBoxName) {
             TextBox cboxitem = new TextBox();
 
-            if (stringArray[0].Equals("NONE DEFINED")) {
+            if (stringArray[0].Equals("NONE DEFINED") || stringArray[0].Equals("0")) {
                 MessageBox.Show("No " + queryType.ToString() + " values returned");//ERROR
             }
             else if (queryType == dataTypes.MTR) {
-                for (int i = 1; i < stringArray.Length; i++) {
-                    if (stringArray[i] != null) {
-                        comboBoxName.Items.Add(stringArray[i]);
+                Int16 motor_count = Int16.Parse(stringArray[0]);
+                if (motor_count != 0) {
+                    for (int i = 1; i <= motor_count; i++) {
+                        comboBoxName.Items.Add(i);
                     }
                 }
+                // sets defaul to first index
+                comboBoxName.SelectedIndex = 0;
             }
             else if (queryType == dataTypes.RHY) // same as above for now, may change in near future
             {
@@ -173,22 +259,35 @@ namespace Haptikos
                         comboBoxName.Items.Add(splitRhy[0]);
                     }
                 }
+                // sets default to first index
+                comboBoxName.SelectedIndex = 0;
             }
             else if (queryType == dataTypes.MAG) {
-                double Period, DutyCycle;
-                int Percentage;
+                String[] splitMag = new String[2];
+
+                // clear magnitude_table
+                for (int i = 0; i < magnitude_table.Length; i++) {
+                    magnitude_table[i] = null;
+                }
+
                 try { //Convert.ToInt16 can cause exception
-                    String[] splitMag = new String[2];
                     for (int i = 1; i < stringArray.Length; i++) {
                         if (stringArray[i] != null) {
                             splitMag = stringArray[i].Split(',');
 
-                            if (splitMag.Length == 3) {
-                                magnitude_table[i - 1] = splitMag[0]; // records Alpha character of magnitude
-                                Period = Convert.ToInt32(splitMag[1]);
-                                DutyCycle = Convert.ToInt32(splitMag[2]);
-                                Percentage = (int)((DutyCycle / Period) * 100);
-
+                            // Ensure that the string array conforms to expected format before processing
+                            if (splitMag.Length == 2) {
+                                magnitude_table[i - 1] = splitMag[0]; // records Alpha character of each magnitude
+                                string Percentage = splitMag[1];
+                                cboxitem.Text = Percentage;
+                                comboBoxName.Items.Add(Percentage + "%");
+                            }
+                            // Else -> process period and duty cycle
+                            else if (splitMag.Length == 3) {
+                                magnitude_table[i - 1] = splitMag[0]; // records Alpha character of each magnitude;
+                                double Period = Convert.ToInt32(splitMag[1]);
+                                double DutyCycle = Convert.ToInt32(splitMag[2]);
+                                int Percentage = (int)((DutyCycle / Period) * 100);
                                 cboxitem.Text = Percentage.ToString();
                                 comboBoxName.Items.Add(Percentage.ToString() + "%");
                             }
@@ -196,14 +295,16 @@ namespace Haptikos
                     }
                 }
                 catch (Exception ex) {
-                    MessageBox.Show("ERROR" + ex);
+                    MessageBox.Show("ERROR" + ex.Message);
                 }
+                // sets default to first index
+                comboBoxName.SelectedIndex = 0;
             }
         }
 
         private void btnSend_Click(object sender, EventArgs e) {
             try {
-                wirelessBelt.WriteData(txtMess.Text.ToUpper());
+                wirelessBelt.SerialPortWriteData(txtMess.Text.ToUpper(), 200);
                 txtLog.Text += "you:" + txtMess.Text + "\r\n";
                 txtMess.Text = "";
             }
@@ -212,33 +313,15 @@ namespace Haptikos
             }
         }
 
-        private void closeMe() {
-            numThreads--;
-            this.Close();
-        }
-
-        private void Form1_Closing(object sender, CancelEventArgs e) {
-            if (this.numThreads > 0) {
-                e.Cancel = true; // cancel Close event if there are still threads
-            }
-            else {
-                e.Cancel = false;
-                wirelessBelt.ClosePorts();
-            }
-            // Once this flag is set the UpdateTxtLog thread will catch
-            // and handle the request to close.
-            // **** THREADS NOT USED
-            this.closeRequested = true;
-            this.Close();
-        }
         private void mnuSettings_Click(object sender, EventArgs e) {
-            SettingsForm form = new SettingsForm(inboundPort, outboundPort);
+            SettingsForm form = new SettingsForm(inboundPort, outboundPort, wirelessBelt);
             if (form.ShowDialog() == DialogResult.OK) {
                 if (form.GetInboundPort().CompareTo("NO PORT SELECTED") == 0 ||
                     form.GetOutboundPort().CompareTo("NO PORT SELECTED") == 0) {
+
                     MessageBox.Show("The ports were not set properly.");
                     labelStatusMsg.Text = "Ports not set.";
-                    mnuConnect.Enabled = false;
+                    menuConnect.Enabled = false;
                 }
                 //else if (form. ){
                 //    MessageBox.Show("The Bluetooth or Serial Device is not turned on!");
@@ -248,12 +331,34 @@ namespace Haptikos
                 else {
                     inboundPort = form.GetInboundPort();
                     outboundPort = form.GetOutboundPort();
-                    mnuConnect.Enabled = true;
+                    menuConnect.Enabled = true;
                     labelStatusMsg.Text = "Ports set. in:" + inboundPort + "; out:" + outboundPort + "; Waiting to press Connect...";
                 }
             }
             form.Close();
             MessageBox.Show("Please make sure the Bluetooth device and PDA are turned on!");
+            // Autoconnect
+            //System.Threading.Thread.Sleep(50);
+            //mnuConnect_Click(sender, e);
+        }
+
+        private void mnuSetupRhyMag_Click(object sender, EventArgs e) {
+            PatternProgForm form = new PatternProgForm(wirelessBelt);
+            if (form.ShowDialog() == DialogResult.OK) {
+                labelStatusMsg.Text = "Ports not set.";
+
+            }
+            //else if (form. ){
+            //    MessageBox.Show("The Bluetooth or Serial Device is not turned on!");
+            //    labelStatusMsg.Text = "Ports not set.";
+            //    mnuConnect.Enabled = false;
+            //}
+            else {
+                labelStatusMsg.Text = "Ports set. in:";
+            }
+            form.Close();
+            System.Threading.Thread.Sleep(50);
+            btnQuery_Click(sender, e); // Send a Query Command to refresh menus
         }
 
         private void mnuConnect_Click(object sender, EventArgs e) {
@@ -272,17 +377,17 @@ namespace Haptikos
                 wirelessBelt.OpenPorts();
 
                 // Check for success
-                if (wirelessBelt.getStatusBufferType() == "Normal")
+                if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.NORMAL)
                     labelStatusMsg.Text = "Input port opened.";
-                else if (wirelessBelt.getStatusBufferType() == "Error")
+                else if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.ERROR)
                     labelStatusMsg.Text = "Error: " + wirelessBelt.getStatusBuffer();
 
                 // Try Output port
                 if (inboundPort != outboundPort) {
                     // Check for success
-                    if (wirelessBelt.getStatusBufferType() == "Normal")
+                    if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.NORMAL)
                         labelStatusMsg.Text = "Output ports opened.";
-                    else if (wirelessBelt.getStatusBufferType() == "Error")
+                    else if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.ERROR)
                         labelStatusMsg.Text = "Error: " + wirelessBelt.getStatusBuffer();
                 }
                 else {
@@ -297,25 +402,32 @@ namespace Haptikos
 
                 btnSend.Enabled = true;
                 labelStatusMsg.Text = "Connected. Inbound:" + inboundPort + "; Outbound:" + outboundPort;
-                mnuConnect.Enabled = false;
-                mnuSettings.Enabled = false;
-                mnuDisconnect.Enabled = true;
+                menuConnect.Enabled = false;
+                menuSettings.Enabled = false;
+                menuDisconnect.Enabled = true;
+                menuQryVer.Enabled = true;
+                menuQryMtr.Enabled = true;
+                menuQryRhy.Enabled = true;
+                menuQryMag.Enabled = true;
+                menuQryTempSpat.Enabled = true;
+                menuSetupRhyMag.Enabled = true;
+                menuStopAll.Enabled = true;
+                menuResetBelt.Enabled = true;
                 txtMess.Enabled = true;
                 txtLog.Enabled = true;
                 btnSend.Enabled = true;
 
                 // Haptic belt Buttons
-                mnuTempSpat.Enabled = true;
-                mnuDemo.Enabled = true;
+                menuTempSpat.Enabled = false; //TODO - Temporary until fixed
+                menuDemo.Enabled = true;
                 btnActivate.Enabled = true;
                 btnQuery.Enabled = true;
                 btnStop.Enabled = true;
-
             }
             catch (Exception ex) {
                 MessageBox.Show(ex.Message);
                 labelStatusMsg.Text = "error.\r\nPorts not set.";
-                mnuConnect.Enabled = false;
+                menuConnect.Enabled = false;
             }
         }
 
@@ -333,42 +445,145 @@ namespace Haptikos
             }
         }
 
-        private void mnuClose_Click(object sender, EventArgs e) {
-            //closeMe();
-            this.Close();
-        }
-
         private void btnQuery_Click(object sender, EventArgs e) {
 
             try {
-                String[] response = wirelessBelt.Query_All();
-                String[] motor = wirelessBelt.getMotors();
-                String[] rhythm = wirelessBelt.getRhythm(false);
-                String[] magnitude = wirelessBelt.getMagnitude();
+                error_t response = wirelessBelt.Query_All();
+                if (response != error_t.ESUCCESS)
+                    labelStatusMsg.Text = wirelessBelt.getErrorMsg(response);
+                else {
+                    // brackets reqd for casting int array to string array
+                    String[] motor = { wirelessBelt.getMotors(QueryType.PREVIOUS).ToString() };
+                    String[] rhythm = wirelessBelt.getRhythm(false, QueryType.PREVIOUS);
+                    String[] magnitude = wirelessBelt.getMagnitude(false, QueryType.PREVIOUS);
+
+                    // Reset Combo Boxes
+                    ResetAllComboBoxes();
+
+                    AddToComboBox(dataTypes.MTR, motor, comboBoxMotor);
+                    AddToComboBox(dataTypes.RHY, rhythm, comboBoxRhy);
+                    AddToComboBox(dataTypes.MAG, magnitude, comboBoxMag);
+
+                    // sets default to first index
+                    comboBoxCycles.SelectedIndex = 0;
+
+                    // Update status message
+                    labelStatusMsg.Text = wirelessBelt.getStatusBufferStr() + ".  ";
+                    //+ wirelessBelt.getCommStatusMsg(); TODO
+                }
+            }
+            catch (Exception ex) {
+                labelStatusMsg.Text = wirelessBelt.getStatusBufferStr() + " " + ex.Message;
+            }
+        }
+
+
+        private void menuItemQryVer_Click(object sender, EventArgs e) {
+            try {
+                String version = wirelessBelt.getVersion(QueryType.SINGLE);
+
+                if (wirelessBelt.getStatus() != error_t.ESUCCESS)
+                    labelStatusMsg.Text = wirelessBelt.getErrorMsg(wirelessBelt.getStatus());
+                else {
+                    // Reset Combo Boxes
+                    ResetAllComboBoxes();
+
+                    // Update status message
+                    labelStatusMsg.Text = wirelessBelt.getStatusBufferStr()
+                        + " Firmware Version: " + version;
+                }
+
+            }
+            catch (Exception ex) {
+                labelStatusMsg.Text = wirelessBelt.getStatusBufferStr() + " " + ex.Message;
+            }
+        }
+
+        private void menuItemQryMtr_Click(object sender, EventArgs e) {
+            try {
+                String[] motor = { wirelessBelt.getMotors(QueryType.SINGLE).ToString() }; // brackets reqd for string array
+
+                if (wirelessBelt.getStatus() != error_t.ESUCCESS)
+                    labelStatusMsg.Text = wirelessBelt.getErrorMsg(wirelessBelt.getStatus());
+                else {
+                    // Reset Combo Boxes
+                    ResetAllComboBoxes();
+
+                    AddToComboBox(dataTypes.MTR, motor, comboBoxMotor);
+
+                    // Update status message
+                    labelStatusMsg.Text = wirelessBelt.getStatusBufferStr();
+                }
+
+            }
+            catch (Exception ex) {
+                labelStatusMsg.Text = wirelessBelt.getStatusBufferStr() + " " + ex.Message;
+            }
+        }
+
+        private void menuItemQryRhy_Click(object sender, EventArgs e) {
+            try {
+                String[] rhythm = wirelessBelt.getRhythm(false, QueryType.SINGLE);
+
+                if (wirelessBelt.getStatus() != error_t.ESUCCESS)
+                    labelStatusMsg.Text = wirelessBelt.getErrorMsg(wirelessBelt.getStatus());
+                else {
+                    // Reset Combo Boxes
+                    ResetAllComboBoxes();
+
+                    AddToComboBox(dataTypes.RHY, rhythm, comboBoxRhy);
+
+                    // Update status message
+                    labelStatusMsg.Text = wirelessBelt.getStatusBufferStr();
+                }
+            }
+            catch (Exception ex) {
+                labelStatusMsg.Text = wirelessBelt.getStatusBufferStr() + " " + ex.Message;
+            }
+        }
+
+        private void menuItemQryMag_Click(object sender, EventArgs e) {
+            try {
+                String[] magnitude = wirelessBelt.getMagnitude(false, QueryType.SINGLE);
+
+                if (wirelessBelt.getStatus() != error_t.ESUCCESS)
+                    labelStatusMsg.Text = wirelessBelt.getErrorMsg(wirelessBelt.getStatus());
+                else {
+                    // Reset Combo Boxes
+                    ResetAllComboBoxes();
+
+                    AddToComboBox(dataTypes.MAG, magnitude, comboBoxMag);
+
+                    // Update status message
+                    labelStatusMsg.Text = wirelessBelt.getStatusBufferStr();
+                }
+            }
+            catch (Exception ex) {
+                labelStatusMsg.Text = wirelessBelt.getStatusBufferStr() + " " + ex.Message;
+            }
+        }
+
+        private void menuItemQryTempSpat_Click(object sender, EventArgs e) {
+            try {
+                error_t response = wirelessBelt.Query_SpatioTemporal();
+                if (response != error_t.ESUCCESS)
+                    labelStatusMsg.Text = wirelessBelt.getStatusBufferStr()
+                        + " " + wirelessBelt.getErrorMsg(response);
 
                 // Reset Combo Boxes
                 ResetAllComboBoxes();
-
-                AddToComboBox(dataTypes.MTR, motor, comboBoxMotor);
-                AddToComboBox(dataTypes.RHY, rhythm, comboBoxRhy);
-                AddToComboBox(dataTypes.MAG, magnitude, comboBoxMag);
-
-                // sets defaults to "1" cycle
-                comboBoxMotor.SelectedIndex = 0;
-                comboBoxRhy.SelectedIndex = 0;
-                comboBoxMag.SelectedIndex = 0;
-                comboBoxCycles.SelectedIndex = 0;
-
             }
-            catch {
+            catch (Exception ex) {
+                labelStatusMsg.Text = wirelessBelt.getStatusBufferStr() + " " + ex.Message;
             }
-
         }
 
         private void btnStop_Click(object sender, EventArgs e) {
             try {
-                String[] response = wirelessBelt.Stop(comboBoxMotor.SelectedItem.ToString());
-                labelStatusMsg.Text = "Stop motor " + comboBoxMotor.SelectedItem.ToString() + ".  " + response[0];
+                error_t response = wirelessBelt.Stop((byte)comboBoxMotor.SelectedIndex);
+
+                labelStatusMsg.Text = "Stop motor " + comboBoxMotor.SelectedItem.ToString()
+                    + ".  ";// +wirelessBelt.getCommStatusMsg(); //TODO
             }
             catch (Exception ex) {
                 MessageBox.Show(ex.Message);
@@ -377,23 +592,33 @@ namespace Haptikos
 
         private void btnStopAll_Click(object sender, EventArgs e) {
             try {
-                stop_demo = true;
-                String[] response = wirelessBelt.StopAll();
+                labelStatusMsg.Text = "Stoping All Motors.";
 
-                labelStatusMsg.Text = "Stoping All Motors.  " + response[0];
+                error_t response = wirelessBelt.StopAll();
+                if (response != error_t.ESUCCESS)
+                    labelStatusMsg.Text += " " + wirelessBelt.getStatusBufferStr()
+                        + " " + wirelessBelt.getErrorMsg(response);
+                else
+                    labelStatusMsg.Text += " " + wirelessBelt.getStatusBufferStr();
             }
             catch (Exception ex) {
-                MessageBox.Show(ex.Message);
+                labelStatusMsg.Text = wirelessBelt.getStatusBufferStr() + " " + ex.Message;
             }
         }
         private void btnActivate_Click(object sender, EventArgs e) {
             try {
 
-                String[] response = wirelessBelt.Vibrate_Motor(comboBoxMotor.SelectedItem.ToString(),
+                // Send Vibrate Motor Command
+                error_t response = wirelessBelt.Vibrate_Motor((byte)comboBoxMotor.SelectedIndex,
                     comboBoxRhy.SelectedItem.ToString(), magnitude_table[comboBoxMag.SelectedIndex],
-                    (comboBoxCycles.SelectedIndex + 1));
+                    (byte)(comboBoxCycles.SelectedIndex + 1));
 
-                labelStatusMsg.Text = "Activating motor " + comboBoxMotor.SelectedItem.ToString() + ".  " + response[0];
+                if (response != error_t.ESUCCESS)
+                    labelStatusMsg.Text = wirelessBelt.getErrorMsg(response);
+                //+ " " + wirelessBelt.getCommStatusMsg(); //TODO
+                else
+                    labelStatusMsg.Text = "Activating motor " + comboBoxMotor.SelectedItem.ToString()
+                        + ".  ";//+wirelessBelt.getStatusBufferStr(); //TODO
 
                 // TODO this is a temporary comment out -> sending binary encode does not work at Belt.
                 //response = wirelessBelt.Start();
@@ -408,10 +633,15 @@ namespace Haptikos
                 labelStatusMsg.Text = "Activating Temporal Spatial Pattern";
 
                 // TODO Need to add timing elements in iteritive loop here
-                MessageBox.Show("These settings are not yet available");
-                //String[] response = wirelessBelt.Vibrate_Motor(comboBoxMotor2.SelectedItem.ToString(),
-                //        comboBoxRhy2.SelectedItem.ToString(), magnitude_table[comboBoxMag2.SelectedIndex],
-                //        (comboBoxCycles2.SelectedIndex+1));
+                //MessageBox.Show("These settings are not yet available");
+                //int response = wirelessBelt.Vibrate_Motor((byte)comboBoxMotor2.SelectedIndex,
+                //      comboBoxRhy2.SelectedItem.ToString(), magnitude_table[comboBoxMag2.SelectedIndex],
+                //      (byte)(comboBoxCycles2.SelectedIndex + 1));
+
+                //if (response != 0)
+                //    labelStatusMsg.Text = "Error: " + wirelessBelt.getErrorMsg(response)
+                //        + " " + wirelessBelt.getCommStatusMsg(); //TODO
+                //else { }
 
                 // TODO this is a temporary comment out -> sending binary encode does not work at Belt.
                 //response = wirelessBelt.Start();
@@ -422,17 +652,17 @@ namespace Haptikos
         }
 
         private void btnActivateDemo_Click(object sender, EventArgs e) {
-            //string motor_no, string rhy_string, string mag_string, int rhy_cycles) {//object sender, EventArgs e) {
-            stop_demo = false;
-            String[] response;
+            //string motor_no, string rhy_string, string mag_string, int rhy_cycles) {
+            //stop_demo = false;
+            error_t response;
             int motor_total = comboBoxMotor.Items.Count;
 
             //int index = 1;
 
-            demoMotor = "1";
+            //demoMotor = "1";
             demoRhy = demoForm.GetSelectedRhy();
             demoMag = demoForm.GetSelectedMag();
-            demoCycles = demoForm.GetSelectedCycles();
+            demoCycles = demoForm.GetSelectedCycles() + 1; // list is zero based, 0 = stop
             demoType = demoForm.GetDemoType();
 
             try {
@@ -448,55 +678,68 @@ namespace Haptikos
                 //demoThread.Start();
                 //do { // creates 1 thread for each iteration
 
-                int i_current = 1;
-                int i_previous = 1;
+                int i_current = 0;
+                int i_previous = 0;
 
                 if (demoType == demoTypes.SCAN) {
                     for (int index = 1; index <= (motor_total * demoCycles); index++) {
                         i_previous = i_current;
-                        i_current = (index % motor_total) + 1;
+                        i_current = (index % motor_total);
 
-                        response = wirelessBelt.Vibrate_Motor(i_current.ToString(),
+                        // Temporary method using strings
+                        response = wirelessBelt.Vibrate_Motor(i_current,
                             demoRhy, magnitude_table[demoMag], demoCycles);
+
                         // Delayed stop
-                        response = wirelessBelt.Stop(i_previous.ToString());
+                        response = wirelessBelt.Stop((byte)i_previous);
                         //System.Threading.Thread.Sleep(50);
                     }
                 }
+                // Multiple activations of this can put the belt in an unknown state
+                // May need to re-QUERY ALL to reset the state.
                 else if (demoType == demoTypes.SWEEP) {
                     for (int index = 1; index <= (motor_total * demoCycles); index++) {
                         for (int i = 1; i <= motor_total; i++) {
-                            response = wirelessBelt.Vibrate_Motor(i.ToString(),
+
+                            // Temporary method using strings
+                            response = wirelessBelt.Vibrate_Motor(i,
                                 demoRhy, magnitude_table[demoMag], demoCycles);
+
                             if (i > 1)// Delayed stop
-                                response = wirelessBelt.Stop(i_previous.ToString());
+                                response = wirelessBelt.Stop((byte)i_previous);
                             i_previous = i;
                         }
                         for (int r = i_previous; r > 0; r--) {
-                            response = wirelessBelt.Vibrate_Motor(r.ToString(),
+                            // Temporary method using strings
+                            response = wirelessBelt.Vibrate_Motor(r,
                                 demoRhy, magnitude_table[demoMag], demoCycles);
+
                             if (r < i_previous)// Delayed stop
-                                response = wirelessBelt.Stop(i_previous.ToString());
+                                response = wirelessBelt.Stop((byte)i_previous);
                             i_previous = r;
                             //System.Threading.Thread.Sleep(50);
                         }
                     }
                 }
+                // HEARTBEATS DOES NOT WORK
                 else if (demoType == demoTypes.HEARTBEATS) {
                     for (int index = 1; index <= (motor_total * demoCycles); index += 2) {
                         i_previous = i_current;
                         i_current = (index % motor_total) + 1;
 
-                        response = wirelessBelt.Vibrate_Motor(i_current.ToString(),
+                        // Temporary method using strings
+                        response = wirelessBelt.Vibrate_Motor(i_current,
                             demoRhy, magnitude_table[demoMag], demoCycles);
 
-                        response = wirelessBelt.Vibrate_Motor((i_current + 1).ToString(),
+                        // Temporary method using strings
+                        response = wirelessBelt.Vibrate_Motor((i_current + 1),
                             demoRhy, magnitude_table[demoMag], demoCycles);
 
                         if (i_current > 1) {
                             // Delayed stop
-                            response = wirelessBelt.Stop(i_previous.ToString());
-                            response = wirelessBelt.Stop((i_previous - 1).ToString());
+                            // Temporary method using strings
+                            response = wirelessBelt.Stop((byte)i_previous);
+                            response = wirelessBelt.Stop((byte)(i_previous - 1));
                         }
                         //System.Threading.Thread.Sleep(50);
                     }
@@ -598,5 +841,24 @@ namespace Haptikos
 
         }
 
+        private void menuStopAll_Click(object sender, EventArgs e) {
+            btnStopAll_Click(sender, e);
+        }
+
+        private void menuResetBelt_Click(object sender, EventArgs e) {
+            try {
+                labelStatusMsg.Text = "Resetting Haptic Belt State.";
+
+                error_t response = wirelessBelt.ResetHapticBelt();
+                if (response != error_t.ESUCCESS)
+                    labelStatusMsg.Text += " " + wirelessBelt.getStatusBufferStr()
+                        + " " + wirelessBelt.getErrorMsg(response);
+                else
+                    labelStatusMsg.Text += " " + wirelessBelt.getStatusBufferStr();
+            }
+            catch (Exception ex) {
+                labelStatusMsg.Text = wirelessBelt.getStatusBufferStr() + " " + ex.Message;
+            }
+        }
     }
 }

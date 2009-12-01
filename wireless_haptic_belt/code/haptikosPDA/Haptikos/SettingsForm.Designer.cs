@@ -1,5 +1,8 @@
 namespace Haptikos
 {
+    /// <summary>
+    /// 
+    /// </summary>
     partial class SettingsForm
     {
         /// <summary>
@@ -36,6 +39,7 @@ namespace Haptikos
             this.btnCancel = new System.Windows.Forms.Button();
             this.comboBoxInbound = new System.Windows.Forms.ComboBox();
             this.comboBoxOutbound = new System.Windows.Forms.ComboBox();
+            this.checkBoxComPortSame = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // label1
@@ -76,13 +80,27 @@ namespace Haptikos
             this.comboBoxInbound.Name = "comboBoxInbound";
             this.comboBoxInbound.Size = new System.Drawing.Size(100, 22);
             this.comboBoxInbound.TabIndex = 10;
+            this.comboBoxInbound.SelectedIndexChanged += new System.EventHandler(this.comboBoxInbound_SelectedIndexChanged);
             // 
             // comboBoxOutbound
             // 
+            this.comboBoxOutbound.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.comboBoxOutbound.Enabled = false;
             this.comboBoxOutbound.Location = new System.Drawing.Point(81, 58);
             this.comboBoxOutbound.Name = "comboBoxOutbound";
             this.comboBoxOutbound.Size = new System.Drawing.Size(100, 22);
             this.comboBoxOutbound.TabIndex = 11;
+            // 
+            // checkBoxComPortSame
+            // 
+            this.checkBoxComPortSame.Checked = true;
+            this.checkBoxComPortSame.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxComPortSame.Location = new System.Drawing.Point(15, 82);
+            this.checkBoxComPortSame.Name = "checkBoxComPortSame";
+            this.checkBoxComPortSame.Size = new System.Drawing.Size(209, 34);
+            this.checkBoxComPortSame.TabIndex = 14;
+            this.checkBoxComPortSame.Text = "Use the same COM port for both";
+            this.checkBoxComPortSame.CheckStateChanged += new System.EventHandler(this.checkBoxComPortSame_CheckedChanged);
             // 
             // SettingsForm
             // 
@@ -90,6 +108,7 @@ namespace Haptikos
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(240, 268);
+            this.Controls.Add(this.checkBoxComPortSame);
             this.Controls.Add(this.comboBoxOutbound);
             this.Controls.Add(this.comboBoxInbound);
             this.Controls.Add(this.btnCancel);
@@ -111,5 +130,6 @@ namespace Haptikos
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.ComboBox comboBoxInbound;
         private System.Windows.Forms.ComboBox comboBoxOutbound;
+        private System.Windows.Forms.CheckBox checkBoxComPortSame;
     }
 }

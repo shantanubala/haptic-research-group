@@ -59,19 +59,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TempSpatForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="TempSpatForm.Designer.cs">
-      <DependentUpon>TempSpatForm.cs</DependentUpon>
-    </Compile>
+    <Compile Include="css_DLL\Buffer.cs" />
+    <Compile Include="css_DLL\Constants.cs" />
+    <Compile Include="css_DLL\ConversionUtility.cs" />
+    <Compile Include="css_DLL\HapticDriver.cs" />
+    <Compile Include="css_DLL\Magnitude.cs" />
+    <Compile Include="css_DLL\MutexLock.cs" />
+    <Compile Include="css_DLL\Rhythm.cs" />
+    <Compile Include="css_DLL\SerialPortManager.cs" />
     <Compile Include="DemoForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DemoForm.Designer.cs">
+    <Compile Include="DemoForm.designer.cs">
       <DependentUpon>DemoForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="HapticDriver.cs" />
+    <Compile Include="PatternProgForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PatternProgForm.designer.cs">
+      <DependentUpon>PatternProgForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -80,12 +87,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="TempSpatForm.resx">
-      <DependentUpon>TempSpatForm.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="DemoForm.resx">
       <DependentUpon>DemoForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PatternProgForm.resx">
+      <DependentUpon>PatternProgForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
@@ -98,20 +105,29 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="SettingsForm.resx">
-      <SubType>Designer</SubType>
       <DependentUpon>SettingsForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TempSpatForm.resx">
+      <DependentUpon>TempSpatForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="SerialPortManager.cs" />
     <Compile Include="SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SettingsForm.Designer.cs">
+    <Compile Include="SettingsForm.designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TempSpatForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TempSpatForm.designer.cs">
+      <DependentUpon>TempSpatForm.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
