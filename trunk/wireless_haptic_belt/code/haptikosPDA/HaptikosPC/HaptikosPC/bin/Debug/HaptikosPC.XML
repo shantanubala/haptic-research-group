@@ -26,12 +26,12 @@
             the contents of this method with the code editor.
             </summary>
         </member>
-        <member name="M:Haptikos.TempSpatForm.#ctor(System.String[],System.String[])">
+        <member name="M:Haptikos.TempSpatForm.#ctor(Haptikos.MainForm,HapticDriver.HapticBelt)">
             <summary>
             
             </summary>
-            <param name="rhyItems"></param>
-            <param name="magItems"></param>
+            <param name="mainForm"></param>
+            <param name="belt"></param>
         </member>
         <member name="T:Haptikos.PatternProgForm">
             <summary>

@@ -32,10 +32,10 @@ namespace Haptikos
             this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.menuSettings = new System.Windows.Forms.MenuItem();
             this.menuConnect = new System.Windows.Forms.MenuItem();
-            this.menuSetupRhyMag = new System.Windows.Forms.MenuItem();
             this.menuDisconnect = new System.Windows.Forms.MenuItem();
+            this.menuSetupRhyMag = new System.Windows.Forms.MenuItem();
+            this.menuTempSpat = new System.Windows.Forms.MenuItem();
             this.menuDemo = new System.Windows.Forms.MenuItem();
-            this.mnuTempSpat = new System.Windows.Forms.MenuItem();
             this.menuItem1 = new System.Windows.Forms.MenuItem();
             this.menuQryVer = new System.Windows.Forms.MenuItem();
             this.menuQryMtr = new System.Windows.Forms.MenuItem();
@@ -85,10 +85,10 @@ namespace Haptikos
             this.menuItem2.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuSettings,
             this.menuConnect,
-            this.menuSetupRhyMag,
             this.menuDisconnect,
-            this.menuDemo,
-            this.mnuTempSpat});
+            this.menuSetupRhyMag,
+            this.menuTempSpat,
+            this.menuDemo});
             this.menuItem2.Text = "Menu";
             // 
             // menuSettings
@@ -104,33 +104,33 @@ namespace Haptikos
             this.menuConnect.Text = "Connect";
             this.menuConnect.Click += new System.EventHandler(this.mnuConnect_Click);
             // 
-            // menuSetupRhyMag
-            // 
-            this.menuSetupRhyMag.Enabled = false;
-            this.menuSetupRhyMag.Index = 2;
-            this.menuSetupRhyMag.Text = "Haptics Setup";
-            this.menuSetupRhyMag.Click += new System.EventHandler(this.mnuSetupRhyMag_Click);
-            // 
             // menuDisconnect
             // 
             this.menuDisconnect.Enabled = false;
-            this.menuDisconnect.Index = 3;
+            this.menuDisconnect.Index = 2;
             this.menuDisconnect.Text = "Disconnect";
             this.menuDisconnect.Click += new System.EventHandler(this.mnuDisconnect_Click);
+            // 
+            // menuSetupRhyMag
+            // 
+            this.menuSetupRhyMag.Enabled = false;
+            this.menuSetupRhyMag.Index = 3;
+            this.menuSetupRhyMag.Text = "Set Haptic Patterns";
+            this.menuSetupRhyMag.Click += new System.EventHandler(this.mnuSetupRhyMag_Click);
+            // 
+            // mnuTempSpat
+            // 
+            this.menuTempSpat.Enabled = false;
+            this.menuTempSpat.Index = 4;
+            this.menuTempSpat.Text = "Set Temporal-Spatial";
+            this.menuTempSpat.Click += new System.EventHandler(this.mnuTempSpat_Click);
             // 
             // menuDemo
             // 
             this.menuDemo.Enabled = false;
-            this.menuDemo.Index = 4;
+            this.menuDemo.Index = 5;
             this.menuDemo.Text = "Demo";
             this.menuDemo.Click += new System.EventHandler(this.mnuDemo_Click);
-            // 
-            // mnuTempSpat
-            // 
-            this.mnuTempSpat.Enabled = false;
-            this.mnuTempSpat.Index = 5;
-            this.mnuTempSpat.Text = "Temp-Spatial";
-            this.mnuTempSpat.Click += new System.EventHandler(this.mnuTempSpat_Click);
             // 
             // menuItem1
             // 
@@ -376,7 +376,7 @@ namespace Haptikos
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(240, 285);
+            this.ClientSize = new System.Drawing.Size(240, 282);
             this.Controls.Add(this.tabControl1);
             this.Menu = this.mainMenu1;
             this.Name = "MainForm";
@@ -415,7 +415,7 @@ namespace Haptikos
         private System.Windows.Forms.ComboBox comboBoxMotor;
         private System.Windows.Forms.Label labelMtr;
         private System.Windows.Forms.MenuItem menuDemo;
-        private System.Windows.Forms.MenuItem mnuTempSpat;
+        private System.Windows.Forms.MenuItem menuTempSpat;
         private System.Windows.Forms.MenuItem menuItem1;
         private System.Windows.Forms.MenuItem menuQryMtr;
         private System.Windows.Forms.MenuItem menuQryRhy;

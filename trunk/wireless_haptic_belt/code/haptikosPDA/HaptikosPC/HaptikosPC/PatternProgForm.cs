@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO.Ports;
 using HapticDriver;
+
 namespace Haptikos
 {
     /// <summary>
@@ -132,8 +133,22 @@ namespace Haptikos
         }
 
         private void btnZap_Click(object sender, EventArgs e) {
-            
+
             error_t return_code = wirelessBelt.Erase_All();
+
+            UpdateTxtLog(wirelessBelt.getErrorMsg(return_code));
+        }
+
+        private void btnTest_Click(object sender, EventArgs e) {
+
+            byte motor = 1;
+            string rhy_id = comboBoxRhySel.SelectedItem.ToString();
+            string mag_id = comboBoxMagSel.SelectedItem.ToString();
+            byte cycles = 1;                  
+
+            // Send Vibrate Motor Command
+            error_t return_code = wirelessBelt.Vibrate_Motor(motor, rhy_id,
+               mag_id, cycles);
 
             UpdateTxtLog(wirelessBelt.getErrorMsg(return_code));
         }
