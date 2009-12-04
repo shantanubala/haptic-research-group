@@ -412,6 +412,11 @@ namespace Haptikos
                 btnActivate.Enabled = true;
                 btnQuery.Enabled = true;
                 btnStop.Enabled = true;
+
+                // Auto Query All
+                //System.Threading.Thread.Sleep(200);
+                //while (wirelessBelt.SerialIsOpen)
+                //btnQuery_Click(sender, e);
             }
             catch (Exception ex) {
                 MessageBox.Show(ex.Message);
