@@ -52,6 +52,7 @@ namespace Haptikos
             this.btnQryAll = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.textBoxRhyTime = new System.Windows.Forms.TextBox();
+            this.btnTest = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // labelMagProg
@@ -258,12 +259,25 @@ namespace Haptikos
             this.textBoxRhyTime.Size = new System.Drawing.Size(34, 20);
             this.textBoxRhyTime.TabIndex = 31;
             // 
+            // btnTest
+            // 
+            this.btnTest.BackColor = System.Drawing.Color.LightGreen;
+            this.btnTest.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnTest.Location = new System.Drawing.Point(131, 84);
+            this.btnTest.Name = "btnTest";
+            this.btnTest.Size = new System.Drawing.Size(96, 24);
+            this.btnTest.TabIndex = 33;
+            this.btnTest.Text = "Test Pattern";
+            this.btnTest.UseVisualStyleBackColor = false;
+            this.btnTest.Click += new System.EventHandler(this.btnTest_Click);
+            // 
             // PatternProgForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(240, 268);
+            this.Controls.Add(this.btnTest);
             this.Controls.Add(this.textBoxRhyTime);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.btnQryAll);
@@ -316,5 +330,6 @@ namespace Haptikos
         private System.Windows.Forms.Button btnQryAll;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox textBoxRhyTime;
+        private System.Windows.Forms.Button btnTest;
     }
 }

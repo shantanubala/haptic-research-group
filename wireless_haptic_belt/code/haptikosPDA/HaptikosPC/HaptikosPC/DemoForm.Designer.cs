@@ -6,7 +6,6 @@ namespace Haptikos
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
-        private System.Windows.Forms.MainMenu mainMenu1;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -26,7 +25,6 @@ namespace Haptikos
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.mainMenu1 = new System.Windows.Forms.MainMenu();
             this.btnDone = new System.Windows.Forms.Button();
             this.checkBoxScan = new System.Windows.Forms.CheckBox();
             this.checkBoxSweep = new System.Windows.Forms.CheckBox();
@@ -87,6 +85,7 @@ namespace Haptikos
             this.labelDemoCfg.Location = new System.Drawing.Point(4, 163);
             this.labelDemoCfg.Name = "labelDemoCfg";
             this.labelDemoCfg.Size = new System.Drawing.Size(49, 33);
+            this.labelDemoCfg.TabIndex = 86;
             this.labelDemoCfg.Text = "Tactor Config:";
             // 
             // labelDemoList
@@ -95,13 +94,14 @@ namespace Haptikos
             this.labelDemoList.Location = new System.Drawing.Point(4, 2);
             this.labelDemoList.Name = "labelDemoList";
             this.labelDemoList.Size = new System.Drawing.Size(174, 20);
+            this.labelDemoList.TabIndex = 87;
             this.labelDemoList.Text = "Temporal-Spatial Demos:";
             // 
             // comboBoxCycles3
             // 
             this.comboBoxCycles3.Location = new System.Drawing.Point(184, 174);
             this.comboBoxCycles3.Name = "comboBoxCycles3";
-            this.comboBoxCycles3.Size = new System.Drawing.Size(44, 22);
+            this.comboBoxCycles3.Size = new System.Drawing.Size(44, 21);
             this.comboBoxCycles3.TabIndex = 62;
             // 
             // labelCyc3
@@ -109,6 +109,7 @@ namespace Haptikos
             this.labelCyc3.Location = new System.Drawing.Point(184, 158);
             this.labelCyc3.Name = "labelCyc3";
             this.labelCyc3.Size = new System.Drawing.Size(44, 20);
+            this.labelCyc3.TabIndex = 88;
             this.labelCyc3.Text = "Cycles";
             this.labelCyc3.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
@@ -116,7 +117,7 @@ namespace Haptikos
             // 
             this.comboBoxMag3.Location = new System.Drawing.Point(122, 174);
             this.comboBoxMag3.Name = "comboBoxMag3";
-            this.comboBoxMag3.Size = new System.Drawing.Size(56, 22);
+            this.comboBoxMag3.Size = new System.Drawing.Size(56, 21);
             this.comboBoxMag3.TabIndex = 61;
             // 
             // labelMag3
@@ -124,6 +125,7 @@ namespace Haptikos
             this.labelMag3.Location = new System.Drawing.Point(116, 158);
             this.labelMag3.Name = "labelMag3";
             this.labelMag3.Size = new System.Drawing.Size(68, 20);
+            this.labelMag3.TabIndex = 89;
             this.labelMag3.Text = "Magnitude";
             this.labelMag3.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
@@ -131,7 +133,7 @@ namespace Haptikos
             // 
             this.comboBoxRhy3.Location = new System.Drawing.Point(63, 174);
             this.comboBoxRhy3.Name = "comboBoxRhy3";
-            this.comboBoxRhy3.Size = new System.Drawing.Size(53, 22);
+            this.comboBoxRhy3.Size = new System.Drawing.Size(53, 21);
             this.comboBoxRhy3.TabIndex = 60;
             // 
             // labelRhy3
@@ -139,6 +141,7 @@ namespace Haptikos
             this.labelRhy3.Location = new System.Drawing.Point(63, 158);
             this.labelRhy3.Name = "labelRhy3";
             this.labelRhy3.Size = new System.Drawing.Size(53, 20);
+            this.labelRhy3.TabIndex = 90;
             this.labelRhy3.Text = "Rhythm";
             this.labelRhy3.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
@@ -178,7 +181,6 @@ namespace Haptikos
             this.Controls.Add(this.labelRhy3);
             this.Controls.Add(this.btnStopAll2);
             this.Controls.Add(this.btnActivateDemo);
-            this.Menu = this.mainMenu1;
             this.Name = "DemoForm";
             this.Text = "Demo Options";
             this.ResumeLayout(false);

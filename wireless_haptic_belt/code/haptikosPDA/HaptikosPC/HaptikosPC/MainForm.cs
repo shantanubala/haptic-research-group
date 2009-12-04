@@ -40,7 +40,6 @@ namespace Haptikos
 
         //Demo elements
         DemoForm demoForm;
-        TempSpatForm tempSpatForm;
         //bool stop_demo = false;
         //private string demoMotor = "";
         private string demoRhy = "";
@@ -75,22 +74,6 @@ namespace Haptikos
             comboBoxCycles.Items.Add("6");
             comboBoxCycles.Items.Add("Run");
 
-            //comboBoxCycles2.Items.Add("1");
-            //comboBoxCycles2.Items.Add("2");
-            //comboBoxCycles2.Items.Add("3");
-            //comboBoxCycles2.Items.Add("4");
-            //comboBoxCycles2.Items.Add("5");
-            //comboBoxCycles2.Items.Add("6");
-            //comboBoxCycles2.Items.Add("Run");
-
-            //comboBoxCycles3.Items.Add("1");
-            //comboBoxCycles3.Items.Add("2");
-            //comboBoxCycles3.Items.Add("3");
-            //comboBoxCycles3.Items.Add("4");
-            //comboBoxCycles3.Items.Add("5");
-            //comboBoxCycles3.Items.Add("6");
-            ////comboBoxCycles3.Items.Add("Run"); not used. 
-
             wirelessBelt = new HapticBelt();
             magnitude_table = new string[HapticBelt.MAG_MAX_NO];
 
@@ -99,7 +82,7 @@ namespace Haptikos
             wirelessBelt.DataReceivedFxn = this.UpdateTxtLog;
 
         }
-        
+
         private void closeMe() {
             numThreads--;
             this.Close();
@@ -179,6 +162,7 @@ namespace Haptikos
             menuQryMag.Enabled = false;
             menuQryTempSpat.Enabled = false;
             menuSetupRhyMag.Enabled = false;
+            menuTempSpat.Enabled = false;
             menuStopAll.Enabled = false;
             menuResetBelt.Enabled = false;
 
@@ -199,7 +183,7 @@ namespace Haptikos
             txtLog.ScrollToCaret();
         }
 
-        private void ResetAllComboBoxes() {
+        internal void ResetAllComboBoxes() {
 
             comboBoxMotor.SelectedIndex = -1;
             comboBoxRhy.SelectedIndex = -1;
@@ -211,7 +195,7 @@ namespace Haptikos
             comboBoxMag.Items.Clear();
         }
 
-        private void AddToComboBox(dataTypes queryType, string[] stringArray, ComboBox comboBoxName) {
+        internal void AddToComboBox(dataTypes queryType, string[] stringArray, ComboBox comboBoxName) {
             TextBox cboxitem = new TextBox();
 
             if (stringArray[0].Equals("NONE DEFINED") || stringArray[0].Equals("0")) {
@@ -295,7 +279,7 @@ namespace Haptikos
             if (form.ShowDialog() == DialogResult.OK) {
                 if (form.GetInboundPort().CompareTo("NO PORT SELECTED") == 0 ||
                     form.GetOutboundPort().CompareTo("NO PORT SELECTED") == 0) {
-                    
+
                     MessageBox.Show("The ports were not set properly.");
                     labelStatusMsg.Text = "Ports not set.";
                     menuConnect.Enabled = false;
@@ -315,8 +299,8 @@ namespace Haptikos
             form.Close();
             MessageBox.Show("Please make sure the Bluetooth device and PDA are turned on!");
             // Autoconnect
-            System.Threading.Thread.Sleep(50);
-            mnuConnect_Click(sender, e);
+            //System.Threading.Thread.Sleep(0); // give other threads a chance to run
+            //mnuConnect_Click(sender, e);
         }
 
         private void mnuSetupRhyMag_Click(object sender, EventArgs e) {
@@ -325,17 +309,45 @@ namespace Haptikos
                 labelStatusMsg.Text = "Ports not set.";
 
             }
-            //else if (form. ){
-            //    MessageBox.Show("The Bluetooth or Serial Device is not turned on!");
-            //    labelStatusMsg.Text = "Ports not set.";
-            //    mnuConnect.Enabled = false;
-            //}
             else {
                 labelStatusMsg.Text = "Ports set. in:";
             }
             form.Close();
-            System.Threading.Thread.Sleep(50);
+            System.Threading.Thread.Sleep(0); //Give other threads a chance to run
             btnQuery_Click(sender, e); // Send a Query Command to refresh menus
+        }
+
+        private void mnuTempSpat_Click(object sender, EventArgs e) {
+
+            // Instantiate form
+            TempSpatForm form = new TempSpatForm(this, wirelessBelt);
+
+            form.Show();
+
+            //if (form.ShowDialog() == DialogResult.OK) {
+            //    labelStatusMsg.Text = "DialogResult.OK";
+
+            //}
+            //else {
+            //    labelStatusMsg.Text = "DialogResult OTHER";
+            //}
+            //form.Close();
+
+            // Refresh and update the combo box selections
+            // brackets reqd for casting int array to string array
+            String[] motor = { wirelessBelt.getMotors(QueryType.PREVIOUS).ToString() };
+            String[] rhythm = wirelessBelt.getRhythm(false, QueryType.PREVIOUS);
+            String[] magnitude = wirelessBelt.getMagnitude(false, QueryType.PREVIOUS);
+
+            // Reset Combo Boxes
+            ResetAllComboBoxes();
+
+            AddToComboBox(dataTypes.MTR, motor, comboBoxMotor);
+            AddToComboBox(dataTypes.RHY, rhythm, comboBoxRhy);
+            AddToComboBox(dataTypes.MAG, magnitude, comboBoxMag);
+
+            // sets default to first index
+            comboBoxCycles.SelectedIndex = 0;
         }
 
         private void mnuConnect_Click(object sender, EventArgs e) {
@@ -395,7 +407,7 @@ namespace Haptikos
                 btnSend.Enabled = true;
 
                 // Haptic belt Buttons
-                mnuTempSpat.Enabled = true;
+                menuTempSpat.Enabled = true;
                 menuDemo.Enabled = true;
                 btnActivate.Enabled = true;
                 btnQuery.Enabled = true;
@@ -432,7 +444,7 @@ namespace Haptikos
                     // brackets reqd for casting int array to string array
                     String[] motor = { wirelessBelt.getMotors(QueryType.PREVIOUS).ToString() };
                     String[] rhythm = wirelessBelt.getRhythm(false, QueryType.PREVIOUS);
-                    String[] magnitude = wirelessBelt.getMagnitude(false,QueryType.PREVIOUS);
+                    String[] magnitude = wirelessBelt.getMagnitude(false, QueryType.PREVIOUS);
 
                     // Reset Combo Boxes
                     ResetAllComboBoxes();
@@ -521,10 +533,10 @@ namespace Haptikos
 
         private void menuItemQryMag_Click(object sender, EventArgs e) {
             try {
-               String[] magnitude = wirelessBelt.getMagnitude(false, QueryType.SINGLE);
+                String[] magnitude = wirelessBelt.getMagnitude(false, QueryType.SINGLE);
 
-               if (wirelessBelt.getStatus() != error_t.ESUCCESS)
-                   labelStatusMsg.Text = wirelessBelt.getErrorMsg(wirelessBelt.getStatus());
+                if (wirelessBelt.getStatus() != error_t.ESUCCESS)
+                    labelStatusMsg.Text = wirelessBelt.getErrorMsg(wirelessBelt.getStatus());
                 else {
                     // Reset Combo Boxes
                     ResetAllComboBoxes();
@@ -669,7 +681,7 @@ namespace Haptikos
 
                         // Delayed stop
                         response = wirelessBelt.Stop((byte)i_previous);
-                        //System.Threading.Thread.Sleep(50);
+                        //wirelessBelt.Wait(50);
                     }
                 }
                 // Multiple activations of this can put the belt in an unknown state
@@ -694,7 +706,7 @@ namespace Haptikos
                             if (r < i_previous)// Delayed stop
                                 response = wirelessBelt.Stop((byte)i_previous);
                             i_previous = r;
-                            //System.Threading.Thread.Sleep(50);
+                            //wirelessBelt.Wait(50);
                         }
                     }
                 }
@@ -718,7 +730,7 @@ namespace Haptikos
                             response = wirelessBelt.Stop((byte)i_previous);
                             response = wirelessBelt.Stop((byte)(i_previous - 1));
                         }
-                        //System.Threading.Thread.Sleep(50);
+                        //wirelessBelt.Wait(50);
                     }
                 }
                 //    if (demoCycles != 7) // 7 equals continuous runtime
@@ -776,48 +788,6 @@ namespace Haptikos
             comboBoxMag.Visible = true;
         }
 
-        private void mnuTempSpat_Click(object sender, EventArgs e) {
-
-            string[] rhyItems = new string[comboBoxRhy.Items.Count];
-            string[] magItems = new string[comboBoxMag.Items.Count];
-            int tempRhySelect = comboBoxMag.SelectedIndex;
-            int tempMagSelect = comboBoxMag.SelectedIndex;
-            int selectedIndex = 0;
-
-            // Get Rhythm options
-            comboBoxRhy.Visible = false;
-            do {
-                if (comboBoxRhy != null)
-                    comboBoxRhy.SelectedIndex = selectedIndex;
-                rhyItems[selectedIndex] = comboBoxRhy.SelectedItem.ToString();
-                selectedIndex++;
-            } while (selectedIndex < comboBoxRhy.Items.Count);
-
-            // Get Magnitude options
-            comboBoxMag.Visible = false;
-            selectedIndex = 0;
-            do {
-                if (comboBoxMag != null)
-                    comboBoxMag.SelectedIndex = selectedIndex;
-            } while (selectedIndex < comboBoxMag.Items.Count);
-
-
-            tempSpatForm = new TempSpatForm(rhyItems, magItems);
-            tempSpatForm.btnActivateTmpSpat.Click += new System.EventHandler(this.btnActivateTmpSpat_Click);
-            tempSpatForm.btnStopAll.Click += new System.EventHandler(this.btnStopAll_Click);
-
-            if (tempSpatForm.ShowDialog() == DialogResult.OK) {
-                tempSpatForm.Close();
-                tempSpatForm.Dispose();
-            }
-            // Restore previous setting
-            comboBoxRhy.SelectedIndex = tempRhySelect;
-            comboBoxMag.SelectedIndex = tempMagSelect;
-            comboBoxRhy.Visible = true;
-            comboBoxMag.Visible = true;
-
-        }
-
         private void menuStopAll_Click(object sender, EventArgs e) {
             btnStopAll_Click(sender, e);
         }
@@ -836,6 +806,36 @@ namespace Haptikos
             catch (Exception ex) {
                 labelStatusMsg.Text = wirelessBelt.getStatusBufferStr() + " " + ex.Message;
             }
+        }
+
+        /*
+         * Static Utility Functions              
+         * */
+        internal static char[] decDigits = {
+        '0', '1', '2', '3', '4', '5', '6', '7',
+        '8', '9'};
+
+        internal static char[] hexDigits = {
+        '0', '1', '2', '3', '4', '5', '6', '7',
+        '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+
+        internal static char[] binaryDigits = { '0', '1' };
+
+        internal static bool verifyDecDigits(string digits) {
+            bool verified = false;
+            int n = 0;
+
+            for (int i = 0; i < digits.Length; i++) {
+                verified = false;
+                n = 0;
+                while (n < decDigits.Length) {
+                    if (digits[i] == decDigits[n++])
+                        verified = true;
+                }
+                if (verified == false)
+                    break;
+            }
+            return verified;
         }
     }
 }

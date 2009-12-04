@@ -9,7 +9,6 @@ namespace Haptikos
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
-        private System.Windows.Forms.MainMenu mainMenu1;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -32,307 +31,430 @@ namespace Haptikos
         /// </summary>
         private void InitializeComponent()
         {
-            this.mainMenu1 = new System.Windows.Forms.MainMenu();
-            this.btnActivateTmpSpat = new System.Windows.Forms.Button();
-            this.btnStopAll = new System.Windows.Forms.Button();
-            this.labelRhy2 = new System.Windows.Forms.Label();
-            this.comboBoxRhy2 = new System.Windows.Forms.ComboBox();
-            this.labelMag2 = new System.Windows.Forms.Label();
-            this.comboBoxMag2 = new System.Windows.Forms.ComboBox();
-            this.labelCyc2 = new System.Windows.Forms.Label();
-            this.comboBoxCycles2 = new System.Windows.Forms.ComboBox();
-            this.labelTimeSeq = new System.Windows.Forms.Label();
-            this.labelMtr2 = new System.Windows.Forms.Label();
-            this.labelStartTime = new System.Windows.Forms.Label();
-            this.labelStopTime = new System.Windows.Forms.Label();
-            this.checkBoxRepeatTmpSpat = new System.Windows.Forms.CheckBox();
-            this.labelTmpSpatCfg = new System.Windows.Forms.Label();
-            this.textBoxStartTime1 = new System.Windows.Forms.TextBox();
-            this.textBoxStopTime1 = new System.Windows.Forms.TextBox();
-            this.comboBoxMotor2 = new System.Windows.Forms.ComboBox();
-            this.textBoxStartTime2 = new System.Windows.Forms.TextBox();
-            this.textBoxStopTime2 = new System.Windows.Forms.TextBox();
-            this.comboBoxMotor3 = new System.Windows.Forms.ComboBox();
-            this.textBoxStartTime3 = new System.Windows.Forms.TextBox();
-            this.textBoxStopTime3 = new System.Windows.Forms.TextBox();
-            this.comboBoxMotor4 = new System.Windows.Forms.ComboBox();
-            this.textBoxStartTime4 = new System.Windows.Forms.TextBox();
-            this.textBoxStopTime4 = new System.Windows.Forms.TextBox();
-            this.comboBoxMotor5 = new System.Windows.Forms.ComboBox();
-            this.btnDone = new System.Windows.Forms.Button();
+            this.btnTmpSpatStart = new System.Windows.Forms.Button();
+            this.btnTmpSpatStop = new System.Windows.Forms.Button();
+            this.labelPatternName = new System.Windows.Forms.Label();
+            this.labelComment = new System.Windows.Forms.Label();
+            this.labelPatternExist = new System.Windows.Forms.Label();
+            this.labelWaitTime = new System.Windows.Forms.Label();
+            this.textBoxPatternExist = new System.Windows.Forms.TextBox();
+            this.textBoxWaitTime = new System.Windows.Forms.TextBox();
+            this.textBoxComment = new System.Windows.Forms.TextBox();
+            this.comboBoxCycles = new System.Windows.Forms.ComboBox();
+            this.labelCyc = new System.Windows.Forms.Label();
+            this.comboBoxMag = new System.Windows.Forms.ComboBox();
+            this.labelMag = new System.Windows.Forms.Label();
+            this.comboBoxRhy = new System.Windows.Forms.ComboBox();
+            this.labelRhy = new System.Windows.Forms.Label();
+            this.comboBoxMotor = new System.Windows.Forms.ComboBox();
+            this.labelMtr = new System.Windows.Forms.Label();
+            this.groupBoxCmd = new System.Windows.Forms.GroupBox();
+            this.radioBtnPattern = new System.Windows.Forms.RadioButton();
+            this.radioBtnComment = new System.Windows.Forms.RadioButton();
+            this.radioBtnStopAll = new System.Windows.Forms.RadioButton();
+            this.radioBtnStop = new System.Windows.Forms.RadioButton();
+            this.radioBtnWait = new System.Windows.Forms.RadioButton();
+            this.radioBtnVibrate = new System.Windows.Forms.RadioButton();
+            this.btnAdd = new System.Windows.Forms.Button();
+            this.btnPatternExist = new System.Windows.Forms.Button();
+            this.textBoxPatternName = new System.Windows.Forms.TextBox();
+            this.btnSave = new System.Windows.Forms.Button();
+            this.comboBoxTempo = new System.Windows.Forms.ComboBox();
+            this.labelTempo = new System.Windows.Forms.Label();
+            this.btnPatternLoad = new System.Windows.Forms.Button();
+            this.patternDesign = new System.Windows.Forms.TextBox();
+            this.groupBoxCmd.SuspendLayout();
             this.SuspendLayout();
             // 
-            // btnActivateTmpSpat
+            // btnTmpSpatStart
             // 
-            this.btnActivateTmpSpat.Location = new System.Drawing.Point(3, 204);
-            this.btnActivateTmpSpat.Name = "btnActivateTmpSpat";
-            this.btnActivateTmpSpat.Size = new System.Drawing.Size(69, 38);
-            this.btnActivateTmpSpat.TabIndex = 21;
-            this.btnActivateTmpSpat.Text = "Activate";
+            this.btnTmpSpatStart.BackColor = System.Drawing.Color.LightGreen;
+            this.btnTmpSpatStart.Location = new System.Drawing.Point(1, 258);
+            this.btnTmpSpatStart.Name = "btnTmpSpatStart";
+            this.btnTmpSpatStart.Size = new System.Drawing.Size(42, 38);
+            this.btnTmpSpatStart.TabIndex = 21;
+            this.btnTmpSpatStart.Text = "Start";
+            this.btnTmpSpatStart.UseVisualStyleBackColor = false;
             // 
-            // btnStopAll
+            // btnTmpSpatStop
             // 
-            this.btnStopAll.Location = new System.Drawing.Point(78, 204);
-            this.btnStopAll.Name = "btnStopAll";
-            this.btnStopAll.Size = new System.Drawing.Size(54, 38);
-            this.btnStopAll.TabIndex = 22;
-            this.btnStopAll.Text = "Stop All";
+            this.btnTmpSpatStop.BackColor = System.Drawing.Color.LightCoral;
+            this.btnTmpSpatStop.Location = new System.Drawing.Point(48, 259);
+            this.btnTmpSpatStop.Name = "btnTmpSpatStop";
+            this.btnTmpSpatStop.Size = new System.Drawing.Size(45, 38);
+            this.btnTmpSpatStop.TabIndex = 22;
+            this.btnTmpSpatStop.Text = "Stop";
+            this.btnTmpSpatStop.UseVisualStyleBackColor = false;
             // 
-            // labelRhy2
+            // labelPatternName
             // 
-            this.labelRhy2.Location = new System.Drawing.Point(62, 160);
-            this.labelRhy2.Name = "labelRhy2";
-            this.labelRhy2.Size = new System.Drawing.Size(53, 20);
-            this.labelRhy2.Text = "Rhythm";
-            this.labelRhy2.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.labelPatternName.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
+            this.labelPatternName.Location = new System.Drawing.Point(3, 4);
+            this.labelPatternName.Name = "labelPatternName";
+            this.labelPatternName.Size = new System.Drawing.Size(124, 20);
+            this.labelPatternName.TabIndex = 63;
+            this.labelPatternName.Text = "Pattern Name:";
             // 
-            // comboBoxRhy2
+            // labelComment
             // 
-            this.comboBoxRhy2.Location = new System.Drawing.Point(62, 176);
-            this.comboBoxRhy2.Name = "comboBoxRhy2";
-            this.comboBoxRhy2.Size = new System.Drawing.Size(53, 22);
-            this.comboBoxRhy2.TabIndex = 25;
+            this.labelComment.Location = new System.Drawing.Point(88, 80);
+            this.labelComment.Name = "labelComment";
+            this.labelComment.Size = new System.Drawing.Size(54, 13);
+            this.labelComment.TabIndex = 62;
+            this.labelComment.Text = "Comment:";
+            this.labelComment.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // labelMag2
+            // labelPatternExist
             // 
-            this.labelMag2.Location = new System.Drawing.Point(115, 160);
-            this.labelMag2.Name = "labelMag2";
-            this.labelMag2.Size = new System.Drawing.Size(68, 20);
-            this.labelMag2.Text = "Magnitude";
-            this.labelMag2.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.labelPatternExist.Location = new System.Drawing.Point(88, 159);
+            this.labelPatternExist.Name = "labelPatternExist";
+            this.labelPatternExist.Size = new System.Drawing.Size(135, 20);
+            this.labelPatternExist.TabIndex = 61;
+            this.labelPatternExist.Text = "Existing Pattern File:";
+            this.labelPatternExist.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // comboBoxMag2
+            // labelWaitTime
             // 
-            this.comboBoxMag2.Location = new System.Drawing.Point(121, 176);
-            this.comboBoxMag2.Name = "comboBoxMag2";
-            this.comboBoxMag2.Size = new System.Drawing.Size(56, 22);
-            this.comboBoxMag2.TabIndex = 26;
+            this.labelWaitTime.Location = new System.Drawing.Point(88, 61);
+            this.labelWaitTime.Name = "labelWaitTime";
+            this.labelWaitTime.Size = new System.Drawing.Size(90, 18);
+            this.labelWaitTime.TabIndex = 60;
+            this.labelWaitTime.Text = "Wait Time (ms):";
+            this.labelWaitTime.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // labelCyc2
+            // textBoxPatternExist
             // 
-            this.labelCyc2.Location = new System.Drawing.Point(183, 160);
-            this.labelCyc2.Name = "labelCyc2";
-            this.labelCyc2.Size = new System.Drawing.Size(44, 20);
-            this.labelCyc2.Text = "Cycles";
-            this.labelCyc2.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.textBoxPatternExist.Location = new System.Drawing.Point(88, 178);
+            this.textBoxPatternExist.Name = "textBoxPatternExist";
+            this.textBoxPatternExist.Size = new System.Drawing.Size(115, 20);
+            this.textBoxPatternExist.TabIndex = 44;
             // 
-            // comboBoxCycles2
+            // textBoxWaitTime
             // 
-            this.comboBoxCycles2.Location = new System.Drawing.Point(183, 176);
-            this.comboBoxCycles2.Name = "comboBoxCycles2";
-            this.comboBoxCycles2.Size = new System.Drawing.Size(44, 22);
-            this.comboBoxCycles2.TabIndex = 27;
+            this.textBoxWaitTime.Location = new System.Drawing.Point(174, 61);
+            this.textBoxWaitTime.Name = "textBoxWaitTime";
+            this.textBoxWaitTime.Size = new System.Drawing.Size(54, 20);
+            this.textBoxWaitTime.TabIndex = 45;
             // 
-            // labelTimeSeq
+            // textBoxComment
             // 
-            this.labelTimeSeq.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
-            this.labelTimeSeq.Location = new System.Drawing.Point(3, 4);
-            this.labelTimeSeq.Name = "labelTimeSeq";
-            this.labelTimeSeq.Size = new System.Drawing.Size(124, 20);
-            this.labelTimeSeq.Text = "Timing Sequence:";
+            this.textBoxComment.Location = new System.Drawing.Point(88, 96);
+            this.textBoxComment.Name = "textBoxComment";
+            this.textBoxComment.Size = new System.Drawing.Size(140, 20);
+            this.textBoxComment.TabIndex = 48;
             // 
-            // labelMtr2
+            // comboBoxCycles
             // 
-            this.labelMtr2.Location = new System.Drawing.Point(28, 21);
-            this.labelMtr2.Name = "labelMtr2";
-            this.labelMtr2.Size = new System.Drawing.Size(39, 20);
-            this.labelMtr2.Text = "Motor";
+            this.comboBoxCycles.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxCycles.Location = new System.Drawing.Point(184, 36);
+            this.comboBoxCycles.Name = "comboBoxCycles";
+            this.comboBoxCycles.Size = new System.Drawing.Size(44, 21);
+            this.comboBoxCycles.TabIndex = 67;
             // 
-            // labelStartTime
+            // labelCyc
             // 
-            this.labelStartTime.Location = new System.Drawing.Point(78, 21);
-            this.labelStartTime.Name = "labelStartTime";
-            this.labelStartTime.Size = new System.Drawing.Size(61, 20);
-            this.labelStartTime.Text = "Start Time";
-            this.labelStartTime.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.labelCyc.Location = new System.Drawing.Point(184, 20);
+            this.labelCyc.Name = "labelCyc";
+            this.labelCyc.Size = new System.Drawing.Size(44, 20);
+            this.labelCyc.TabIndex = 68;
+            this.labelCyc.Text = "Cycles";
+            this.labelCyc.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
-            // labelStopTime
+            // comboBoxMag
             // 
-            this.labelStopTime.Location = new System.Drawing.Point(141, 21);
-            this.labelStopTime.Name = "labelStopTime";
-            this.labelStopTime.Size = new System.Drawing.Size(67, 20);
-            this.labelStopTime.Text = "Stop Time";
-            this.labelStopTime.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.comboBoxMag.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxMag.Location = new System.Drawing.Point(122, 36);
+            this.comboBoxMag.Name = "comboBoxMag";
+            this.comboBoxMag.Size = new System.Drawing.Size(56, 21);
+            this.comboBoxMag.TabIndex = 66;
             // 
-            // checkBoxRepeatTmpSpat
+            // labelMag
             // 
-            this.checkBoxRepeatTmpSpat.Checked = true;
-            this.checkBoxRepeatTmpSpat.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxRepeatTmpSpat.Location = new System.Drawing.Point(3, 144);
-            this.checkBoxRepeatTmpSpat.Name = "checkBoxRepeatTmpSpat";
-            this.checkBoxRepeatTmpSpat.Size = new System.Drawing.Size(208, 18);
-            this.checkBoxRepeatTmpSpat.TabIndex = 35;
-            this.checkBoxRepeatTmpSpat.Text = "Repeat Temporal-Spatial Pattern";
+            this.labelMag.Location = new System.Drawing.Point(116, 20);
+            this.labelMag.Name = "labelMag";
+            this.labelMag.Size = new System.Drawing.Size(68, 20);
+            this.labelMag.TabIndex = 69;
+            this.labelMag.Text = "Magnitude";
+            this.labelMag.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
-            // labelTmpSpatCfg
+            // comboBoxRhy
             // 
-            this.labelTmpSpatCfg.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
-            this.labelTmpSpatCfg.Location = new System.Drawing.Point(3, 165);
-            this.labelTmpSpatCfg.Name = "labelTmpSpatCfg";
-            this.labelTmpSpatCfg.Size = new System.Drawing.Size(49, 33);
-            this.labelTmpSpatCfg.Text = "Tactor Config:";
+            this.comboBoxRhy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxRhy.Location = new System.Drawing.Point(63, 36);
+            this.comboBoxRhy.Name = "comboBoxRhy";
+            this.comboBoxRhy.Size = new System.Drawing.Size(53, 21);
+            this.comboBoxRhy.TabIndex = 65;
             // 
-            // textBoxStartTime1
+            // labelRhy
             // 
-            this.textBoxStartTime1.Location = new System.Drawing.Point(80, 39);
-            this.textBoxStartTime1.Name = "textBoxStartTime1";
-            this.textBoxStartTime1.Size = new System.Drawing.Size(59, 21);
-            this.textBoxStartTime1.TabIndex = 38;
+            this.labelRhy.Location = new System.Drawing.Point(63, 20);
+            this.labelRhy.Name = "labelRhy";
+            this.labelRhy.Size = new System.Drawing.Size(53, 20);
+            this.labelRhy.TabIndex = 70;
+            this.labelRhy.Text = "Rhythm";
+            this.labelRhy.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
-            // textBoxStopTime1
+            // comboBoxMotor
             // 
-            this.textBoxStopTime1.Location = new System.Drawing.Point(145, 39);
-            this.textBoxStopTime1.Name = "textBoxStopTime1";
-            this.textBoxStopTime1.Size = new System.Drawing.Size(59, 21);
-            this.textBoxStopTime1.TabIndex = 39;
+            this.comboBoxMotor.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxMotor.Location = new System.Drawing.Point(13, 36);
+            this.comboBoxMotor.Name = "comboBoxMotor";
+            this.comboBoxMotor.Size = new System.Drawing.Size(44, 21);
+            this.comboBoxMotor.TabIndex = 64;
             // 
-            // comboBoxMotor2
+            // labelMtr
             // 
-            this.comboBoxMotor2.Location = new System.Drawing.Point(28, 39);
-            this.comboBoxMotor2.Name = "comboBoxMotor2";
-            this.comboBoxMotor2.Size = new System.Drawing.Size(44, 22);
-            this.comboBoxMotor2.TabIndex = 40;
+            this.labelMtr.Location = new System.Drawing.Point(13, 20);
+            this.labelMtr.Name = "labelMtr";
+            this.labelMtr.Size = new System.Drawing.Size(44, 20);
+            this.labelMtr.TabIndex = 71;
+            this.labelMtr.Text = "Motor";
+            this.labelMtr.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
-            // textBoxStartTime2
+            // groupBoxCmd
             // 
-            this.textBoxStartTime2.Location = new System.Drawing.Point(80, 66);
-            this.textBoxStartTime2.Name = "textBoxStartTime2";
-            this.textBoxStartTime2.Size = new System.Drawing.Size(59, 21);
-            this.textBoxStartTime2.TabIndex = 41;
+            this.groupBoxCmd.Controls.Add(this.radioBtnPattern);
+            this.groupBoxCmd.Controls.Add(this.radioBtnComment);
+            this.groupBoxCmd.Controls.Add(this.radioBtnStopAll);
+            this.groupBoxCmd.Controls.Add(this.radioBtnStop);
+            this.groupBoxCmd.Controls.Add(this.radioBtnWait);
+            this.groupBoxCmd.Controls.Add(this.radioBtnVibrate);
+            this.groupBoxCmd.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.groupBoxCmd.Location = new System.Drawing.Point(6, 64);
+            this.groupBoxCmd.Name = "groupBoxCmd";
+            this.groupBoxCmd.Size = new System.Drawing.Size(76, 134);
+            this.groupBoxCmd.TabIndex = 72;
+            this.groupBoxCmd.TabStop = false;
+            this.groupBoxCmd.Text = "Command";
             // 
-            // textBoxStopTime2
+            // radioBtnPattern
             // 
-            this.textBoxStopTime2.Location = new System.Drawing.Point(145, 66);
-            this.textBoxStopTime2.Name = "textBoxStopTime2";
-            this.textBoxStopTime2.Size = new System.Drawing.Size(59, 21);
-            this.textBoxStopTime2.TabIndex = 42;
+            this.radioBtnPattern.AutoSize = true;
+            this.radioBtnPattern.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.radioBtnPattern.Location = new System.Drawing.Point(3, 100);
+            this.radioBtnPattern.Name = "radioBtnPattern";
+            this.radioBtnPattern.Size = new System.Drawing.Size(61, 30);
+            this.radioBtnPattern.TabIndex = 5;
+            this.radioBtnPattern.TabStop = true;
+            this.radioBtnPattern.Text = "Existing\r\nPattern";
+            this.radioBtnPattern.UseVisualStyleBackColor = true;
             // 
-            // comboBoxMotor3
+            // radioBtnComment
             // 
-            this.comboBoxMotor3.Location = new System.Drawing.Point(28, 66);
-            this.comboBoxMotor3.Name = "comboBoxMotor3";
-            this.comboBoxMotor3.Size = new System.Drawing.Size(44, 22);
-            this.comboBoxMotor3.TabIndex = 43;
+            this.radioBtnComment.AutoSize = true;
+            this.radioBtnComment.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.radioBtnComment.Location = new System.Drawing.Point(3, 84);
+            this.radioBtnComment.Name = "radioBtnComment";
+            this.radioBtnComment.Size = new System.Drawing.Size(69, 17);
+            this.radioBtnComment.TabIndex = 4;
+            this.radioBtnComment.TabStop = true;
+            this.radioBtnComment.Text = "Comment";
+            this.radioBtnComment.UseVisualStyleBackColor = true;
             // 
-            // textBoxStartTime3
+            // radioBtnStopAll
             // 
-            this.textBoxStartTime3.Location = new System.Drawing.Point(80, 93);
-            this.textBoxStartTime3.Name = "textBoxStartTime3";
-            this.textBoxStartTime3.Size = new System.Drawing.Size(59, 21);
-            this.textBoxStartTime3.TabIndex = 44;
+            this.radioBtnStopAll.AutoSize = true;
+            this.radioBtnStopAll.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.radioBtnStopAll.Location = new System.Drawing.Point(3, 68);
+            this.radioBtnStopAll.Name = "radioBtnStopAll";
+            this.radioBtnStopAll.Size = new System.Drawing.Size(61, 17);
+            this.radioBtnStopAll.TabIndex = 3;
+            this.radioBtnStopAll.TabStop = true;
+            this.radioBtnStopAll.Text = "Stop All";
+            this.radioBtnStopAll.UseVisualStyleBackColor = true;
             // 
-            // textBoxStopTime3
+            // radioBtnStop
             // 
-            this.textBoxStopTime3.Location = new System.Drawing.Point(145, 93);
-            this.textBoxStopTime3.Name = "textBoxStopTime3";
-            this.textBoxStopTime3.Size = new System.Drawing.Size(59, 21);
-            this.textBoxStopTime3.TabIndex = 45;
+            this.radioBtnStop.AutoSize = true;
+            this.radioBtnStop.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.radioBtnStop.Location = new System.Drawing.Point(3, 51);
+            this.radioBtnStop.Name = "radioBtnStop";
+            this.radioBtnStop.Size = new System.Drawing.Size(47, 17);
+            this.radioBtnStop.TabIndex = 2;
+            this.radioBtnStop.TabStop = true;
+            this.radioBtnStop.Text = "Stop";
+            this.radioBtnStop.UseVisualStyleBackColor = true;
             // 
-            // comboBoxMotor4
+            // radioBtnWait
             // 
-            this.comboBoxMotor4.Location = new System.Drawing.Point(28, 93);
-            this.comboBoxMotor4.Name = "comboBoxMotor4";
-            this.comboBoxMotor4.Size = new System.Drawing.Size(44, 22);
-            this.comboBoxMotor4.TabIndex = 46;
+            this.radioBtnWait.AutoSize = true;
+            this.radioBtnWait.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.radioBtnWait.Location = new System.Drawing.Point(3, 35);
+            this.radioBtnWait.Name = "radioBtnWait";
+            this.radioBtnWait.Size = new System.Drawing.Size(47, 17);
+            this.radioBtnWait.TabIndex = 1;
+            this.radioBtnWait.TabStop = true;
+            this.radioBtnWait.Text = "Wait";
+            this.radioBtnWait.UseVisualStyleBackColor = true;
             // 
-            // textBoxStartTime4
+            // radioBtnVibrate
             // 
-            this.textBoxStartTime4.Location = new System.Drawing.Point(80, 120);
-            this.textBoxStartTime4.Name = "textBoxStartTime4";
-            this.textBoxStartTime4.Size = new System.Drawing.Size(59, 21);
-            this.textBoxStartTime4.TabIndex = 47;
+            this.radioBtnVibrate.AutoSize = true;
+            this.radioBtnVibrate.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.radioBtnVibrate.Location = new System.Drawing.Point(3, 19);
+            this.radioBtnVibrate.Name = "radioBtnVibrate";
+            this.radioBtnVibrate.Size = new System.Drawing.Size(58, 17);
+            this.radioBtnVibrate.TabIndex = 0;
+            this.radioBtnVibrate.TabStop = true;
+            this.radioBtnVibrate.Text = "Vibrate";
+            this.radioBtnVibrate.UseVisualStyleBackColor = true;
             // 
-            // textBoxStopTime4
+            // btnAdd
             // 
-            this.textBoxStopTime4.Location = new System.Drawing.Point(145, 120);
-            this.textBoxStopTime4.Name = "textBoxStopTime4";
-            this.textBoxStopTime4.Size = new System.Drawing.Size(59, 21);
-            this.textBoxStopTime4.TabIndex = 48;
+            this.btnAdd.BackColor = System.Drawing.Color.LightGreen;
+            this.btnAdd.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAdd.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnAdd.Location = new System.Drawing.Point(101, 122);
+            this.btnAdd.Name = "btnAdd";
+            this.btnAdd.Size = new System.Drawing.Size(58, 38);
+            this.btnAdd.TabIndex = 73;
+            this.btnAdd.Text = "Add to \r\nPattern";
+            this.btnAdd.UseVisualStyleBackColor = false;
+            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
             // 
-            // comboBoxMotor5
+            // btnPatternExist
             // 
-            this.comboBoxMotor5.Location = new System.Drawing.Point(28, 120);
-            this.comboBoxMotor5.Name = "comboBoxMotor5";
-            this.comboBoxMotor5.Size = new System.Drawing.Size(44, 22);
-            this.comboBoxMotor5.TabIndex = 49;
+            this.btnPatternExist.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnPatternExist.Location = new System.Drawing.Point(209, 177);
+            this.btnPatternExist.Name = "btnPatternExist";
+            this.btnPatternExist.Size = new System.Drawing.Size(27, 23);
+            this.btnPatternExist.TabIndex = 74;
+            this.btnPatternExist.Text = "...";
+            this.btnPatternExist.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.btnPatternExist.UseVisualStyleBackColor = true;
+            this.btnPatternExist.Click += new System.EventHandler(this.btnPatternExist_Click);
             // 
-            // btnDone
+            // textBoxPatternName
             // 
-            this.btnDone.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnDone.Location = new System.Drawing.Point(181, 204);
-            this.btnDone.Name = "btnDone";
-            this.btnDone.Size = new System.Drawing.Size(56, 38);
-            this.btnDone.TabIndex = 58;
-            this.btnDone.Text = "Done";
+            this.textBoxPatternName.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxPatternName.Location = new System.Drawing.Point(101, 2);
+            this.textBoxPatternName.Name = "textBoxPatternName";
+            this.textBoxPatternName.Size = new System.Drawing.Size(127, 20);
+            this.textBoxPatternName.TabIndex = 75;
+            // 
+            // btnSave
+            // 
+            this.btnSave.BackColor = System.Drawing.Color.LightBlue;
+            this.btnSave.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSave.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnSave.Location = new System.Drawing.Point(165, 122);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(58, 38);
+            this.btnSave.TabIndex = 76;
+            this.btnSave.Text = "Save \r\nPattern";
+            this.btnSave.UseVisualStyleBackColor = false;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            // 
+            // comboBoxTempo
+            // 
+            this.comboBoxTempo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxTempo.Location = new System.Drawing.Point(49, 232);
+            this.comboBoxTempo.Name = "comboBoxTempo";
+            this.comboBoxTempo.Size = new System.Drawing.Size(44, 21);
+            this.comboBoxTempo.TabIndex = 77;
+            // 
+            // labelTempo
+            // 
+            this.labelTempo.Location = new System.Drawing.Point(49, 216);
+            this.labelTempo.Name = "labelTempo";
+            this.labelTempo.Size = new System.Drawing.Size(44, 20);
+            this.labelTempo.TabIndex = 78;
+            this.labelTempo.Text = "Tempo";
+            this.labelTempo.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // btnPatternLoad
+            // 
+            this.btnPatternLoad.BackColor = System.Drawing.Color.LightBlue;
+            this.btnPatternLoad.Location = new System.Drawing.Point(1, 215);
+            this.btnPatternLoad.Name = "btnPatternLoad";
+            this.btnPatternLoad.Size = new System.Drawing.Size(42, 38);
+            this.btnPatternLoad.TabIndex = 79;
+            this.btnPatternLoad.Text = "Load";
+            this.btnPatternLoad.UseVisualStyleBackColor = false;
+            // 
+            // patternDesign
+            // 
+            this.patternDesign.Location = new System.Drawing.Point(99, 206);
+            this.patternDesign.Multiline = true;
+            this.patternDesign.Name = "patternDesign";
+            this.patternDesign.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.patternDesign.Size = new System.Drawing.Size(137, 90);
+            this.patternDesign.TabIndex = 80;
+            this.patternDesign.WordWrap = false;
             // 
             // TempSpatForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.AutoScroll = true;
-            this.ClientSize = new System.Drawing.Size(240, 268);
-            this.Controls.Add(this.btnDone);
-            this.Controls.Add(this.comboBoxMotor5);
-            this.Controls.Add(this.textBoxStopTime4);
-            this.Controls.Add(this.textBoxStartTime4);
-            this.Controls.Add(this.comboBoxMotor4);
-            this.Controls.Add(this.textBoxStopTime3);
-            this.Controls.Add(this.textBoxStartTime3);
-            this.Controls.Add(this.comboBoxMotor3);
-            this.Controls.Add(this.textBoxStopTime2);
-            this.Controls.Add(this.textBoxStartTime2);
-            this.Controls.Add(this.comboBoxMotor2);
-            this.Controls.Add(this.textBoxStopTime1);
-            this.Controls.Add(this.textBoxStartTime1);
-            this.Controls.Add(this.comboBoxCycles2);
-            this.Controls.Add(this.comboBoxMag2);
-            this.Controls.Add(this.comboBoxRhy2);
-            this.Controls.Add(this.labelTmpSpatCfg);
-            this.Controls.Add(this.checkBoxRepeatTmpSpat);
-            this.Controls.Add(this.labelStopTime);
-            this.Controls.Add(this.labelStartTime);
-            this.Controls.Add(this.labelMtr2);
-            this.Controls.Add(this.labelTimeSeq);
-            this.Controls.Add(this.labelCyc2);
-            this.Controls.Add(this.labelMag2);
-            this.Controls.Add(this.labelRhy2);
-            this.Controls.Add(this.btnStopAll);
-            this.Controls.Add(this.btnActivateTmpSpat);
-            this.Menu = this.mainMenu1;
+            this.ClientSize = new System.Drawing.Size(240, 299);
+            this.Controls.Add(this.patternDesign);
+            this.Controls.Add(this.btnPatternLoad);
+            this.Controls.Add(this.comboBoxTempo);
+            this.Controls.Add(this.labelTempo);
+            this.Controls.Add(this.btnSave);
+            this.Controls.Add(this.textBoxPatternName);
+            this.Controls.Add(this.btnPatternExist);
+            this.Controls.Add(this.btnAdd);
+            this.Controls.Add(this.groupBoxCmd);
+            this.Controls.Add(this.comboBoxCycles);
+            this.Controls.Add(this.labelCyc);
+            this.Controls.Add(this.comboBoxMag);
+            this.Controls.Add(this.labelMag);
+            this.Controls.Add(this.comboBoxRhy);
+            this.Controls.Add(this.labelRhy);
+            this.Controls.Add(this.comboBoxMotor);
+            this.Controls.Add(this.labelMtr);
+            this.Controls.Add(this.textBoxComment);
+            this.Controls.Add(this.textBoxWaitTime);
+            this.Controls.Add(this.textBoxPatternExist);
+            this.Controls.Add(this.labelWaitTime);
+            this.Controls.Add(this.labelPatternExist);
+            this.Controls.Add(this.labelComment);
+            this.Controls.Add(this.labelPatternName);
+            this.Controls.Add(this.btnTmpSpatStop);
+            this.Controls.Add(this.btnTmpSpatStart);
             this.Name = "TempSpatForm";
             this.Text = "Temporal-Spatial";
+            this.groupBoxCmd.ResumeLayout(false);
+            this.groupBoxCmd.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.ComboBox comboBoxMotor5;
-        private System.Windows.Forms.TextBox textBoxStopTime4;
-        private System.Windows.Forms.TextBox textBoxStartTime4;
-        private System.Windows.Forms.ComboBox comboBoxMotor4;
-        private System.Windows.Forms.TextBox textBoxStopTime3;
-        private System.Windows.Forms.TextBox textBoxStartTime3;
-        private System.Windows.Forms.ComboBox comboBoxMotor3;
-        private System.Windows.Forms.TextBox textBoxStopTime2;
-        private System.Windows.Forms.TextBox textBoxStartTime2;
-        private System.Windows.Forms.ComboBox comboBoxMotor2;
-        private System.Windows.Forms.TextBox textBoxStopTime1;
-        private System.Windows.Forms.TextBox textBoxStartTime1;
-        private System.Windows.Forms.ComboBox comboBoxCycles2;
-        private System.Windows.Forms.ComboBox comboBoxMag2;
-        private System.Windows.Forms.ComboBox comboBoxRhy2;
-        private System.Windows.Forms.Label labelTmpSpatCfg;
-        private System.Windows.Forms.CheckBox checkBoxRepeatTmpSpat;
-        private System.Windows.Forms.Label labelStopTime;
-        private System.Windows.Forms.Label labelStartTime;
-        private System.Windows.Forms.Label labelMtr2;
-        private System.Windows.Forms.Label labelTimeSeq;
-        private System.Windows.Forms.Label labelCyc2;
-        private System.Windows.Forms.Label labelMag2;
-        private System.Windows.Forms.Label labelRhy2;
-        internal System.Windows.Forms.Button btnStopAll;
-        internal System.Windows.Forms.Button btnActivateTmpSpat;
-        private System.Windows.Forms.Button btnDone;
+        private System.Windows.Forms.TextBox textBoxComment;
+        private System.Windows.Forms.TextBox textBoxWaitTime;
+        private System.Windows.Forms.TextBox textBoxPatternExist;
+        private System.Windows.Forms.Label labelWaitTime;
+        private System.Windows.Forms.Label labelPatternExist;
+        private System.Windows.Forms.Label labelComment;
+        private System.Windows.Forms.Label labelPatternName;
+        internal System.Windows.Forms.Button btnTmpSpatStop;
+        internal System.Windows.Forms.Button btnTmpSpatStart;
+        private System.Windows.Forms.ComboBox comboBoxCycles;
+        private System.Windows.Forms.Label labelCyc;
+        private System.Windows.Forms.ComboBox comboBoxMag;
+        private System.Windows.Forms.Label labelMag;
+        private System.Windows.Forms.ComboBox comboBoxRhy;
+        private System.Windows.Forms.Label labelRhy;
+        private System.Windows.Forms.ComboBox comboBoxMotor;
+        private System.Windows.Forms.Label labelMtr;
+        private System.Windows.Forms.GroupBox groupBoxCmd;
+        private System.Windows.Forms.RadioButton radioBtnStop;
+        private System.Windows.Forms.RadioButton radioBtnWait;
+        private System.Windows.Forms.RadioButton radioBtnVibrate;
+        private System.Windows.Forms.RadioButton radioBtnPattern;
+        private System.Windows.Forms.RadioButton radioBtnComment;
+        private System.Windows.Forms.RadioButton radioBtnStopAll;
+        internal System.Windows.Forms.Button btnAdd;
+        private System.Windows.Forms.Button btnPatternExist;
+        private System.Windows.Forms.TextBox textBoxPatternName;
+        internal System.Windows.Forms.Button btnSave;
+        private System.Windows.Forms.ComboBox comboBoxTempo;
+        private System.Windows.Forms.Label labelTempo;
+        internal System.Windows.Forms.Button btnPatternLoad;
+        private System.Windows.Forms.TextBox patternDesign;
     }
 }
