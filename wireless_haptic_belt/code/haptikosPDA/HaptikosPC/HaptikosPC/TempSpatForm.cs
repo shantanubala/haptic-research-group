@@ -42,31 +42,30 @@ namespace Haptikos
                     mainForm.AddToComboBox(MainForm.dataTypes.MTR, motor, comboBoxMotor);
                     mainForm.AddToComboBox(MainForm.dataTypes.RHY, rhythm, comboBoxRhy);
                     mainForm.AddToComboBox(MainForm.dataTypes.MAG, magnitude, comboBoxMag);
+
+                    comboBoxCycles.Items.Add("1");
+                    comboBoxCycles.Items.Add("2");
+                    comboBoxCycles.Items.Add("3");
+                    comboBoxCycles.Items.Add("4");
+                    comboBoxCycles.Items.Add("5");
+                    comboBoxCycles.Items.Add("6");
+                    comboBoxCycles.Items.Add("Run");
+
+                    comboBoxTempo.Items.Add("1");
+                    comboBoxTempo.Items.Add("2");
+                    comboBoxTempo.Items.Add("3");
+                    comboBoxTempo.Items.Add("4");
+                    comboBoxTempo.Items.Add("5");
+
+                    comboBoxRhy.SelectedIndex = 0;
+                    comboBoxMag.SelectedIndex = 0;
+                    comboBoxCycles.SelectedIndex = 0;
+                    comboBoxTempo.SelectedIndex = 2; //midline for default tempo
                 }
             }
             catch (Exception ex) {
                 MessageBox.Show(ex.Message.ToString());
             }
-
-            comboBoxCycles.Items.Add("1");
-            comboBoxCycles.Items.Add("2");
-            comboBoxCycles.Items.Add("3");
-            comboBoxCycles.Items.Add("4");
-            comboBoxCycles.Items.Add("5");
-            comboBoxCycles.Items.Add("6");
-            comboBoxCycles.Items.Add("Run");
-
-            comboBoxTempo.Items.Add("1");
-            comboBoxTempo.Items.Add("2");
-            comboBoxTempo.Items.Add("3");
-            comboBoxTempo.Items.Add("4");
-            comboBoxTempo.Items.Add("5");
-
-            comboBoxRhy.SelectedIndex = 0;
-            comboBoxMag.SelectedIndex = 0;
-            comboBoxCycles.SelectedIndex = 0;
-            comboBoxTempo.SelectedIndex = 2; //midline for default tempo
-
         }
 
         private void btnPatternExist_Click(object sender, EventArgs e) {
@@ -106,22 +105,34 @@ namespace Haptikos
         }
 
         private void btnAdd_Click(object sender, EventArgs e) {
-            string delim = ":";
+            string dlm = ":";
             string patternCmd = "";
-            
+
             if (radioBtnVibrate.Checked) {
-                // Vibrate command
+                string motor = comboBoxMotor.SelectedItem.ToString();
+                string rhy_id = comboBoxRhy.SelectedItem.ToString();
+                string mag_id = comboBoxMag.SelectedItem.ToString().TrimEnd('%');
+                string cycles = comboBoxCycles.SelectedItem.ToString();
+
+                patternCmd = "VIBRATE"
+                    + dlm + motor
+                    + dlm + rhy_id
+                    + dlm + mag_id
+                    + dlm + cycles;
             }
             else if (radioBtnWait.Checked) {
                 string waitTime = textBoxWaitTime.Text.Trim();
 
                 if (MainForm.verifyDecDigits(waitTime))
-                    patternCmd = "WAIT" + delim + waitTime +" x TEMPO";
+                    patternCmd = "WAIT" + dlm + waitTime;
                 else
-                    MessageBox.Show("Invalid Wait Time - must be integers");
+                    MessageBox.Show("Invalid Wait Time - must be Integers");
             }
             else if (radioBtnStop.Checked) {
-                //Stop Command
+                string motor = comboBoxMotor.SelectedItem.ToString();
+
+                patternCmd = "STOP"
+                    + dlm + motor;
             }
             else if (radioBtnStopAll.Checked) {
                 error_t msg = wirelessBelt.StopAll();
@@ -133,7 +144,7 @@ namespace Haptikos
                 string pattern = textBoxPatternExist.Text.Trim();
 
                 if (pattern != null && pattern != "")
-                    patternCmd = "PATTERN" + delim + pattern;
+                    patternCmd = "PATTERN" + dlm + pattern;
             }
             else if (radioBtnComment.Checked) {
                 string comment = textBoxComment.Text.Trim();
@@ -142,9 +153,13 @@ namespace Haptikos
 
             // Add command if not empty
             if (patternCmd != "") {
-                patternDesign.Text += patternCmd + "\n";
+                patternDesign.Text += patternCmd + "\r\n";
                 patternDesign.Select(patternDesign.TextLength, 0);
                 patternDesign.ScrollToCaret();
+
+                // TODO ALSO ADD TO INTERNAL DATA STRUCTURE SO 
+                // LOAD IS NOT REQUIRED UNLESS patternCmd is a PATTERN file name
+                // Call other function to load with Load(pattern)
             }
         }
     }
