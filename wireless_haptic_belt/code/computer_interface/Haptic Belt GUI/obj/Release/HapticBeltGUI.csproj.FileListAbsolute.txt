@@ -1,0 +1,9 @@
+C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\bin\Release\HapticBeltGUI.exe
+C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\bin\Release\HapticBeltGUI.pdb
+C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Release\ResolveAssemblyReference.cache
+C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Release\WindowsFormsApplication1.Properties.Resources.resources
+C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Release\HapticBeltGUI.csproj.GenerateResource.Cache
+C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Release\HapticBeltGUI.exe
+C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Release\HapticBeltGUI.pdb
+C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\bin\Release\HapticDriver.DLL
+C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Release\HapticGUI.GUI.resources
