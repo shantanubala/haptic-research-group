@@ -75,6 +75,7 @@ namespace Haptikos
             this.btnTmpSpatStart.TabIndex = 21;
             this.btnTmpSpatStart.Text = "Start";
             this.btnTmpSpatStart.UseVisualStyleBackColor = false;
+            this.btnTmpSpatStart.Click += new System.EventHandler(this.btnTmpSpatStart_Click);
             // 
             // btnTmpSpatStop
             // 
@@ -85,6 +86,7 @@ namespace Haptikos
             this.btnTmpSpatStop.TabIndex = 22;
             this.btnTmpSpatStop.Text = "Stop";
             this.btnTmpSpatStop.UseVisualStyleBackColor = false;
+            this.btnTmpSpatStop.Click += new System.EventHandler(this.btnTmpSpatStop_Click);
             // 
             // labelPatternName
             // 
@@ -352,6 +354,7 @@ namespace Haptikos
             this.comboBoxTempo.Name = "comboBoxTempo";
             this.comboBoxTempo.Size = new System.Drawing.Size(44, 21);
             this.comboBoxTempo.TabIndex = 77;
+            this.comboBoxTempo.SelectedIndexChanged += new System.EventHandler(this.comboBoxTempo_SelectedIndexChanged);
             // 
             // labelTempo
             // 
@@ -371,6 +374,7 @@ namespace Haptikos
             this.btnPatternLoad.TabIndex = 79;
             this.btnPatternLoad.Text = "Load";
             this.btnPatternLoad.UseVisualStyleBackColor = false;
+            this.btnPatternLoad.Click += new System.EventHandler(this.btnPatternLoad_Click);
             // 
             // patternDesign
             // 

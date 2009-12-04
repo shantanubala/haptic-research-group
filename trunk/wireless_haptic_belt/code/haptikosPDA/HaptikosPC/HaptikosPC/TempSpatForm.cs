@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.IO.Ports;
+using System.Threading;
 using HapticDriver;
 
 namespace Haptikos
@@ -14,6 +16,10 @@ namespace Haptikos
     public partial class TempSpatForm : Form
     {
         HapticBelt wirelessBelt;
+        private bool _run = false;
+        private int _tempo = 1;
+        private List<PatternElement> patternPlayback;
+        Thread trd; // used for playback
 
         /// <summary>
         /// 
@@ -24,6 +30,7 @@ namespace Haptikos
             InitializeComponent();
 
             wirelessBelt = belt;
+            patternPlayback = new List<PatternElement>(2); // start with 2 element and grow
 
             try {
                 error_t response = wirelessBelt.Query_All();
@@ -51,11 +58,11 @@ namespace Haptikos
                     comboBoxCycles.Items.Add("6");
                     comboBoxCycles.Items.Add("Run");
 
-                    comboBoxTempo.Items.Add("1");
-                    comboBoxTempo.Items.Add("2");
-                    comboBoxTempo.Items.Add("3");
-                    comboBoxTempo.Items.Add("4");
-                    comboBoxTempo.Items.Add("5");
+                    comboBoxTempo.Items.Add("5"); // Fastest Tempo (div by 1.5)
+                    comboBoxTempo.Items.Add("4"); // Faster Tempo (div by 1.25)
+                    comboBoxTempo.Items.Add("3"); // Default as entered by user
+                    comboBoxTempo.Items.Add("2"); // Slower Tempo (multiply by 1.25)
+                    comboBoxTempo.Items.Add("1"); // Slowest Tempo (multiply by 1.5)
 
                     comboBoxRhy.SelectedIndex = 0;
                     comboBoxMag.SelectedIndex = 0;
@@ -96,7 +103,7 @@ namespace Haptikos
                     //StreamWriter writeText = new StreamWriter(myStream);
                     TextWriter writeText = new StreamWriter(myStream);
 
-                    writeText.Write(patternDesign.Text);
+                    writeText.Write(patternDesign.Text.Trim());
                     // close the stream
                     writeText.Close();
                     myStream.Close();
@@ -119,36 +126,39 @@ namespace Haptikos
                     + dlm + rhy_id
                     + dlm + mag_id
                     + dlm + cycles;
+
+                patternPlayback.Add(new PatternElement("VIBRATE", motor, rhy_id, mag_id, cycles));
             }
             else if (radioBtnWait.Checked) {
                 string waitTime = textBoxWaitTime.Text.Trim();
 
-                if (MainForm.verifyDecDigits(waitTime))
+                if (MainForm.verifyDecDigits(waitTime)) {
                     patternCmd = "WAIT" + dlm + waitTime;
+                    patternPlayback.Add(new PatternElement("WAIT", waitTime, "", "", ""));
+                }
                 else
                     MessageBox.Show("Invalid Wait Time - must be Integers");
             }
             else if (radioBtnStop.Checked) {
                 string motor = comboBoxMotor.SelectedItem.ToString();
-
-                patternCmd = "STOP"
-                    + dlm + motor;
+                patternCmd = "STOP" + dlm + motor;
+                patternPlayback.Add(new PatternElement("STOP", motor, "", "", ""));
             }
             else if (radioBtnStopAll.Checked) {
-                error_t msg = wirelessBelt.StopAll();
-
-                if (msg != error_t.ESUCCESS)
-                    MessageBox.Show(wirelessBelt.getErrorMsg(msg));
+                patternCmd = "STOP" + dlm + "ALL";
+                patternPlayback.Add(new PatternElement("STOP", "ALL", "", "", ""));
             }
             else if (radioBtnPattern.Checked) {
                 string pattern = textBoxPatternExist.Text.Trim();
 
                 if (pattern != null && pattern != "")
                     patternCmd = "PATTERN" + dlm + pattern;
+                patternPlayback.Add(new PatternElement("PATTERN", pattern, "", "", ""));
             }
             else if (radioBtnComment.Checked) {
                 string comment = textBoxComment.Text.Trim();
                 patternCmd = "//" + comment;
+                // Do not add to playback list
             }
 
             // Add command if not empty
@@ -156,10 +166,170 @@ namespace Haptikos
                 patternDesign.Text += patternCmd + "\r\n";
                 patternDesign.Select(patternDesign.TextLength, 0);
                 patternDesign.ScrollToCaret();
+            }
+        }
 
-                // TODO ALSO ADD TO INTERNAL DATA STRUCTURE SO 
-                // LOAD IS NOT REQUIRED UNLESS patternCmd is a PATTERN file name
-                // Call other function to load with Load(pattern)
+        private void btnPatternLoad_Click(object sender, EventArgs e) {
+            patternPlayback = new List<PatternElement>(2); // new list
+            string filename = "";
+
+            // Select file
+            OpenFileDialog fdlg = new OpenFileDialog();
+            fdlg.Title = "Select Haptic Pattern File";
+            fdlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            fdlg.Filter = "Haptic Patterns (*.pattern)|*.pattern|Text files (*.txt)|*.txt|All files (*.*)|*.*";
+            fdlg.FilterIndex = 1;
+            fdlg.RestoreDirectory = true;
+            if (fdlg.ShowDialog() == DialogResult.OK) {
+                filename = fdlg.FileName;
+                // Add to title at top, does not include path or extension
+                textBoxPatternName.Text = fdlg.SafeFileName.Split('.')[0];
+            }
+
+            // Load data
+            patternLoad(filename);
+        }
+
+        private void patternLoad(string filename) {
+            char[] separator = { '\r', '\n', ' ' }; // space chars too.
+
+            if (filename != null && filename != "") {
+
+                // Specify file, instructions, and privelegdes
+                FileStream file = new FileStream(filename, FileMode.Open, FileAccess.Read);
+
+                // Create a new stream to read from a file
+                StreamReader sr = new StreamReader(file);
+
+                // Read contents of file, separate lines "\r\n", load into List
+                string s = sr.ReadToEnd();
+                loadPatternData(s.Split(separator));
+
+                // add to display
+                patternDesign.Text = s;
+                patternDesign.Select(patternDesign.TextLength, 0);
+                patternDesign.ScrollToCaret();
+
+                // Close StreamReader and file
+                sr.Close();
+                file.Close();
+            }
+
+        }
+
+        private void comboBoxTempo_SelectedIndexChanged(object sender, EventArgs e) {
+            int factor = comboBoxTempo.SelectedIndex;
+
+            if (factor == 0)
+                //"5" Fastest Tempo (div by 1.5)
+                _tempo = (int)(_tempo / 1.5);
+            else if (factor == 1)
+                //"4" Faster Tempo (div by 1.25)
+                _tempo = (int)(_tempo / 1.25);
+            else if (factor == 3)
+                //"2" // Slower Tempo (multiply by 1.25)
+                _tempo = (int)(_tempo * 1.25);
+            else if (factor == 4)
+                //"1" Slowest Tempo (multiply by 1.5)
+                _tempo = (int)(_tempo * 1.5);
+            else
+                _tempo = 1;
+        }
+
+        private void btnTmpSpatStop_Click(object sender, EventArgs e) {
+            _run = false;
+        }
+
+        private void btnTmpSpatStart_Click(object sender, EventArgs e) {
+            _run = true;
+
+            //trd = new Thread(new ThreadStart(this.executePattern));
+            //trd.IsBackground = true;
+            //trd.Start();
+
+            error_t msg = error_t.EMAX;
+
+            // local variable
+            PatternElement element = new PatternElement();
+            int count = 0;
+            int max = comboBoxCycles.SelectedIndex;
+
+            while (_run) {
+                for (int command = 0; command < patternPlayback.Count; command++) {
+                    element = patternPlayback[command];
+
+                    if (element.name.Equals("VIBRATE")) {
+                        byte motor = (byte)(Convert.ToByte(element.mtr_time_file) - 1); //use offset
+                        string rhy_id = element.rhythm;
+                        string mag_id = element.magnitude;
+                        byte cycles = (byte)Convert.ToByte(element.cycles);
+
+                        // Send Vibrate Motor Command
+                        msg = wirelessBelt.Vibrate_Motor(motor, rhy_id, mag_id, cycles);
+                    }
+                    else if (element.name.Equals("WAIT")) {
+                        int waitTime = Int16.Parse(element.mtr_time_file) * _tempo;
+
+                        System.Threading.Thread.Sleep(waitTime); //give other threads a chance
+                        //HapticBelt.Wait(waitTime);
+                        msg = error_t.ESUCCESS;
+                    }
+                    else if (element.name.Equals("STOP") && MainForm.verifyDecDigits(element.mtr_time_file)) {
+                        msg = wirelessBelt.Stop((byte)Convert.ToByte(element.mtr_time_file));
+                    }
+                    else if (element.name.Equals("STOP") && element.mtr_time_file.Equals("ALL")) {
+                        msg = wirelessBelt.StopAll();
+                    }
+                    else {
+                        // Do nothing
+                        ;
+                    }
+                    if (msg != error_t.ESUCCESS)
+                        MessageBox.Show(wirelessBelt.getErrorMsg(msg));
+                }
+                count++;
+                // Check for cycles if not continuous run == index[6] or 7
+                if (count > max && max != 6)
+                    _run = false;
+            }
+        }
+
+        private void loadPatternData(string[] fileread) {
+
+            string[] element = new string[5]; // Same No. of elements as PatternElement
+
+            for (int line = 0; line < fileread.Length; line++) {
+                element = fileread[line].Split(':');
+
+                if (element[0].Trim().Equals("VIBRATE")) {
+                    if (element[4].Trim().Equals("Run"))
+                        patternPlayback.Add(new PatternElement(element[0].Trim(),
+                           element[1].Trim(), element[2].Trim(), element[3].Trim(), "7"));
+                    else
+                        patternPlayback.Add(new PatternElement(element[0].Trim(),
+                            element[1].Trim(), element[2].Trim(), element[3].Trim(),
+                            element[4].Trim()));
+                }
+                else if (element[0].Trim().Equals("WAIT")) {
+                    patternPlayback.Add(new PatternElement(element[0].Trim(), element[1].Trim(), "", "", ""));
+                }
+                else if (element[0].Trim().Equals("STOP") && MainForm.verifyDecDigits(element[1])) {
+                    patternPlayback.Add(new PatternElement(element[0].Trim(), element[1].Trim(), "", "", ""));
+                }
+                else if (element[0].Trim().Equals("STOP") && element[1].Equals("ALL")) {
+                    patternPlayback.Add(new PatternElement(element[0].Trim(), element[1].Trim(), "", "", ""));
+                }
+                else if (element[0].Trim().Equals("PATTERN")) {
+                    if (element[1] != null && element[1] != "") {
+
+                        // Makes a Recursive call and loads data in order
+                        patternLoad(element[1]);
+                    }
+                }
+                else {
+                    // Do not add to playback list
+                    ;
+                }
             }
         }
     }
