@@ -141,7 +141,7 @@ namespace Haptikos
 
         private void btnTest_Click(object sender, EventArgs e) {
 
-            byte motor = 1;
+            byte motor = 0; // Equates to motor #1, address 0
             string rhy_id = comboBoxRhySel.SelectedItem.ToString();
             string mag_id = comboBoxMagSel.SelectedItem.ToString();
             byte cycles = 1;                  
