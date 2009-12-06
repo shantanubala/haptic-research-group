@@ -140,9 +140,9 @@ namespace Haptikos
             if (wirelessBelt.getDataRecvType() == (byte)HapticDriver.MessageType.INCOMING) {
                 try {
                     string line = wirelessBelt.getDataRecvBuffer();
-                    if (line.CompareTo("quit$$$") == 0) {
-                        disconnectRequested = true;
-                    }
+                    //if (line.CompareTo("quit$$$") == 0) {
+                    //    disconnectRequested = true;
+                    //}
                     //Invoke main thread function
                     txtLog.Invoke(new updateText(UpdateText), line);
                 }
@@ -183,7 +183,8 @@ namespace Haptikos
         }
 
         private void UpdateText(string s) {
-            txtLog.Text += "them:\r\n" + s;
+            if (!s.Equals("")) 
+                txtLog.Text += "them:\r\n" + s;
             txtLog.Select(txtLog.TextLength, 0);
             txtLog.ScrollToCaret();
         }
