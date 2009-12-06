@@ -183,6 +183,8 @@ namespace HapticDriver
         EXCLRNMAG,
         /// <summary>Exception occured - serial com port write data</summary> 
         EXCCOMPRTWRITE,
+        /// <summary>Exception occured - serial com port read data</summary> 
+        EXCCOMPRTREAD,
         /// <summary>Exception occured - opening serial com port</summary> 
         EXCCOMPRTOPEN,
         /// <summary>Exception occured - closing serial com port</summary> 
@@ -295,6 +297,7 @@ namespace HapticDriver
         private const string exclrnrhy = "Exception occured - learn rhythm command";
         private const string exclrnmag = "Exception occured - learn magnitude command";
         private const string execomprtwrite = "Exception occured - serial com port write data";
+        private const string execomprtread = "Exception occured - serial com port read data";
         private const string execomprtopen = "Exception occured - opening serial com port";
         private const string execomprtcls = "Exception occured - closing serial com port";
         private const string excwireless = "Error sending command over wireless";
@@ -347,6 +350,7 @@ namespace HapticDriver
             exclrnrhy,
             exclrnmag,
             execomprtwrite,
+            execomprtread,
             execomprtopen,
             execomprtcls,
             excwireless,
