@@ -589,7 +589,7 @@ namespace HapticDriver
 
             int time = Environment.TickCount;
             while (true)
-                if (Environment.TickCount - time >= ms) return;
+                if (Environment.TickCount - time >= ms) break;
         }
         #endregion
     }
