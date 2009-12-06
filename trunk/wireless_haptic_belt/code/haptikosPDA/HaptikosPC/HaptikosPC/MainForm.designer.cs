@@ -118,7 +118,7 @@ namespace Haptikos
             this.menuSetupRhyMag.Text = "Set Haptic Patterns";
             this.menuSetupRhyMag.Click += new System.EventHandler(this.mnuSetupRhyMag_Click);
             // 
-            // mnuTempSpat
+            // menuTempSpat
             // 
             this.menuTempSpat.Enabled = false;
             this.menuTempSpat.Index = 4;
@@ -376,7 +376,7 @@ namespace Haptikos
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(240, 282);
+            this.ClientSize = new System.Drawing.Size(240, 281);
             this.Controls.Add(this.tabControl1);
             this.Menu = this.mainMenu1;
             this.Name = "MainForm";
