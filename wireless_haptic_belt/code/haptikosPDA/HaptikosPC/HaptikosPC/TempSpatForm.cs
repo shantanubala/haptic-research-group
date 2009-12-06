@@ -346,8 +346,11 @@ namespace Haptikos
                     else {  // Do nothing
                         ;
                     }
-                    if (msg != error_t.ESUCCESS)
+                    if (msg != error_t.ESUCCESS) {
                         MessageBox.Show(wirelessBelt.getErrorMsg(msg));
+                        _run = false;
+                        threadCount--; // done with playback
+                    }
                 }
                 count++;
                 // Check for cycles if not continuous run == index[6] or 7
