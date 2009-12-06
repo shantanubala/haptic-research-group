@@ -35,6 +35,7 @@ namespace Haptikos
         private string stopbits_string = "1";
         private string databits_string = "8";
         private int readTimeout = 1000;
+        private string fileDirectory = "";
 
         private string[] magnitude_table;
 
@@ -108,7 +109,7 @@ namespace Haptikos
             //this.Close();
         }
 
-        private void mnuClose_Click(object sender, EventArgs e) {           
+        private void mnuClose_Click(object sender, EventArgs e) {
             // Once this flag is set the UpdateTxtLog thread will catch
             // and handle the request to close.
             // **** THREADS NOT USED
@@ -153,9 +154,9 @@ namespace Haptikos
         }
         private void onDisconnect() {
             error_t response = wirelessBelt.ResetHapticBelt();
-                if (response != error_t.ESUCCESS)
-                    MessageBox.Show(wirelessBelt.getErrorMsg(response));
-            
+            if (response != error_t.ESUCCESS)
+                MessageBox.Show(wirelessBelt.getErrorMsg(response));
+
             wirelessBelt.ClosePorts();
 
             menuDisconnect.Enabled = false;
@@ -183,7 +184,7 @@ namespace Haptikos
         }
 
         private void UpdateText(string s) {
-            if (!s.Equals("")) 
+            if (!s.Equals(""))
                 txtLog.Text += "them:\r\n" + s;
             txtLog.Select(txtLog.TextLength, 0);
             txtLog.ScrollToCaret();
@@ -281,7 +282,7 @@ namespace Haptikos
         }
 
         private void mnuSettings_Click(object sender, EventArgs e) {
-            SettingsForm form = new SettingsForm(inboundPort, outboundPort, readTimeout, wirelessBelt);
+            SettingsForm form = new SettingsForm(inboundPort, outboundPort, readTimeout, fileDirectory, wirelessBelt);
             if (form.ShowDialog() == DialogResult.OK) {
                 if (form.GetInboundPort().CompareTo("NO PORT SELECTED") == 0 ||
                     form.GetOutboundPort().CompareTo("NO PORT SELECTED") == 0) {
@@ -297,12 +298,13 @@ namespace Haptikos
                 //}
                 else {
                     inboundPort = form.GetInboundPort();
-                    outboundPort = form.GetOutboundPort();                    
+                    outboundPort = form.GetOutboundPort();
                     menuConnect.Enabled = true;
                     labelStatusMsg.Text = "Ports set. in:" + inboundPort + "; out:" + outboundPort + "; Waiting to press Connect...";
                 }
                 readTimeout = form.GetComPortTimeout();
                 wirelessBelt.MAX_RESPONSE_TIMEOUT = readTimeout;
+                fileDirectory = form.GetFileDirectory();
             }
             form.Close();
             MessageBox.Show("Please make sure the Bluetooth device and PDA are turned on!");
@@ -328,7 +330,7 @@ namespace Haptikos
         private void mnuTempSpat_Click(object sender, EventArgs e) {
 
             // Instantiate form
-            TempSpatForm form = new TempSpatForm(this, wirelessBelt);
+            TempSpatForm form = new TempSpatForm(this, fileDirectory, wirelessBelt);
 
             form.Show();
 
