@@ -7,9 +7,10 @@ C:\Courses\WinMobile_terminal\HaptikosPC\HaptikosPC\obj\Debug\Haptikos.SettingsF
 C:\Courses\WinMobile_terminal\HaptikosPC\HaptikosPC\obj\Debug\HaptikosPC.csproj.GenerateResource.Cache
 C:\Courses\WinMobile_terminal\HaptikosPC\HaptikosPC\obj\Debug\HaptikosPC.exe
 C:\Courses\WinMobile_terminal\HaptikosPC\HaptikosPC\obj\Debug\HaptikosPC.pdb
+C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\bin\Debug\HaptikosPC.XML
 C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\bin\Debug\HaptikosPC.exe
 C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\bin\Debug\HaptikosPC.pdb
-C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\bin\Debug\HapticDriver.DLL
+C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\bin\Debug\HapticDriver.dll
 C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\bin\Debug\HapticDriver.pdb
 C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\bin\Debug\HapticDriver.xml
 C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\obj\Debug\ResolveAssemblyReference.cache
@@ -22,4 +23,3 @@ C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosP
 C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\obj\Debug\HaptikosPC.csproj.GenerateResource.Cache
 C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\obj\Debug\HaptikosPC.exe
 C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\obj\Debug\HaptikosPC.pdb
-C:\Courses\haptic-research-group\wireless_haptic_belt\code\haptikosPDA\HaptikosPC\HaptikosPC\bin\Debug\HaptikosPC.XML

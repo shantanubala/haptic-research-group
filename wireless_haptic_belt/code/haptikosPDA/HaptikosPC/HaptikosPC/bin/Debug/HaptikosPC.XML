@@ -143,12 +143,13 @@
             the contents of this method with the code editor.
             </summary>
         </member>
-        <member name="M:Haptikos.SettingsForm.#ctor(System.String,System.String,HapticDriver.HapticBelt)">
+        <member name="M:Haptikos.SettingsForm.#ctor(System.String,System.String,System.Int32,HapticDriver.HapticBelt)">
             <summary>
             
             </summary>
             <param name="inbound"></param>
             <param name="outbound"></param>
+            <param name="readTimeout"></param>
             <param name="belt"></param>
         </member>
         <member name="M:Haptikos.SettingsForm.GetInboundPort">
@@ -158,6 +159,12 @@
             <returns></returns>
         </member>
         <member name="M:Haptikos.SettingsForm.GetOutboundPort">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Haptikos.SettingsForm.GetComPortTimeout">
             <summary>
             
             </summary>
