@@ -419,6 +419,7 @@ namespace Haptikos
             this.Controls.Add(this.btnTmpSpatStart);
             this.Name = "TempSpatForm";
             this.Text = "Temporal-Spatial";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.TempSpatForm_FormClosing);
             this.groupBoxCmd.ResumeLayout(false);
             this.groupBoxCmd.PerformLayout();
             this.ResumeLayout(false);
