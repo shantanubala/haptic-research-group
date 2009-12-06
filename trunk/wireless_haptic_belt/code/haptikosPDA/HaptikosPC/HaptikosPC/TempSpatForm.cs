@@ -23,6 +23,7 @@ namespace Haptikos
         private double _tempo = 1;
         private List<PatternElement> patternPlayback;
         Thread play;
+        int threadCount = 0;
 
         /// <summary>
         /// 
@@ -219,19 +220,19 @@ namespace Haptikos
 
             if (factor == 0)
                 //"5" Fastest Tempo (div by 1.5)
-                _tempo = (1 / 2.0);
+                _tempo = (1 / 3.0);
             else if (factor == 1)
                 //"4" Faster Tempo (div by 1.25)
-                _tempo = (1 / 1.25);
+                _tempo = (1 / 2.0);
             else if (factor == 2)
                 //"3" // Default Tempo as set by user
                 _tempo = (1);
             else if (factor == 3)
                 //"2" // Slower Tempo (multiply by 1.25)
-                _tempo = (1.25);
+                _tempo = (2);
             else if (factor == 4)
                 //"1" Slowest Tempo (multiply by 1.5)
-                _tempo = (2);
+                _tempo = (3);
             else
                 _tempo = 1; // as set by the user
         }
@@ -240,9 +241,10 @@ namespace Haptikos
 
             // Stop thread if _run = false
             _run = false;
-            if (play.IsAlive)
+            if (play != null && play.IsAlive) {
                 play.Abort();
-
+                threadCount--;
+            }
             // stop actuations
             wirelessBelt.StopAll();
         }
@@ -254,10 +256,13 @@ namespace Haptikos
             loadPatternData(patternDesign.Text.Split(separator), false);
 
             _run = true;
-            play = new Thread(new ParameterizedThreadStart(this.playbackRun), max);
-            play.Name = "Pattern Playback";
-            play.IsBackground = true;
-            play.Start(max);
+            if (threadCount < 1) { // Only want one playback thread
+                play = new Thread(new ParameterizedThreadStart(this.playbackRun), max);
+                play.Name = "Pattern Playback";
+                play.IsBackground = true;
+                play.Start(max);
+                threadCount++;
+            }
         }
 
         private void loadPatternData(string[] data, bool append) {
@@ -340,9 +345,15 @@ namespace Haptikos
                 }
                 count++;
                 // Check for cycles if not continuous run == index[6] or 7
-                if (count > maxCycles && maxCycles != 6)
+                if (count > maxCycles && maxCycles != 6) {
                     _run = false;
-            }
+                    threadCount--; // done with playback
+                }
+            }            
+        }
+
+        private void TempSpatForm_FormClosing(object sender, FormClosingEventArgs e) {
+            this.btnTmpSpatStop_Click(sender, e);
         }
     }
 }
