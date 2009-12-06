@@ -20,14 +20,17 @@ namespace Haptikos
         /// <param name="inbound"></param>
         /// <param name="outbound"></param>
         /// <param name="readTimeout"></param>
+        /// <param name="fileDirectory"></param>
         /// <param name="belt"></param>
-        public SettingsForm(string inbound, string outbound, int readTimeout, HapticBelt belt) {
+        public SettingsForm(string inbound, string outbound, int readTimeout,
+                            string fileDirectory, HapticBelt belt) {
             InitializeComponent();
 
             // Setup ports
             inboundPort = inbound;
             outboundPort = outbound;
             textBoxTimeout.Text = readTimeout.ToString();
+            textBoxFileDirectory.Text = fileDirectory;
             string[] ports = belt.GetSerialPortNames();//SerialPort.GetPortNames();
 
             // ComboBox 1 = inbound ports
@@ -92,6 +95,14 @@ namespace Haptikos
             return Int16.Parse(textBoxTimeout.Text.Trim());
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public string GetFileDirectory() {
+            return textBoxFileDirectory.Text.Trim();
+        }
+
         private void checkBoxComPortSame_CheckedChanged(object sender, EventArgs e) {
             if (checkBoxComPortSame.Checked == false) {
                 comboBoxOutbound.Enabled = true;
@@ -107,6 +118,15 @@ namespace Haptikos
         private void comboBoxInbound_SelectedIndexChanged(object sender, EventArgs e) {
             if (checkBoxComPortSame.Checked == true)
                 comboBoxOutbound.SelectedItem = comboBoxInbound.SelectedItem;
+        }
+
+        private void btnFileDirectory_Click(object sender, EventArgs e) {
+            FolderBrowserDialog fdlg = new FolderBrowserDialog();
+            fdlg.Description = "Select Haptic Pattern File";
+            //fdlg.RootFolder = Environment.SpecialFolder.MyDocuments;
+            if (fdlg.ShowDialog() == DialogResult.OK) {
+                textBoxFileDirectory.Text = fdlg.SelectedPath;
+            }
         }
 
         //public string CheckHardwareEnable() {

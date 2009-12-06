@@ -15,7 +15,7 @@ namespace Haptikos
 {
     public partial class TempSpatForm : Form
     {
-        char[] separator = { '\r', '\n', ' ' }; // space chars too.
+        char[] separator = { '\r', '\n'}; // space chars too.
         char dlm = ','; // delimiter used for each pattern command line
 
         HapticBelt wirelessBelt;
@@ -24,16 +24,19 @@ namespace Haptikos
         private List<PatternElement> patternPlayback;
         Thread play;
         int threadCount = 0;
+        string _fileDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="mainForm"></param>
+        /// <param name="fileDirectory"></param>
         /// <param name="belt"></param>
-        public TempSpatForm(MainForm mainForm, HapticBelt belt) {
+        public TempSpatForm(MainForm mainForm, string fileDirectory, HapticBelt belt) {
             InitializeComponent();
 
             wirelessBelt = belt;
+            this._fileDirectory = fileDirectory;
             patternPlayback = new List<PatternElement>(2); // start with 2 element and grow
 
             try {
@@ -82,7 +85,7 @@ namespace Haptikos
         private void btnPatternExist_Click(object sender, EventArgs e) {
             OpenFileDialog fdlg = new OpenFileDialog();
             fdlg.Title = "Select Haptic Pattern File";
-            fdlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            fdlg.InitialDirectory = _fileDirectory;
             fdlg.Filter = "Haptic Patterns (*.pattern)|*.pattern|Text files (*.txt)|*.txt|All files (*.*)|*.*";
             fdlg.FilterIndex = 1;
             fdlg.RestoreDirectory = true;
@@ -97,7 +100,7 @@ namespace Haptikos
 
             saveFileDialog.Title = "Save Haptic Pattern File";
             saveFileDialog.FileName = textBoxPatternName.Text + ".pattern";
-            saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            saveFileDialog.InitialDirectory = _fileDirectory;
             saveFileDialog.Filter = "Haptic Patterns (*.pattern)|*.pattern|Text files (*.txt)|*.txt|All files (*.*)|*.*";
             saveFileDialog.FilterIndex = 1;
             saveFileDialog.RestoreDirectory = true;
@@ -166,6 +169,9 @@ namespace Haptikos
 
             // Add command if not empty
             if (patternCmd != "") {
+                // TODO - need to add code so text append will occur at current 
+                // caret position.  Also need TextBox to allow CTRL-A or clear all
+                //patternDesign.ScrollToCaret();
                 patternDesign.Text += patternCmd + "\r\n";
                 patternDesign.Select(patternDesign.TextLength, 0);
                 patternDesign.ScrollToCaret();
@@ -178,7 +184,7 @@ namespace Haptikos
             // Select file
             OpenFileDialog fdlg = new OpenFileDialog();
             fdlg.Title = "Select Haptic Pattern File";
-            fdlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            fdlg.InitialDirectory = _fileDirectory;
             fdlg.Filter = "Haptic Patterns (*.pattern)|*.pattern|Text files (*.txt)|*.txt|All files (*.*)|*.*";
             fdlg.FilterIndex = 1;
             fdlg.RestoreDirectory = true;
