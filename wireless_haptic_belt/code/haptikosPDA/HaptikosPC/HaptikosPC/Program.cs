@@ -9,7 +9,7 @@ namespace Haptikos
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-        [STAThread]
+        [STAThread] // Single Thread Application
         static void Main()
         {
             Application.Run(new MainForm());

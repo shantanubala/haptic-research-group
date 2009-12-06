@@ -19,13 +19,15 @@ namespace Haptikos
         /// </summary>
         /// <param name="inbound"></param>
         /// <param name="outbound"></param>
+        /// <param name="readTimeout"></param>
         /// <param name="belt"></param>
-        public SettingsForm(string inbound, string outbound, HapticBelt belt) {
+        public SettingsForm(string inbound, string outbound, int readTimeout, HapticBelt belt) {
             InitializeComponent();
 
             // Setup ports
             inboundPort = inbound;
             outboundPort = outbound;
+            textBoxTimeout.Text = readTimeout.ToString();
             string[] ports = belt.GetSerialPortNames();//SerialPort.GetPortNames();
 
             // ComboBox 1 = inbound ports
@@ -82,6 +84,14 @@ namespace Haptikos
             return (string)comboBoxOutbound.SelectedItem;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public int GetComPortTimeout() {
+            return Int16.Parse(textBoxTimeout.Text.Trim());
+        }
+
         private void checkBoxComPortSame_CheckedChanged(object sender, EventArgs e) {
             if (checkBoxComPortSame.Checked == false) {
                 comboBoxOutbound.Enabled = true;
@@ -98,6 +108,7 @@ namespace Haptikos
             if (checkBoxComPortSame.Checked == true)
                 comboBoxOutbound.SelectedItem = comboBoxInbound.SelectedItem;
         }
+
         //public string CheckHardwareEnable() {
         //    return (string)System.IO.Ports.SerialPort.;
         //}
