@@ -34,7 +34,7 @@ namespace HapticDriver
         /// default is 400 milliseconds, which might need to be increased
         /// for long wireless transmission distances (up to 100m outdoors).
         /// </summary>
-        public static int MAX_RESPONSE_TIMEOUT = 500; // milliseconds
+        public int MAX_RESPONSE_TIMEOUT = 500; // milliseconds
 
         //Responses:
         //VER x 1, MAG x 4, RHY x 8, MTR x 1, BAT x1 = 15
@@ -192,12 +192,12 @@ namespace HapticDriver
         /// <param name="par">parity bits to be used (None, Odd, Even, Mark, Space)</param>
         /// <param name="timeout">specifies the default timeout for sending/recieving data</param>
         /// <returns>error code resulting from COM port setup</returns>
-        public error_t SetupPorts(string portInName, string portOutName, string baud, string dBits, string sBits, string par, string timeout) {
+        public error_t SetupPorts(string portInName, string portOutName, string baud, string dBits, string sBits, string par, int timeout) {
             error_t error = error_t.COMPRTSETUP;
 
             // validate parameters
             if (portInName == null || portOutName == null || baud == null || dBits == null
-                || sBits == null || par == null || timeout == null) {
+                || sBits == null || par == null || timeout == 0) {
 
                 error = error_t.COMPRTINVALID;
             }
@@ -239,12 +239,12 @@ namespace HapticDriver
                 error = serialIn.OpenPort();
                 if (_portInName != _portOutName)
                     error = serialOut.OpenPort();
-                
+
                 // Send  Use HEX 0x0A for newline to signal to belt "End of Transmission"
                 // In case the belt is in an unknown byte count or state
                 // expect COM port read timeout since nothing should be returned
                 byte[] test = { 0x0A }; // == '\n'                
-                SerialPortWriteData(test, 10); 
+                SerialPortWriteData(test, 10);
             }
             _dll_error = error;
             return error;
@@ -447,13 +447,27 @@ namespace HapticDriver
         /// </summary>
         /// <returns>error code resulting from the reset</returns>
         public error_t ResetHapticBelt() {
-            //Reset Belt's mode
-            _dll_error = change_acmd_mode(acmd_mode_t.ACM_LRN);
+            return ResetHapticBelt(false);
+        }
+
+        /// <summary>
+        /// Reset haptic belt and driver to the default states if any erroneous 
+        /// states occur in DLL or belt.  This is an attempt to regain control
+        /// to a known state.
+        /// </summary>
+        /// <param name="resetComPorts">Set if you want to reset the connection</param>
+        /// <returns>error code resulting from the reset</returns>
+        public error_t ResetHapticBelt(bool resetComPorts) {
 
             //Reset Com Ports
-            _dll_error = ClosePorts();
-            System.Threading.Thread.Sleep(100); //must use this for Windows
-            _dll_error = OpenPorts();
+            if (resetComPorts) {
+                _dll_error = ClosePorts();
+                System.Threading.Thread.Sleep(1000); //must use Sleep for Windows
+                _dll_error = OpenPorts();
+            }
+
+            //Reset Belt's mode
+            _dll_error = change_acmd_mode(acmd_mode_t.ACM_LRN);
 
             return _dll_error;
         }
@@ -650,7 +664,7 @@ namespace HapticDriver
                     }
                 }
             }
-            catch (Exception e){
+            catch (Exception e) {
                 qry_resp[0] = "0";
                 return_error = error_t.EXCQRYCMD;
             }

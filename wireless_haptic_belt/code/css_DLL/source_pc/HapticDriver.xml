@@ -132,6 +132,9 @@
         <member name="F:HapticDriver.error_t.EXCCOMPRTWRITE">
             <summary>Exception occured - serial com port write data</summary> 
         </member>
+        <member name="F:HapticDriver.error_t.EXCCOMPRTREAD">
+            <summary>Exception occured - serial com port read data</summary> 
+        </member>
         <member name="F:HapticDriver.error_t.EXCCOMPRTOPEN">
             <summary>Exception occured - opening serial com port</summary> 
         </member>
@@ -298,7 +301,7 @@
             Accessor method that returns the error code message for a particular error code.
             </summary>
         </member>
-        <member name="M:HapticDriver.HapticBelt.SetupPorts(System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+        <member name="M:HapticDriver.HapticBelt.SetupPorts(System.String,System.String,System.String,System.String,System.String,System.String,System.Int32)">
             <summary>
             Initializes the Serial COM ports
             </summary>
@@ -345,6 +348,15 @@
             states occur in DLL or belt.  This is an attempt to regain control
             to a known state.
             </summary>
+            <returns>error code resulting from the reset</returns>
+        </member>
+        <member name="M:HapticDriver.HapticBelt.ResetHapticBelt(System.Boolean)">
+            <summary>
+            Reset haptic belt and driver to the default states if any erroneous 
+            states occur in DLL or belt.  This is an attempt to regain control
+            to a known state.
+            </summary>
+            <param name="resetComPorts">Set if you want to reset the connection</param>
             <returns>error code resulting from the reset</returns>
         </member>
         <member name="M:HapticDriver.HapticBelt.Vibrate_Motor(HapticDriver.acmd_mode_t,System.Byte,System.Byte,System.Byte,System.Byte)">
@@ -577,7 +589,7 @@
             Delegate handler used for a Data Recieved event
             </summary>
         </member>
-        <member name="M:HapticDriver.SerialPortManager.#ctor(System.String,System.String,System.String,System.String,System.String,System.String,HapticDriver.Buffer)">
+        <member name="M:HapticDriver.SerialPortManager.#ctor(System.String,System.String,System.String,System.String,System.String,System.Int32,HapticDriver.Buffer)">
             <summary>
             Constructor to set the properties of the SerialPortManager Class
             </summary>
@@ -589,7 +601,7 @@
             <param name="timeout"></param>
             <param name="databuf"></param>
         </member>
-        <member name="M:HapticDriver.SerialPortManager.#ctor(System.String,System.String,System.String,System.String,System.String,System.String)">
+        <member name="M:HapticDriver.SerialPortManager.#ctor(System.String,System.String,System.String,System.String,System.String,System.Int32)">
             <summary>
             Constructor without string buffer specified
             </summary>

@@ -45,7 +45,7 @@ namespace HapticDriver
         private string _stopBits = string.Empty;
         private string _dataBits = string.Empty;
         private string _portName = string.Empty;
-        private string _readTimeout = string.Empty;
+        private int _readTimeout; //default
 
         internal bool EchoBack = false;
 
@@ -72,7 +72,7 @@ namespace HapticDriver
         /// <param name="par"></param>
         /// <param name="timeout"></param>
         /// <param name="databuf"></param>
-        internal SerialPortManager(string portName, string baud, string dBits, string sBits, string par, string timeout, Buffer databuf) {
+        internal SerialPortManager(string portName, string baud, string dBits, string sBits, string par, int timeout, Buffer databuf) {
             comPort = new SerialPort();
             serialMutex = new MutexLock();
             dataBufferMutex = new MutexLock();
@@ -91,7 +91,7 @@ namespace HapticDriver
         /// <summary>
         /// Constructor without string buffer specified
         /// </summary>
-        internal SerialPortManager(string portName, string baud, string dBits, string sBits, string par, string timeout) {
+        internal SerialPortManager(string portName, string baud, string dBits, string sBits, string par, int timeout) {
             comPort = new SerialPort();
             serialMutex = new MutexLock();
             dataBufferMutex = new MutexLock();
@@ -120,7 +120,7 @@ namespace HapticDriver
             _stopBits = "1"; // string.Empty;
             _dataBits = "8"; // string.Empty;
             _portName = "COM1";
-            _readTimeout = "1000";
+            _readTimeout = 2056;
             _dataRecvBuffer = new Buffer(dataBufferMutex);
             _statusBuffer = new Buffer(statusBufferMutex);
             //this.DataRecievedFxn = handler;
@@ -251,7 +251,7 @@ namespace HapticDriver
 
                 // Add slight timing delay before other functions can use serial port.
                 //System.Threading.Thread.Sleep(50);
-                HapticBelt.Wait(50);
+                HapticBelt.Wait(500);
             }
             // Saved for debug purposes
             //catch (FormatException ex) {
@@ -290,7 +290,7 @@ namespace HapticDriver
                 // Help with garbage
                 this.DataReceivedFxn = null;
                 //System.Threading.Thread.Sleep(50);
-                HapticBelt.Wait(50);
+                HapticBelt.Wait(500);
             }
             // Saved for debug purposes
             //catch (FormatException ex) {
@@ -370,9 +370,10 @@ namespace HapticDriver
                         // the NewLine value is removed from the input buffer. By default, 
                         // the ReadLine method will block until a line is received.
                         // Method also results in "\r" inserted at the end.
-                        serialMutex.GetLock();
+
+                        //serialMutex.GetLock(); Buffer is not currently shared
                         string line = comPort.ReadLine();
-                        serialMutex.Unlock();
+                        //serialMutex.Unlock();
 
                         // add to buffer while replacing the stripped NewLine character
                         strBuffer += line + "\n";
@@ -384,7 +385,7 @@ namespace HapticDriver
                         }
                     }
                     else { //type = DataType.Hex
-                        serialMutex.GetLock();
+                        //serialMutex.GetLock();  Buffer is not currently shared
                         if (comPort.BytesToRead > 0) {
                             byte_count = comPort.BytesToRead;
 
@@ -404,7 +405,7 @@ namespace HapticDriver
                             //store the data in a buffer available to the Driver
                             ReturnData(MessageType.INCOMING, dataBuffer);
                         }
-                        serialMutex.Unlock(); // release mutex
+                        //serialMutex.Unlock(); // release mutex
                         error = error_t.ESUCCESS;
                     }
                     // Update timer and compare (need to disable during step debug)
@@ -417,8 +418,8 @@ namespace HapticDriver
                 } // END OF LOOP
             }
             catch (TimeoutException) {
-                error = error_t.COMPRTREADTIME;
-                serialMutex.Unlock();
+                error = error_t.EXCCOMPRTREAD;//COMPRTREADTIME;
+                //serialMutex.Unlock(); Buffer is not currently shared
             }
             //store the text data in a buffer available to the Driver
             if (type == DataType.Text) {
