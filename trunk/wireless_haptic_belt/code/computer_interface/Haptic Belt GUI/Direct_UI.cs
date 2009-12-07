@@ -37,13 +37,15 @@ namespace HapticGUI
         //Enters program mode
         private void Show_Program_Mode()
         {
+            _viewableMotors = 16;
+
             //Set proper buttons for this mode since its shared with Operation mode
             DirectActivateGroup.Hide();
             DirectActivateSet.Hide();
             DirectActivateMotor.Hide();
             DirectStop.Hide();
-            DirectOption.Hide();
-            DirectOptionLabel.Hide();
+            DirectShowOption.Hide();
+            DirectShowOptionLabel.Hide();
             DirectProgramBack.Show();
 
             Initialize_Program_Mode();
@@ -58,8 +60,8 @@ namespace HapticGUI
             DirectActivateSet.Show();
             DirectActivateMotor.Show();
             DirectStop.Show();
-            DirectOption.Show();
-            DirectOptionLabel.Show();
+            DirectShowOption.Show();
+            DirectShowOptionLabel.Show();
             DirectProgramBack.Hide();
 
             DirectPanel.Hide();
@@ -77,9 +79,9 @@ namespace HapticGUI
         } 
  //Button Events: Motors: Add, Delete, Clear, Activate
         //Adds a new activation to selected set, based on comboBox parameters
-        private void DirectAddMotor_Click(object sender, EventArgs e)
+        private void DirectSetMotor_Click(object sender, EventArgs e)
         {
-            Add_Activation(DirectRhythmBox.SelectedItem.ToString(), DirectMagBox.SelectedItem.ToString(), DirectCyclesBox.SelectedItem.ToString(), Convert.ToInt16(DirectDelayField.Value));
+            Set_Activation(DirectRhythmBox.SelectedItem.ToString(), DirectMagBox.SelectedItem.ToString(), DirectCyclesBox.SelectedItem.ToString(), Convert.ToInt16(DirectDelayField.Value));
         }
         //Removes selected activation request from selected set
         private void DirectDeleteMotor_Click(object sender, EventArgs e)
@@ -186,19 +188,22 @@ namespace HapticGUI
                 Swap_Sets();
         }
         //Changes the display labels on the GUI
-        private void AddedList_SelectedIndexChanged(object sender, EventArgs e)
+        private void MotorList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Change_Labels();
+            if (MotorList.SelectedIndices.Count == 1)
+                Change_Motor();
+            else if (MotorList.SelectedIndices.Count == 2)
+                Swap_Motors(DirectSwapOption.Checked);
         }
         //Limits viewing to available motors only if checked
-        private void DirectOption_CheckedChanged(object sender, EventArgs e)
+        private void DirectSwapOption_CheckedChanged(object sender, EventArgs e)
         {
-            if (DirectOption.Checked)
+            if (DirectShowOption.Checked)
                 _viewableMotors = _motorcount;
             else
                 _viewableMotors = _maxmotors;
 
             Change_Set();
-        } 
+        }
     }
 }

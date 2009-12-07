@@ -155,6 +155,8 @@ namespace HapticGUI
         {
             if(DirectDelayField.Value%50 != 0)
                 DirectDelayField.Value = Convert.ToInt32(DirectDelayField.Value) / 50 * 50;
-        } 
+        }
+
+        
     }
 }
