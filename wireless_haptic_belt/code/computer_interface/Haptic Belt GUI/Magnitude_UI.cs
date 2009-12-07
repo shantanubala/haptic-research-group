@@ -71,8 +71,7 @@ namespace HapticGUI
                 }
             }
             //Wait for motors to finish vibrating or user to click "Stop" on MagTestStop Button
-            MagTestStop.Show();
-        
+            MagTestStop.Show(); 
         }
         private void MagTestStop_Click(object sender, EventArgs e)
         {
