@@ -8,25 +8,11 @@ using System.Windows.Forms;
 using System.Threading;
 using HapticDriver;
 
-/*TODO
- * 
- * Display Error Prompts in Main.
- * Display Error Prompt if Name Field is empty when trying to ADD/RENAME
- * 
- * 
- * 
- * 
- * 
- * 
- */
-
-
 
 namespace HapticGUI
 {
     partial class GUI
     {
-        Group[] _group;
         int _current_set = 0;
         int _current_group = 0;
         bool _done_activating = true; // Used to make sure we are done activating motors before issuing a stop command
@@ -39,145 +25,18 @@ namespace HapticGUI
 
         const int _maxmotors = 16; //Max amount of motors possible for this application
 
-//Data structures 
-        //Set Data Structure has a name String, a motor String[], and delay int[].
-        private struct Set
-        {
-            public String name;
-            public String[] motor;
-            
-            //Allocates and copies into new memory with a deep copy
-            public Set(Set toClone)
-            {
-                motor = (String[])toClone.motor.Clone();
-                name = (String)toClone.name.Clone();
-            }
-        }
-        //Group Data Structure, has a name and a String[]
-        private struct Group
-        {
-            public String name;
-            public Set[] set;
-            
-            //Allocates and copies into new memory with a deep copy
-            public Group(Group toClone)
-            {
-                set = (Set[])toClone.set.Clone();
-                name = (String)toClone.name.Clone();
-            }
-        }
-//Data structure functions
-        //Increases the given Set[] size by 1, and copies all data from old_set into the returned set.
-        private Set[] increaseSet(Set[] old_set, String name)
-        {
-            Set[] new_set;
 
-            if (old_set == null)
-            {
-                new_set = new Set[1];
 
-                //Instantiate the Name and motor array of the last indexed newly created set
-                new_set[0].motor = new String[_maxmotors];
-                new_set[0].name = name;
-
-                //Initialize newly created Set's motor array to "";
-                for (int i = 0; i < _maxmotors; i++)
-                    new_set[0].motor[i] = "";
-            }
-            else
-            {
-                new_set = new Set[old_set.Length + 1];
-
-                //Copy old contents into new contents (uses deep copy)
-                for (int i = 0; i < old_set.Length; i++)
-                    new_set[i] = new Set(old_set[i]);
-
-                //Instantiate the Name and motor array of the last indexed newly created set
-                new_set[new_set.Length - 1].motor = new String[_maxmotors];
-                new_set[new_set.Length - 1].name = name;
-
-                //Initialize newly created Set's motor array to "";
-                for (int i = 0; i < _maxmotors; i++)
-                    new_set[new_set.Length - 1].motor[i] = "";
-            }
-            return new_set;
-        }
-        //Increases the given Group[] size by 1, and copies all data from old_set into the returned set.
-        private Group[] increaseGroup(Group[] old_group, String name)
-        {
-            Group[] new_group;
-
-            if (old_group == null)
-            {
-                new_group = new Group[1];
-
-                //Initialize the name of the new group
-                new_group[0].name = name;
-                new_group[0].set = null;
-            }
-            else
-            {
-                new_group = new Group[old_group.Length + 1];
-                //Copy old contents into new contents (uses deep copy)
-                for (int i = 0; i < old_group.Length; i++)
-                    new_group[i] = new Group(old_group[i]);
-
-                //Initialize the name of the new group
-                new_group[new_group.Length - 1].name = name;
-                new_group[new_group.Length - 1].set = null;
-            }
-            
-            return new_group;
-        }
-        //Deletes the specified Set via index from the specified Set[], and shifts and shrinks the Set[] data to fill gap.
-        private Set[] decreaseSet(Set[] old_set, int index)
-        {
-            Set[] new_set = new Set[old_set.Length - 1];
-
-            //Copy old contents into new contents up to index (using deep copy)
-            for (int i = 0; i < index; i++)
-                new_set[i] = new Set(old_set[i]);
-            //Copy old contents into new contents starting after index (using deep copy)
-            for (int i = index + 1; i < old_set.Length; i++)
-                new_set[i-1] = new Set(old_set[i]);
-
-            return new_set;
-        }
-
-        //Deletes the specified Group via index from the specified Group[], and shifts and shrinks the Group[] data to fill gap.
-        private Group[] decreaseGroup(Group[] old_group, int index)
-        {
-            Group[] new_group = new Group[old_group.Length - 1];
-
-            //Copy old contents into new contents up to index (using deep copy)
-            for (int i = 0; i < index; i++)
-                new_group[i] = new Group(old_group[i]);
-            //Copy old contents into new contents starting after index (using deep copy)
-            for (int i = index + 1; i < old_group.Length; i++)
-                new_group[i - 1] = new Group(old_group[i]);
-
-            return new_group;
-        }
-
-//Initialization Functions - Called when entering from Main menu.
-        private void Initialize_Operation_Mode()
-        {
-            //Query Belt
-            _motorcount = belt.getMotors(QueryType.SINGLE);
-            if (hasError(belt.getStatus(), "getMotors()"))
-            {
-                //Handle Error
-            }
-            //Set viewability to only include attached motors (sets off action event handler)
-            DirectShowOption.Checked = true;
-        }
-
-        private void Initialize_Program_Mode()
-        {
-            //Set viewablilty to include all motors (sets off action event handler)
-            DirectShowOption.Checked = false; 
-        }
 //Functions that manipulate Text Labels
+        //Change File - called when a file is loaded
+        private void Change_File()
+        {
+            MotorList.Items.Clear();
+            SetList.Items.Clear();
+            GroupList.Items.Clear();
+            for (int i = 0; i < _group.Length; i++)
+                GroupList.Items.Add(_group[i].name);
+        }
         //Populates 3 lables based on selected motor in "AddedList"
         private void Change_Motor()
         {
@@ -294,8 +153,6 @@ namespace HapticGUI
             }
 
             Change_Set();
-
-            MotorList.SelectedIndex = swapA;
         }
         //Swaps the two selected sets
         private void Swap_Sets()
@@ -316,10 +173,7 @@ namespace HapticGUI
             _group[_current_group].set[swapA] = new Set(_group[_current_group].set[swapB]);
             _group[_current_group].set[swapB] = store;
 
-            Change_Group();
-
-            SetList.SelectedIndex = swapA;
-            
+            Change_Group();          
         }
         //Swaps the two selected groups
         private void Swap_Groups()
@@ -347,8 +201,6 @@ namespace HapticGUI
             //Populate GroupList based on newly selected group
             for (int i = 0; i < _group.Length; i++)
                 GroupList.Items.Add(_group[i].name);
-
-            GroupList.SelectedIndex = swapA;
         }
 
 //Functions on Activations
@@ -439,6 +291,11 @@ namespace HapticGUI
 
                 DirectRenameField.Clear();
             }
+            else
+            {
+                ErrorForm errorForm = new ErrorForm("Name field blank, you must have a name for each set", "Add_Set()", false);
+                errorForm.ShowDialog();  
+            }
         }
         //Deletes the selected set
         private void Delete_Set()
@@ -460,7 +317,7 @@ namespace HapticGUI
         //Deletes all sets
         private void Clear_Set()
         {
-            _group[_current_group].set = null;
+            _group[_current_group].set = new Set[0];
             
             //Clear out SetList, AddedList and AvailableList
             MotorList.Items.Clear();
@@ -542,6 +399,11 @@ namespace HapticGUI
 
                 DirectRenameField.Clear();
             }
+            else
+            {
+                ErrorForm errorForm = new ErrorForm("Name field blank, you must have a name for each group", "Add_Group()", false);
+                errorForm.ShowDialog();  
+            }
         }
         //Deletes selected group
         private void Delete_Group()
@@ -565,7 +427,7 @@ namespace HapticGUI
         private void Clear_Group()
         {  
             //Initialize group->set->motor data structures
-            _group = null;
+            _group = new Group[0];
            
             //Clear all ListBoxes
             MotorList.Items.Clear();

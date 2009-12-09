@@ -29,7 +29,8 @@ namespace HapticGUI
             //Rhythm Time cannot exceed 3200ms
             else if (on + off + total_duration > 3200)
             {
-                dispError("Rhythm length cannot exceed 3200ms"); 
+                ErrorForm errorForm = new ErrorForm("Rhythm length cannot exceed 3200ms", "Add_Pair()", false);
+                errorForm.ShowDialog(); 
             }
             else
             {
@@ -54,7 +55,8 @@ namespace HapticGUI
                 //Rhythm Time cannot exceed 3200ms
                 else if ((on + off + total_duration) > 3200)
                 {
-                    dispError("Rhythm length cannot exceed 3200ms"); 
+                    ErrorForm errorForm = new ErrorForm("Rhythm length cannot exceed 3200ms", "Insert_Pair()", false);
+                    errorForm.ShowDialog(); 
                 }
                 else
                 {
@@ -88,7 +90,8 @@ namespace HapticGUI
                 //Rhythm Time cannot exceed 3200ms, compares difference in values against limit
                 else if ((on + off + total_duration - Convert.ToInt32(splitPair[0]) - Convert.ToInt32(splitPair[1])) > 3200)
                 {
-                    dispError("Rhythm length cannot exceed 3200ms");                                                                                                                                                                                                                                                            
+                    ErrorForm errorForm = new ErrorForm("Rhythm length cannot exceed 3200ms", "Replace_Pair()", false);
+                    errorForm.ShowDialog();                                                                                                                                                                                                                                                            
                 }
                 else
                 {
@@ -138,56 +141,50 @@ namespace HapticGUI
          *the String[] rhythmItems, a different format that
          *represents On,Off durations in pairs.
          */
-        private void Populate_Rhythm(String sel)
-        {           
-            String pattern = belt.getRhythmPattern(sel,true,QueryType.SINGLE);
+        private void Populate_Rhythm()
+        {
+            String pattern = _group[_current_group].rhythm[RhythmComboBox.SelectedIndex].pattern;
             String currChar = "";
             String prevChar = "";
+            int duration = 0;    //Accumulates successive 1's or 0's as 50ms increments
 
-            if (hasError(belt.getStatus(), "getRhythmPattern()"))
+            rhythmItems = new String[64]; //Clear old rhythmItems
+            pairs = 0;       //Number of On,Off pairs
+            //We set these parameters to make the loop logic more simple
+            prevChar = pattern.Substring(0, 1);
+
+            //Creates a string array of pairs of on,off durations, based on string pattern
+            for (int i = 0; i < pattern.Length; i++)
             {
-                //Handle Error
-            }
-            else
-            {
-                int duration = 0;    //Accumulates successive 1's or 0's as 50ms increments
-                rhythmItems = new String[64];
-                pairs = 0;       //Number of On,Off pairs
-                //We set these parameters to make the loop logic more simple
-                prevChar = pattern.Substring(0, 1);
-                //Creates a string array of pairs of on,off durations, based on string pattern
-                for (int i = 0; i < pattern.Length; i++)
+                currChar = pattern.Substring(i, 1);
+                if (prevChar == currChar)
                 {
-                    currChar = pattern.Substring(i, 1);
-                    if (prevChar == currChar)
+                    duration += 50;
+                }
+                else
+                {
+                    if (currChar == "1")
                     {
-                        duration += 50;
+                        rhythmItems[pairs] = rhythmItems[pairs] + duration.ToString();
+                        pairs++;
                     }
                     else
                     {
-                        if (currChar == "1")
-                        {
-                            rhythmItems[pairs] = rhythmItems[pairs] + duration.ToString();
-                            pairs++;
-                        }
-                        else
-                        {
-                            rhythmItems[pairs] = duration.ToString() + ",";
-                        }
-                        total_duration += duration; //accumulate duration
-                        duration = 50; //reset duration
+                        rhythmItems[pairs] = duration.ToString() + ",";
                     }
-                    prevChar = currChar; //Set the new previous character
+                    total_duration += duration; //accumulate duration
+                    duration = 50; //reset duration
                 }
-                //Adds last of the pairs after loop completes
-                rhythmItems[pairs] = rhythmItems[pairs] + duration.ToString();
-                total_duration += duration;
-                pairs++;
-                //Adds items to collection of RhythmPattern Box Display
-                for (int i = 0; i < pairs; i++)
-                {
-                    RhythmPatternList.Items.Add(rhythmItems[i]);
-                }
+                prevChar = currChar; //Set the new previous character
+            }
+            //Adds last of the pairs after loop completes
+            rhythmItems[pairs] = rhythmItems[pairs] + duration.ToString();
+            total_duration += duration;
+            pairs++;
+            //Adds items to collection of RhythmPattern Box Display
+            for (int i = 0; i < pairs; i++)
+            {
+                RhythmPatternList.Items.Add(rhythmItems[i]);
             }
         }
         /*Paints Rythm based on String[] rhythmItems's contents

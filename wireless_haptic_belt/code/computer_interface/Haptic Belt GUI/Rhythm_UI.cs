@@ -18,32 +18,25 @@ namespace HapticGUI
             //Initiates the Rhythm Panel by Clearing then Populating the 
             //selection box and painting the represented patern.
             Clear_Rhythm();
-            Populate_Rhythm(RhythmComboBox.SelectedItem.ToString());
+            Populate_Rhythm();
             Paint_Rythm();
             RhythmPanel.Show();
         }
-        //Handles all necessary conditions to hide this panel
-        private void Hide_Rhythm_Mode()
-        {
-            RhythmPanel.Hide();
-        }
-        //Sends user back to Select Mode (Main Menu)
-        private void RhythmBack_Click(object sender, EventArgs e)
-        {
-            Hide_Rhythm_Mode();
-            Show_Select_Mode();
-        }
+
         //Calls the Library to learn the Rhythm specified by the listBox
-        private void RhythmLearn_Click(object sender, EventArgs e)
+        private void RhythmSet_Click(object sender, EventArgs e)
         {
             if (pairs != 0)
             {
                 String[] pattern = Get_Pattern().Split(',');
 
-                if(hasError(belt.Learn_Rhythm(RhythmComboBox.SelectedItem.ToString(), pattern[0],Convert.ToInt16(pattern[1]),true),"Learn_Rhythm()"))
-                {
-                    //Handle Error
-                }
+                _group[_current_group].rhythm[RhythmComboBox.SelectedIndex].pattern = pattern[0];
+                _group[_current_group].rhythm[RhythmComboBox.SelectedIndex].time = Convert.ToInt16(pattern[1]);
+            }
+            else
+            {
+                ErrorForm errorForm = new ErrorForm("Rhythm length must be at least 50ms", "RhythmSet_Click()", false);
+                errorForm.ShowDialog(); 
             }
         }
         //Learns and plays Rhythm on belt using Rhythm H and Learns 100% Magnitude on setting A, and replaces A at the end
@@ -54,8 +47,6 @@ namespace HapticGUI
             {
                 //Hide Rhythm Buttons so no interference will occur
                 RhythmTest.Hide();
-                RhythmBack.Hide();
-                RhythmLearn.Hide();
 
                 //Get the User Inputed Pattern
                 String[] pattern = Get_Pattern().Split(',');
@@ -111,15 +102,13 @@ namespace HapticGUI
             }
             //Reset button visability to original states
             RhythmTest.Show();
-            RhythmBack.Show();
-            RhythmLearn.Show();
             RhythmTestStop.Hide();
         }
         //Changes the PatternBox, called only upon changes in the ComboBox
         private void RhythmComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             Clear_Rhythm();
-            Populate_Rhythm(RhythmComboBox.SelectedItem.ToString());
+            Populate_Rhythm();
             Paint_Rythm();
         }
         //When a change occurs, we want to place markers around selected pattern
