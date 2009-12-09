@@ -18,65 +18,10 @@ namespace HapticGUI
 {
     partial class GUI
     {
-        //Handles all necessary conditions to display this panel
-        //if we can Query the belt w/o conflict, we enter this mode
-        //otherwise we stay in Select Mode.
-        private void Show_Operation_Mode()
-        {
-            //Must be done before start we allow user control.
-            Initialize_Operation_Mode();
-            DirectPanel.Show();
-        }
-        //Triggers stop button and goes back to Main Menu
-        private void Hide_Operation_Mode()
-        {
-            //Stop All Motors before going back
-            StopMotors();
-            DirectPanel.Hide();
-        }
-        //Enters program mode
-        private void Show_Program_Mode()
-        {
-            _viewableMotors = 16;
 
-            //Set proper buttons for this mode since its shared with Operation mode
-            DirectActivateGroup.Hide();
-            DirectActivateSet.Hide();
-            DirectActivateMotor.Hide();
-            DirectStop.Hide();
-            DirectShowOption.Hide();
-            DirectShowOptionLabel.Hide();
-            DirectProgramBack.Show();
 
-            Initialize_Program_Mode();
 
-            DirectPanel.Show();
-        }
-        //Goes back to Main Menu
-        private void Hide_Program_Mode()
-        {
-            //Reset buttons back to original states since its shared with Operation Mode
-            DirectActivateGroup.Show();
-            DirectActivateSet.Show();
-            DirectActivateMotor.Show();
-            DirectStop.Show();
-            DirectShowOption.Show();
-            DirectShowOptionLabel.Show();
-            DirectProgramBack.Hide();
 
-            DirectPanel.Hide();
-        }
-
-//Button Events: Save and Load
-        private void DirectLoad_Click(object sender, EventArgs e)
-        {
-            //TODO
-        }
-
-        private void DirectSave_Click(object sender, EventArgs e)
-        {
-            //TODO
-        } 
  //Button Events: Motors: Add, Delete, Clear, Activate
         //Adds a new activation to selected set, based on comboBox parameters
         private void DirectSetMotor_Click(object sender, EventArgs e)
@@ -142,18 +87,8 @@ namespace HapticGUI
             Activate_Group();
         }      
 //Other Button Events
-        //Go back to menu from Operation Mode
-        private void DirectOperationBack_Click(object sender, EventArgs e)
-        {
-            Hide_Operation_Mode();
-            Show_Select_Mode();
-        }
-        //Go back to menu from Program Mode
-        private void DirectProgramBack_Click(object sender, EventArgs e)
-        {
-            Hide_Program_Mode();
-            Show_Select_Mode();
-        } 
+
+ 
         //Stops all motors from vibrating
         private void DirectStop_Click(object sender, EventArgs e)
         {
@@ -193,17 +128,24 @@ namespace HapticGUI
             if (MotorList.SelectedIndices.Count == 1)
                 Change_Motor();
             else if (MotorList.SelectedIndices.Count == 2)
-                Swap_Motors(DirectSwapOption.Checked);
+                Swap_Motors(motorSwapingOnAllGroupsSetsMenu.Checked);
         }
         //Limits viewing to available motors only if checked
-        private void DirectSwapOption_CheckedChanged(object sender, EventArgs e)
+        private void showOnlyConnectedMotorsMenu_Click(object sender, EventArgs e)
         {
-            if (DirectShowOption.Checked)
+            if (showOnlyConnectedMotorsMenu.Checked)
                 _viewableMotors = _motorcount;
             else
                 _viewableMotors = _maxmotors;
 
             Change_Set();
+        }
+ 
+
+        private void DirectDelayField_ValueChanged(object sender, EventArgs e)
+        {
+            if (DirectDelayField.Value % 50 != 0)
+                DirectDelayField.Value = Convert.ToInt32(DirectDelayField.Value) / 50 * 50;
         }
     }
 }

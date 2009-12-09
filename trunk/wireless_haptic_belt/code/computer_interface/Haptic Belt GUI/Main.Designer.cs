@@ -28,24 +28,25 @@ namespace HapticGUI
         /// </summary>
         private void InitializeComponent()
         {
-            this.ModeComboBox = new System.Windows.Forms.ComboBox();
-            this.SelectModeLabel = new System.Windows.Forms.Label();
-            this.ModeGo = new System.Windows.Forms.Button();
-            this.Exit = new System.Windows.Forms.Button();
             this.RhythmComboBox = new System.Windows.Forms.ComboBox();
-            this.RhythmLearn = new System.Windows.Forms.Button();
-            this.RhythmBack = new System.Windows.Forms.Button();
             this.RhythmTest = new System.Windows.Forms.Button();
             this.RhythmPatternList = new System.Windows.Forms.ListBox();
-            this.MainPanel = new System.Windows.Forms.Panel();
-            this.ClosePort = new System.Windows.Forms.Button();
-            this.OpenPort = new System.Windows.Forms.Button();
-            this.RefreshPorts = new System.Windows.Forms.Button();
             this.MagPanel = new System.Windows.Forms.Panel();
+            this.MagSet = new System.Windows.Forms.Button();
             this.MagTestStop = new System.Windows.Forms.Button();
             this.DutyLabel = new System.Windows.Forms.Label();
             this.DutyCycle = new System.Windows.Forms.NumericUpDown();
+            this.Period = new System.Windows.Forms.NumericUpDown();
+            this.PeriodLabel = new System.Windows.Forms.Label();
+            this.PeriodDefaultLabel = new System.Windows.Forms.Label();
+            this.MagOption = new System.Windows.Forms.CheckBox();
+            this.Percentage = new System.Windows.Forms.NumericUpDown();
+            this.PercentLabel = new System.Windows.Forms.Label();
+            this.MagTest = new System.Windows.Forms.Button();
+            this.MagComboBox = new System.Windows.Forms.ComboBox();
+            this.MagSelLabel = new System.Windows.Forms.Label();
             this.RhythmPanel = new System.Windows.Forms.Panel();
+            this.RhythmSet = new System.Windows.Forms.Button();
             this.RhythmTestStop = new System.Windows.Forms.Button();
             this.RhythmTime = new System.Windows.Forms.Label();
             this.TimeLabel = new System.Windows.Forms.Label();
@@ -60,28 +61,11 @@ namespace HapticGUI
             this.RhythmOff = new System.Windows.Forms.NumericUpDown();
             this.RhythmOn = new System.Windows.Forms.NumericUpDown();
             this.RhythmLabel = new System.Windows.Forms.Label();
-            this.Period = new System.Windows.Forms.NumericUpDown();
-            this.PeriodLabel = new System.Windows.Forms.Label();
-            this.PeriodDefaultLabel = new System.Windows.Forms.Label();
-            this.MagOption = new System.Windows.Forms.CheckBox();
-            this.Percentage = new System.Windows.Forms.NumericUpDown();
-            this.PercentLabel = new System.Windows.Forms.Label();
-            this.MagTest = new System.Windows.Forms.Button();
-            this.MagBack = new System.Windows.Forms.Button();
-            this.MagLearn = new System.Windows.Forms.Button();
-            this.MagComboBox = new System.Windows.Forms.ComboBox();
-            this.MagSelLabel = new System.Windows.Forms.Label();
-            this.COMComboBox = new System.Windows.Forms.ComboBox();
-            this.SelectPortLabel = new System.Windows.Forms.Label();
             this.DirectPanel = new System.Windows.Forms.Panel();
-            this.DirectShowOptionLabel = new System.Windows.Forms.Label();
-            this.DirectShowOption = new System.Windows.Forms.CheckBox();
-            this.DirectProgramBack = new System.Windows.Forms.Button();
+            this.DirectGroupProgram = new System.Windows.Forms.Button();
             this.AddedDelayLabel = new System.Windows.Forms.Label();
             this.DirectDelayLabel = new System.Windows.Forms.Label();
             this.DirectDelayField = new System.Windows.Forms.NumericUpDown();
-            this.DirectSave = new System.Windows.Forms.Button();
-            this.DirectLoad = new System.Windows.Forms.Button();
             this.DirectRenameLabel = new System.Windows.Forms.Label();
             this.DirectActivateMotor = new System.Windows.Forms.Button();
             this.DirectActivateGroup = new System.Windows.Forms.Button();
@@ -94,7 +78,6 @@ namespace HapticGUI
             this.DirectAddSet = new System.Windows.Forms.Button();
             this.GroupList = new System.Windows.Forms.ListBox();
             this.DirectRenameGroup = new System.Windows.Forms.Button();
-            this.DirectOperationBack = new System.Windows.Forms.Button();
             this.DirectRenameField = new System.Windows.Forms.TextBox();
             this.DirectRenameSet = new System.Windows.Forms.Button();
             this.DirectStop = new System.Windows.Forms.Button();
@@ -115,65 +98,33 @@ namespace HapticGUI
             this.DirectMotorLabel = new System.Windows.Forms.Label();
             this.SetList = new System.Windows.Forms.ListBox();
             this.MotorList = new System.Windows.Forms.ListBox();
-            this.ErrorStatus = new System.Windows.Forms.Label();
-            this.ErrorLocation = new System.Windows.Forms.Label();
-            this.DirectSwapOption = new System.Windows.Forms.CheckBox();
-            this.DirectSwapOptionLabel = new System.Windows.Forms.Label();
-            this.MainPanel.SuspendLayout();
+            this.loadBinaryFile = new System.Windows.Forms.OpenFileDialog();
+            this.saveBinaryFile = new System.Windows.Forms.SaveFileDialog();
+            this.MenuStrip = new System.Windows.Forms.MenuStrip();
+            this.fileMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.connectMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.disconnectMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.refreshPortsMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.COMComboBoxMenu = new System.Windows.Forms.ToolStripComboBox();
+            this.loadMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.optionsMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.showOnlyConnectedMotorsMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.motorSwapingOnAllGroupsSetsMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.versionMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.guiVersionMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.firmwareVersionMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.MagPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DutyCycle)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Period)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Percentage)).BeginInit();
             this.RhythmPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.RhythmOff)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.RhythmOn)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Period)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Percentage)).BeginInit();
             this.DirectPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DirectDelayField)).BeginInit();
+            this.MenuStrip.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // ModeComboBox
-            // 
-            this.ModeComboBox.FormattingEnabled = true;
-            this.ModeComboBox.Items.AddRange(new object[] {
-            "Direct Program Mode",
-            "Direct Operation Mode",
-            "Rhythm Mode",
-            "Magnitude Mode"});
-            this.ModeComboBox.Location = new System.Drawing.Point(99, 16);
-            this.ModeComboBox.Name = "ModeComboBox";
-            this.ModeComboBox.Size = new System.Drawing.Size(156, 21);
-            this.ModeComboBox.TabIndex = 1;
-            this.ModeComboBox.Text = "Direct Program Mode";
-            // 
-            // SelectModeLabel
-            // 
-            this.SelectModeLabel.AutoSize = true;
-            this.SelectModeLabel.BackColor = System.Drawing.SystemColors.Control;
-            this.SelectModeLabel.Location = new System.Drawing.Point(13, 19);
-            this.SelectModeLabel.Name = "SelectModeLabel";
-            this.SelectModeLabel.Size = new System.Drawing.Size(67, 13);
-            this.SelectModeLabel.TabIndex = 1;
-            this.SelectModeLabel.Text = "Select Mode";
-            // 
-            // ModeGo
-            // 
-            this.ModeGo.Location = new System.Drawing.Point(180, 222);
-            this.ModeGo.Name = "ModeGo";
-            this.ModeGo.Size = new System.Drawing.Size(75, 23);
-            this.ModeGo.TabIndex = 7;
-            this.ModeGo.Text = "Go";
-            this.ModeGo.UseVisualStyleBackColor = true;
-            this.ModeGo.Click += new System.EventHandler(this.ModeGo_Click);
-            // 
-            // Exit
-            // 
-            this.Exit.Location = new System.Drawing.Point(16, 222);
-            this.Exit.Name = "Exit";
-            this.Exit.Size = new System.Drawing.Size(75, 23);
-            this.Exit.TabIndex = 6;
-            this.Exit.Text = "Exit";
-            this.Exit.UseVisualStyleBackColor = true;
-            this.Exit.Click += new System.EventHandler(this.Exit_Click);
             // 
             // RhythmComboBox
             // 
@@ -190,29 +141,9 @@ namespace HapticGUI
             this.RhythmComboBox.TabIndex = 1;
             this.RhythmComboBox.Text = "A";
             // 
-            // RhythmLearn
-            // 
-            this.RhythmLearn.Location = new System.Drawing.Point(180, 222);
-            this.RhythmLearn.Name = "RhythmLearn";
-            this.RhythmLearn.Size = new System.Drawing.Size(75, 23);
-            this.RhythmLearn.TabIndex = 12;
-            this.RhythmLearn.Text = "Learn";
-            this.RhythmLearn.UseVisualStyleBackColor = true;
-            this.RhythmLearn.Click += new System.EventHandler(this.RhythmLearn_Click);
-            // 
-            // RhythmBack
-            // 
-            this.RhythmBack.Location = new System.Drawing.Point(16, 222);
-            this.RhythmBack.Name = "RhythmBack";
-            this.RhythmBack.Size = new System.Drawing.Size(75, 23);
-            this.RhythmBack.TabIndex = 10;
-            this.RhythmBack.Text = "Back";
-            this.RhythmBack.UseVisualStyleBackColor = true;
-            this.RhythmBack.Click += new System.EventHandler(this.RhythmBack_Click);
-            // 
             // RhythmTest
             // 
-            this.RhythmTest.Location = new System.Drawing.Point(98, 222);
+            this.RhythmTest.Location = new System.Drawing.Point(18, 222);
             this.RhythmTest.Name = "RhythmTest";
             this.RhythmTest.Size = new System.Drawing.Size(75, 23);
             this.RhythmTest.TabIndex = 11;
@@ -229,60 +160,12 @@ namespace HapticGUI
             this.RhythmPatternList.TabIndex = 4;
             this.RhythmPatternList.SelectedIndexChanged += new System.EventHandler(this.RhythmPatternList_SelectedIndexChanged);
             // 
-            // MainPanel
-            // 
-            this.MainPanel.Controls.Add(this.ClosePort);
-            this.MainPanel.Controls.Add(this.OpenPort);
-            this.MainPanel.Controls.Add(this.RefreshPorts);
-            this.MainPanel.Controls.Add(this.MagPanel);
-            this.MainPanel.Controls.Add(this.COMComboBox);
-            this.MainPanel.Controls.Add(this.SelectPortLabel);
-            this.MainPanel.Controls.Add(this.Exit);
-            this.MainPanel.Controls.Add(this.ModeGo);
-            this.MainPanel.Controls.Add(this.ModeComboBox);
-            this.MainPanel.Controls.Add(this.SelectModeLabel);
-            this.MainPanel.Location = new System.Drawing.Point(13, 35);
-            this.MainPanel.Name = "MainPanel";
-            this.MainPanel.Size = new System.Drawing.Size(270, 248);
-            this.MainPanel.TabIndex = 25;
-            // 
-            // ClosePort
-            // 
-            this.ClosePort.Location = new System.Drawing.Point(180, 102);
-            this.ClosePort.Name = "ClosePort";
-            this.ClosePort.Size = new System.Drawing.Size(75, 21);
-            this.ClosePort.TabIndex = 5;
-            this.ClosePort.Text = "Close";
-            this.ClosePort.UseVisualStyleBackColor = true;
-            this.ClosePort.Visible = false;
-            this.ClosePort.Click += new System.EventHandler(this.ClosePort_Click);
-            // 
-            // OpenPort
-            // 
-            this.OpenPort.Location = new System.Drawing.Point(180, 74);
-            this.OpenPort.Name = "OpenPort";
-            this.OpenPort.Size = new System.Drawing.Size(75, 21);
-            this.OpenPort.TabIndex = 4;
-            this.OpenPort.Text = "Open";
-            this.OpenPort.UseVisualStyleBackColor = true;
-            this.OpenPort.Click += new System.EventHandler(this.OpenPort_Click);
-            // 
-            // RefreshPorts
-            // 
-            this.RefreshPorts.Location = new System.Drawing.Point(180, 47);
-            this.RefreshPorts.Name = "RefreshPorts";
-            this.RefreshPorts.Size = new System.Drawing.Size(75, 21);
-            this.RefreshPorts.TabIndex = 3;
-            this.RefreshPorts.Text = "Refresh";
-            this.RefreshPorts.UseVisualStyleBackColor = true;
-            this.RefreshPorts.Click += new System.EventHandler(this.RefreshPorts_Click);
-            // 
             // MagPanel
             // 
+            this.MagPanel.Controls.Add(this.MagSet);
             this.MagPanel.Controls.Add(this.MagTestStop);
             this.MagPanel.Controls.Add(this.DutyLabel);
             this.MagPanel.Controls.Add(this.DutyCycle);
-            this.MagPanel.Controls.Add(this.RhythmPanel);
             this.MagPanel.Controls.Add(this.Period);
             this.MagPanel.Controls.Add(this.PeriodLabel);
             this.MagPanel.Controls.Add(this.PeriodDefaultLabel);
@@ -290,19 +173,30 @@ namespace HapticGUI
             this.MagPanel.Controls.Add(this.Percentage);
             this.MagPanel.Controls.Add(this.PercentLabel);
             this.MagPanel.Controls.Add(this.MagTest);
-            this.MagPanel.Controls.Add(this.MagBack);
-            this.MagPanel.Controls.Add(this.MagLearn);
             this.MagPanel.Controls.Add(this.MagComboBox);
             this.MagPanel.Controls.Add(this.MagSelLabel);
-            this.MagPanel.Location = new System.Drawing.Point(0, 0);
+            this.MagPanel.Location = new System.Drawing.Point(12, 296);
             this.MagPanel.Name = "MagPanel";
             this.MagPanel.Size = new System.Drawing.Size(270, 248);
             this.MagPanel.TabIndex = 26;
             this.MagPanel.Visible = false;
             // 
+            // MagSet
+            // 
+            this.MagSet.Enabled = false;
+            this.MagSet.Location = new System.Drawing.Point(180, 222);
+            this.MagSet.Name = "MagSet";
+            this.MagSet.Size = new System.Drawing.Size(75, 23);
+            this.MagSet.TabIndex = 38;
+            this.MagSet.Text = "Set";
+            this.MagSet.UseVisualStyleBackColor = true;
+            this.MagSet.Visible = false;
+            this.MagSet.Click += new System.EventHandler(this.MagSet_Click);
+            // 
             // MagTestStop
             // 
-            this.MagTestStop.Location = new System.Drawing.Point(98, 222);
+            this.MagTestStop.Enabled = false;
+            this.MagTestStop.Location = new System.Drawing.Point(99, 222);
             this.MagTestStop.Name = "MagTestStop";
             this.MagTestStop.Size = new System.Drawing.Size(75, 23);
             this.MagTestStop.TabIndex = 37;
@@ -335,12 +229,121 @@ namespace HapticGUI
             this.DutyCycle.Visible = false;
             this.DutyCycle.ValueChanged += new System.EventHandler(this.DutyCycle_ValueChanged);
             // 
+            // Period
+            // 
+            this.Period.Location = new System.Drawing.Point(107, 99);
+            this.Period.Maximum = new decimal(new int[] {
+            2000,
+            0,
+            0,
+            0});
+            this.Period.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.Period.Name = "Period";
+            this.Period.Size = new System.Drawing.Size(66, 20);
+            this.Period.TabIndex = 12;
+            this.Period.Value = new decimal(new int[] {
+            2000,
+            0,
+            0,
+            0});
+            this.Period.Visible = false;
+            this.Period.ValueChanged += new System.EventHandler(this.Period_ValueChanged);
+            // 
+            // PeriodLabel
+            // 
+            this.PeriodLabel.AutoSize = true;
+            this.PeriodLabel.Location = new System.Drawing.Point(46, 102);
+            this.PeriodLabel.Name = "PeriodLabel";
+            this.PeriodLabel.Size = new System.Drawing.Size(54, 13);
+            this.PeriodLabel.TabIndex = 11;
+            this.PeriodLabel.Text = "Period(us)";
+            this.PeriodLabel.Visible = false;
+            // 
+            // PeriodDefaultLabel
+            // 
+            this.PeriodDefaultLabel.AutoSize = true;
+            this.PeriodDefaultLabel.Location = new System.Drawing.Point(180, 102);
+            this.PeriodDefaultLabel.Name = "PeriodDefaultLabel";
+            this.PeriodDefaultLabel.Size = new System.Drawing.Size(74, 13);
+            this.PeriodDefaultLabel.TabIndex = 10;
+            this.PeriodDefaultLabel.Text = "(Default 2000)";
+            this.PeriodDefaultLabel.Visible = false;
+            // 
+            // MagOption
+            // 
+            this.MagOption.AutoSize = true;
+            this.MagOption.Location = new System.Drawing.Point(59, 163);
+            this.MagOption.Name = "MagOption";
+            this.MagOption.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.MagOption.Size = new System.Drawing.Size(114, 17);
+            this.MagOption.TabIndex = 7;
+            this.MagOption.Text = "Advanced Options";
+            this.MagOption.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.MagOption.UseVisualStyleBackColor = true;
+            this.MagOption.CheckedChanged += new System.EventHandler(this.MagOption_CheckedChanged);
+            // 
+            // Percentage
+            // 
+            this.Percentage.Location = new System.Drawing.Point(108, 71);
+            this.Percentage.Name = "Percentage";
+            this.Percentage.Size = new System.Drawing.Size(65, 20);
+            this.Percentage.TabIndex = 6;
+            this.Percentage.ValueChanged += new System.EventHandler(this.Percentage_ValueChanged);
+            // 
+            // PercentLabel
+            // 
+            this.PercentLabel.AutoSize = true;
+            this.PercentLabel.Location = new System.Drawing.Point(31, 73);
+            this.PercentLabel.Name = "PercentLabel";
+            this.PercentLabel.Size = new System.Drawing.Size(71, 13);
+            this.PercentLabel.TabIndex = 5;
+            this.PercentLabel.Text = "Magnitude(%)";
+            // 
+            // MagTest
+            // 
+            this.MagTest.Location = new System.Drawing.Point(18, 222);
+            this.MagTest.Name = "MagTest";
+            this.MagTest.Size = new System.Drawing.Size(75, 23);
+            this.MagTest.TabIndex = 4;
+            this.MagTest.Text = "Test";
+            this.MagTest.UseVisualStyleBackColor = true;
+            this.MagTest.Click += new System.EventHandler(this.MagTest_Click);
+            // 
+            // MagComboBox
+            // 
+            this.MagComboBox.FormattingEnabled = true;
+            this.MagComboBox.Items.AddRange(new object[] {
+            "A",
+            "B",
+            "C",
+            "D"});
+            this.MagComboBox.Location = new System.Drawing.Point(108, 16);
+            this.MagComboBox.Name = "MagComboBox";
+            this.MagComboBox.Size = new System.Drawing.Size(65, 21);
+            this.MagComboBox.TabIndex = 0;
+            this.MagComboBox.Text = "A";
+            this.MagComboBox.SelectedIndexChanged += new System.EventHandler(this.MagComboBox_SelectedIndexChanged);
+            // 
+            // MagSelLabel
+            // 
+            this.MagSelLabel.AutoSize = true;
+            this.MagSelLabel.BackColor = System.Drawing.SystemColors.Control;
+            this.MagSelLabel.Location = new System.Drawing.Point(12, 19);
+            this.MagSelLabel.Name = "MagSelLabel";
+            this.MagSelLabel.Size = new System.Drawing.Size(90, 13);
+            this.MagSelLabel.TabIndex = 1;
+            this.MagSelLabel.Text = "Select Magnitude";
+            // 
             // RhythmPanel
             // 
             this.RhythmPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.RhythmPanel.Controls.Add(this.RhythmSet);
             this.RhythmPanel.Controls.Add(this.RhythmTestStop);
             this.RhythmPanel.Controls.Add(this.RhythmTime);
-            this.RhythmPanel.Controls.Add(this.RhythmLearn);
             this.RhythmPanel.Controls.Add(this.TimeLabel);
             this.RhythmPanel.Controls.Add(this.RhythmClear);
             this.RhythmPanel.Controls.Add(this.RhythmPaint);
@@ -353,20 +356,32 @@ namespace HapticGUI
             this.RhythmPanel.Controls.Add(this.RhythmOff);
             this.RhythmPanel.Controls.Add(this.RhythmOn);
             this.RhythmPanel.Controls.Add(this.RhythmTest);
-            this.RhythmPanel.Controls.Add(this.RhythmBack);
             this.RhythmPanel.Controls.Add(this.RhythmLabel);
             this.RhythmPanel.Controls.Add(this.RhythmComboBox);
             this.RhythmPanel.Controls.Add(this.RhythmPatternList);
-            this.RhythmPanel.Location = new System.Drawing.Point(0, 0);
+            this.RhythmPanel.Location = new System.Drawing.Point(282, 296);
             this.RhythmPanel.Name = "RhythmPanel";
             this.RhythmPanel.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.RhythmPanel.Size = new System.Drawing.Size(270, 248);
             this.RhythmPanel.TabIndex = 26;
             this.RhythmPanel.Visible = false;
             // 
+            // RhythmSet
+            // 
+            this.RhythmSet.Enabled = false;
+            this.RhythmSet.Location = new System.Drawing.Point(180, 222);
+            this.RhythmSet.Name = "RhythmSet";
+            this.RhythmSet.Size = new System.Drawing.Size(75, 23);
+            this.RhythmSet.TabIndex = 39;
+            this.RhythmSet.Text = "Set";
+            this.RhythmSet.UseVisualStyleBackColor = true;
+            this.RhythmSet.Visible = false;
+            this.RhythmSet.Click += new System.EventHandler(this.RhythmSet_Click);
+            // 
             // RhythmTestStop
             // 
-            this.RhythmTestStop.Location = new System.Drawing.Point(98, 222);
+            this.RhythmTestStop.Enabled = false;
+            this.RhythmTestStop.Location = new System.Drawing.Point(99, 222);
             this.RhythmTestStop.Name = "RhythmTestStop";
             this.RhythmTestStop.Size = new System.Drawing.Size(75, 23);
             this.RhythmTestStop.TabIndex = 13;
@@ -515,164 +530,12 @@ namespace HapticGUI
             this.RhythmLabel.TabIndex = 1;
             this.RhythmLabel.Text = "Select Rhythm";
             // 
-            // Period
-            // 
-            this.Period.Location = new System.Drawing.Point(107, 99);
-            this.Period.Maximum = new decimal(new int[] {
-            2000,
-            0,
-            0,
-            0});
-            this.Period.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.Period.Name = "Period";
-            this.Period.Size = new System.Drawing.Size(66, 20);
-            this.Period.TabIndex = 12;
-            this.Period.Value = new decimal(new int[] {
-            2000,
-            0,
-            0,
-            0});
-            this.Period.Visible = false;
-            this.Period.ValueChanged += new System.EventHandler(this.Period_ValueChanged);
-            // 
-            // PeriodLabel
-            // 
-            this.PeriodLabel.AutoSize = true;
-            this.PeriodLabel.Location = new System.Drawing.Point(46, 102);
-            this.PeriodLabel.Name = "PeriodLabel";
-            this.PeriodLabel.Size = new System.Drawing.Size(54, 13);
-            this.PeriodLabel.TabIndex = 11;
-            this.PeriodLabel.Text = "Period(us)";
-            this.PeriodLabel.Visible = false;
-            // 
-            // PeriodDefaultLabel
-            // 
-            this.PeriodDefaultLabel.AutoSize = true;
-            this.PeriodDefaultLabel.Location = new System.Drawing.Point(180, 102);
-            this.PeriodDefaultLabel.Name = "PeriodDefaultLabel";
-            this.PeriodDefaultLabel.Size = new System.Drawing.Size(74, 13);
-            this.PeriodDefaultLabel.TabIndex = 10;
-            this.PeriodDefaultLabel.Text = "(Default 2000)";
-            this.PeriodDefaultLabel.Visible = false;
-            // 
-            // MagOption
-            // 
-            this.MagOption.AutoSize = true;
-            this.MagOption.Location = new System.Drawing.Point(59, 163);
-            this.MagOption.Name = "MagOption";
-            this.MagOption.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.MagOption.Size = new System.Drawing.Size(114, 17);
-            this.MagOption.TabIndex = 7;
-            this.MagOption.Text = "Advanced Options";
-            this.MagOption.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.MagOption.UseVisualStyleBackColor = true;
-            this.MagOption.CheckedChanged += new System.EventHandler(this.MagOption_CheckedChanged);
-            // 
-            // Percentage
-            // 
-            this.Percentage.Location = new System.Drawing.Point(108, 71);
-            this.Percentage.Name = "Percentage";
-            this.Percentage.Size = new System.Drawing.Size(65, 20);
-            this.Percentage.TabIndex = 6;
-            this.Percentage.ValueChanged += new System.EventHandler(this.Percentage_ValueChanged);
-            // 
-            // PercentLabel
-            // 
-            this.PercentLabel.AutoSize = true;
-            this.PercentLabel.Location = new System.Drawing.Point(31, 73);
-            this.PercentLabel.Name = "PercentLabel";
-            this.PercentLabel.Size = new System.Drawing.Size(71, 13);
-            this.PercentLabel.TabIndex = 5;
-            this.PercentLabel.Text = "Magnitude(%)";
-            // 
-            // MagTest
-            // 
-            this.MagTest.Location = new System.Drawing.Point(98, 222);
-            this.MagTest.Name = "MagTest";
-            this.MagTest.Size = new System.Drawing.Size(75, 23);
-            this.MagTest.TabIndex = 4;
-            this.MagTest.Text = "Test";
-            this.MagTest.UseVisualStyleBackColor = true;
-            this.MagTest.Click += new System.EventHandler(this.MagTest_Click);
-            // 
-            // MagBack
-            // 
-            this.MagBack.Location = new System.Drawing.Point(16, 222);
-            this.MagBack.Name = "MagBack";
-            this.MagBack.Size = new System.Drawing.Size(75, 23);
-            this.MagBack.TabIndex = 3;
-            this.MagBack.Text = "Back";
-            this.MagBack.UseVisualStyleBackColor = true;
-            this.MagBack.Click += new System.EventHandler(this.MagBack_Click);
-            // 
-            // MagLearn
-            // 
-            this.MagLearn.Location = new System.Drawing.Point(180, 222);
-            this.MagLearn.Name = "MagLearn";
-            this.MagLearn.Size = new System.Drawing.Size(75, 23);
-            this.MagLearn.TabIndex = 2;
-            this.MagLearn.Text = "Learn";
-            this.MagLearn.UseVisualStyleBackColor = true;
-            this.MagLearn.Click += new System.EventHandler(this.MagLearn_Click);
-            // 
-            // MagComboBox
-            // 
-            this.MagComboBox.FormattingEnabled = true;
-            this.MagComboBox.Items.AddRange(new object[] {
-            "A",
-            "B",
-            "C",
-            "D"});
-            this.MagComboBox.Location = new System.Drawing.Point(108, 16);
-            this.MagComboBox.Name = "MagComboBox";
-            this.MagComboBox.Size = new System.Drawing.Size(65, 21);
-            this.MagComboBox.TabIndex = 0;
-            this.MagComboBox.Text = "A";
-            this.MagComboBox.SelectedIndexChanged += new System.EventHandler(this.MagComboBox_SelectedIndexChanged);
-            // 
-            // MagSelLabel
-            // 
-            this.MagSelLabel.AutoSize = true;
-            this.MagSelLabel.BackColor = System.Drawing.SystemColors.Control;
-            this.MagSelLabel.Location = new System.Drawing.Point(12, 19);
-            this.MagSelLabel.Name = "MagSelLabel";
-            this.MagSelLabel.Size = new System.Drawing.Size(90, 13);
-            this.MagSelLabel.TabIndex = 1;
-            this.MagSelLabel.Text = "Select Magnitude";
-            // 
-            // COMComboBox
-            // 
-            this.COMComboBox.FormattingEnabled = true;
-            this.COMComboBox.Location = new System.Drawing.Point(99, 47);
-            this.COMComboBox.Name = "COMComboBox";
-            this.COMComboBox.Size = new System.Drawing.Size(75, 21);
-            this.COMComboBox.TabIndex = 2;
-            // 
-            // SelectPortLabel
-            // 
-            this.SelectPortLabel.AutoSize = true;
-            this.SelectPortLabel.Location = new System.Drawing.Point(13, 52);
-            this.SelectPortLabel.Name = "SelectPortLabel";
-            this.SelectPortLabel.Size = new System.Drawing.Size(59, 13);
-            this.SelectPortLabel.TabIndex = 4;
-            this.SelectPortLabel.Text = "Select Port";
-            // 
             // DirectPanel
             // 
-            this.DirectPanel.Controls.Add(this.DirectSwapOptionLabel);
-            this.DirectPanel.Controls.Add(this.DirectSwapOption);
-            this.DirectPanel.Controls.Add(this.DirectShowOptionLabel);
-            this.DirectPanel.Controls.Add(this.DirectShowOption);
-            this.DirectPanel.Controls.Add(this.DirectProgramBack);
+            this.DirectPanel.Controls.Add(this.DirectGroupProgram);
             this.DirectPanel.Controls.Add(this.AddedDelayLabel);
             this.DirectPanel.Controls.Add(this.DirectDelayLabel);
             this.DirectPanel.Controls.Add(this.DirectDelayField);
-            this.DirectPanel.Controls.Add(this.DirectSave);
-            this.DirectPanel.Controls.Add(this.DirectLoad);
             this.DirectPanel.Controls.Add(this.DirectRenameLabel);
             this.DirectPanel.Controls.Add(this.DirectActivateMotor);
             this.DirectPanel.Controls.Add(this.DirectActivateGroup);
@@ -685,7 +548,6 @@ namespace HapticGUI
             this.DirectPanel.Controls.Add(this.DirectAddSet);
             this.DirectPanel.Controls.Add(this.GroupList);
             this.DirectPanel.Controls.Add(this.DirectRenameGroup);
-            this.DirectPanel.Controls.Add(this.DirectOperationBack);
             this.DirectPanel.Controls.Add(this.DirectRenameField);
             this.DirectPanel.Controls.Add(this.DirectRenameSet);
             this.DirectPanel.Controls.Add(this.DirectStop);
@@ -706,45 +568,19 @@ namespace HapticGUI
             this.DirectPanel.Controls.Add(this.DirectMotorLabel);
             this.DirectPanel.Controls.Add(this.SetList);
             this.DirectPanel.Controls.Add(this.MotorList);
-            this.DirectPanel.Location = new System.Drawing.Point(11, 35);
+            this.DirectPanel.Location = new System.Drawing.Point(12, 27);
             this.DirectPanel.Name = "DirectPanel";
             this.DirectPanel.Size = new System.Drawing.Size(539, 263);
             this.DirectPanel.TabIndex = 27;
-            this.DirectPanel.Visible = false;
             // 
-            // DirectShowOptionLabel
+            // DirectGroupProgram
             // 
-            this.DirectShowOptionLabel.AutoSize = true;
-            this.DirectShowOptionLabel.Location = new System.Drawing.Point(440, 97);
-            this.DirectShowOptionLabel.Name = "DirectShowOptionLabel";
-            this.DirectShowOptionLabel.Size = new System.Drawing.Size(94, 13);
-            this.DirectShowOptionLabel.TabIndex = 45;
-            this.DirectShowOptionLabel.Text = "Connected Motors";
-            // 
-            // DirectShowOption
-            // 
-            this.DirectShowOption.AutoSize = true;
-            this.DirectShowOption.Checked = true;
-            this.DirectShowOption.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.DirectShowOption.Location = new System.Drawing.Point(447, 82);
-            this.DirectShowOption.Name = "DirectShowOption";
-            this.DirectShowOption.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.DirectShowOption.Size = new System.Drawing.Size(77, 17);
-            this.DirectShowOption.TabIndex = 44;
-            this.DirectShowOption.Text = "Show Only";
-            this.DirectShowOption.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.DirectShowOption.UseVisualStyleBackColor = true;
-            // 
-            // DirectProgramBack
-            // 
-            this.DirectProgramBack.Location = new System.Drawing.Point(16, 237);
-            this.DirectProgramBack.Name = "DirectProgramBack";
-            this.DirectProgramBack.Size = new System.Drawing.Size(75, 23);
-            this.DirectProgramBack.TabIndex = 43;
-            this.DirectProgramBack.Text = "Back";
-            this.DirectProgramBack.UseVisualStyleBackColor = true;
-            this.DirectProgramBack.Visible = false;
-            this.DirectProgramBack.Click += new System.EventHandler(this.DirectProgramBack_Click);
+            this.DirectGroupProgram.Location = new System.Drawing.Point(285, 237);
+            this.DirectGroupProgram.Name = "DirectGroupProgram";
+            this.DirectGroupProgram.Size = new System.Drawing.Size(79, 23);
+            this.DirectGroupProgram.TabIndex = 43;
+            this.DirectGroupProgram.Text = "Program";
+            this.DirectGroupProgram.UseVisualStyleBackColor = true;
             // 
             // AddedDelayLabel
             // 
@@ -782,26 +618,6 @@ namespace HapticGUI
             this.DirectDelayField.TabIndex = 40;
             this.DirectDelayField.ValueChanged += new System.EventHandler(this.DirectDelayField_ValueChanged);
             // 
-            // DirectSave
-            // 
-            this.DirectSave.Location = new System.Drawing.Point(449, 45);
-            this.DirectSave.Name = "DirectSave";
-            this.DirectSave.Size = new System.Drawing.Size(75, 23);
-            this.DirectSave.TabIndex = 39;
-            this.DirectSave.Text = "Save";
-            this.DirectSave.UseVisualStyleBackColor = true;
-            this.DirectSave.Click += new System.EventHandler(this.DirectSave_Click);
-            // 
-            // DirectLoad
-            // 
-            this.DirectLoad.Location = new System.Drawing.Point(449, 14);
-            this.DirectLoad.Name = "DirectLoad";
-            this.DirectLoad.Size = new System.Drawing.Size(75, 23);
-            this.DirectLoad.TabIndex = 38;
-            this.DirectLoad.Text = "Load";
-            this.DirectLoad.UseVisualStyleBackColor = true;
-            this.DirectLoad.Click += new System.EventHandler(this.DirectLoad_Click);
-            // 
             // DirectRenameLabel
             // 
             this.DirectRenameLabel.AutoSize = true;
@@ -813,6 +629,7 @@ namespace HapticGUI
             // 
             // DirectActivateMotor
             // 
+            this.DirectActivateMotor.Enabled = false;
             this.DirectActivateMotor.Location = new System.Drawing.Point(67, 183);
             this.DirectActivateMotor.Name = "DirectActivateMotor";
             this.DirectActivateMotor.Size = new System.Drawing.Size(60, 20);
@@ -823,6 +640,7 @@ namespace HapticGUI
             // 
             // DirectActivateGroup
             // 
+            this.DirectActivateGroup.Enabled = false;
             this.DirectActivateGroup.Location = new System.Drawing.Point(370, 183);
             this.DirectActivateGroup.Name = "DirectActivateGroup";
             this.DirectActivateGroup.Size = new System.Drawing.Size(60, 20);
@@ -921,16 +739,6 @@ namespace HapticGUI
             this.DirectRenameGroup.UseVisualStyleBackColor = true;
             this.DirectRenameGroup.Click += new System.EventHandler(this.DirectRenameGroup_Click);
             // 
-            // DirectOperationBack
-            // 
-            this.DirectOperationBack.Location = new System.Drawing.Point(16, 237);
-            this.DirectOperationBack.Name = "DirectOperationBack";
-            this.DirectOperationBack.Size = new System.Drawing.Size(75, 23);
-            this.DirectOperationBack.TabIndex = 26;
-            this.DirectOperationBack.Text = "Back";
-            this.DirectOperationBack.UseVisualStyleBackColor = true;
-            this.DirectOperationBack.Click += new System.EventHandler(this.DirectOperationBack_Click);
-            // 
             // DirectRenameField
             // 
             this.DirectRenameField.Location = new System.Drawing.Point(341, 16);
@@ -953,6 +761,7 @@ namespace HapticGUI
             // 
             // DirectStop
             // 
+            this.DirectStop.Enabled = false;
             this.DirectStop.Location = new System.Drawing.Point(449, 237);
             this.DirectStop.Name = "DirectStop";
             this.DirectStop.Size = new System.Drawing.Size(75, 23);
@@ -1009,6 +818,7 @@ namespace HapticGUI
             // 
             // DirectActivateSet
             // 
+            this.DirectActivateSet.Enabled = false;
             this.DirectActivateSet.Location = new System.Drawing.Point(218, 183);
             this.DirectActivateSet.Name = "DirectActivateSet";
             this.DirectActivateSet.Size = new System.Drawing.Size(60, 20);
@@ -1139,47 +949,134 @@ namespace HapticGUI
             this.MotorList.TabIndex = 1;
             this.MotorList.SelectedIndexChanged += new System.EventHandler(this.MotorList_SelectedIndexChanged);
             // 
-            // ErrorStatus
+            // loadBinaryFile
             // 
-            this.ErrorStatus.AutoSize = true;
-            this.ErrorStatus.Location = new System.Drawing.Point(291, 4);
-            this.ErrorStatus.Name = "ErrorStatus";
-            this.ErrorStatus.Size = new System.Drawing.Size(65, 13);
-            this.ErrorStatus.TabIndex = 28;
-            this.ErrorStatus.Text = "Error Status:";
+            this.loadBinaryFile.DefaultExt = "hbg";
+            this.loadBinaryFile.Filter = "GUI Binary Files|*.hbg|All files|*";
+            this.loadBinaryFile.FileOk += new System.ComponentModel.CancelEventHandler(this.loadBinaryFile_FileOk);
             // 
-            // ErrorLocation
+            // saveBinaryFile
             // 
-            this.ErrorLocation.AutoSize = true;
-            this.ErrorLocation.Location = new System.Drawing.Point(12, 4);
-            this.ErrorLocation.Name = "ErrorLocation";
-            this.ErrorLocation.Size = new System.Drawing.Size(76, 13);
-            this.ErrorLocation.TabIndex = 29;
-            this.ErrorLocation.Text = "Error Location:";
+            this.saveBinaryFile.DefaultExt = "hbg";
+            this.saveBinaryFile.Filter = "GUI Binary Files|*.hbg|All files|*";
+            this.saveBinaryFile.FileOk += new System.ComponentModel.CancelEventHandler(this.saveBinaryFile_FileOk);
             // 
-            // DirectSwapOption
+            // MenuStrip
             // 
-            this.DirectSwapOption.AutoSize = true;
-            this.DirectSwapOption.Checked = true;
-            this.DirectSwapOption.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.DirectSwapOption.Location = new System.Drawing.Point(436, 118);
-            this.DirectSwapOption.Name = "DirectSwapOption";
-            this.DirectSwapOption.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.DirectSwapOption.Size = new System.Drawing.Size(88, 17);
-            this.DirectSwapOption.TabIndex = 46;
-            this.DirectSwapOption.Text = "Motors Swap";
-            this.DirectSwapOption.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.DirectSwapOption.UseVisualStyleBackColor = true;
-            this.DirectSwapOption.CheckedChanged += new System.EventHandler(this.DirectSwapOption_CheckedChanged);
+            this.MenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileMenu,
+            this.optionsMenu,
+            this.versionMenu});
+            this.MenuStrip.Location = new System.Drawing.Point(0, 0);
+            this.MenuStrip.Name = "MenuStrip";
+            this.MenuStrip.Size = new System.Drawing.Size(852, 24);
+            this.MenuStrip.TabIndex = 30;
+            this.MenuStrip.Text = "menuStrip1";
             // 
-            // DirectSwapOptionLabel
+            // fileMenu
             // 
-            this.DirectSwapOptionLabel.AutoSize = true;
-            this.DirectSwapOptionLabel.Location = new System.Drawing.Point(436, 133);
-            this.DirectSwapOptionLabel.Name = "DirectSwapOptionLabel";
-            this.DirectSwapOptionLabel.Size = new System.Drawing.Size(98, 13);
-            this.DirectSwapOptionLabel.TabIndex = 47;
-            this.DirectSwapOptionLabel.Text = "On All Groups/Sets";
+            this.fileMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.connectMenu,
+            this.loadMenu,
+            this.saveMenu});
+            this.fileMenu.Name = "fileMenu";
+            this.fileMenu.Size = new System.Drawing.Size(37, 20);
+            this.fileMenu.Text = "File";
+            // 
+            // connectMenu
+            // 
+            this.connectMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.disconnectMenu,
+            this.refreshPortsMenu,
+            this.COMComboBoxMenu});
+            this.connectMenu.Name = "connectMenu";
+            this.connectMenu.Size = new System.Drawing.Size(119, 22);
+            this.connectMenu.Text = "Connect";
+            // 
+            // disconnectMenu
+            // 
+            this.disconnectMenu.Enabled = false;
+            this.disconnectMenu.Name = "disconnectMenu";
+            this.disconnectMenu.Size = new System.Drawing.Size(181, 22);
+            this.disconnectMenu.Text = "Disconnect";
+            this.disconnectMenu.Click += new System.EventHandler(this.disconnectMenu_Click);
+            // 
+            // refreshPortsMenu
+            // 
+            this.refreshPortsMenu.Name = "refreshPortsMenu";
+            this.refreshPortsMenu.Size = new System.Drawing.Size(181, 22);
+            this.refreshPortsMenu.Text = "Refresh Ports";
+            this.refreshPortsMenu.Click += new System.EventHandler(this.refreshPortsMenu_Click);
+            // 
+            // COMComboBoxMenu
+            // 
+            this.COMComboBoxMenu.Name = "COMComboBoxMenu";
+            this.COMComboBoxMenu.Size = new System.Drawing.Size(121, 23);
+            this.COMComboBoxMenu.Text = "Port List";
+            this.COMComboBoxMenu.Click += new System.EventHandler(this.COMComboBoxMenu_Click);
+            // 
+            // loadMenu
+            // 
+            this.loadMenu.Name = "loadMenu";
+            this.loadMenu.Size = new System.Drawing.Size(119, 22);
+            this.loadMenu.Text = "Load";
+            this.loadMenu.Click += new System.EventHandler(this.loadMenu_Click);
+            // 
+            // saveMenu
+            // 
+            this.saveMenu.Name = "saveMenu";
+            this.saveMenu.Size = new System.Drawing.Size(119, 22);
+            this.saveMenu.Text = "Save";
+            this.saveMenu.Click += new System.EventHandler(this.saveMenu_Click);
+            // 
+            // optionsMenu
+            // 
+            this.optionsMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.showOnlyConnectedMotorsMenu,
+            this.motorSwapingOnAllGroupsSetsMenu});
+            this.optionsMenu.Name = "optionsMenu";
+            this.optionsMenu.Size = new System.Drawing.Size(61, 20);
+            this.optionsMenu.Text = "Options";
+            // 
+            // showOnlyConnectedMotorsMenu
+            // 
+            this.showOnlyConnectedMotorsMenu.Checked = true;
+            this.showOnlyConnectedMotorsMenu.CheckOnClick = true;
+            this.showOnlyConnectedMotorsMenu.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.showOnlyConnectedMotorsMenu.Name = "showOnlyConnectedMotorsMenu";
+            this.showOnlyConnectedMotorsMenu.Size = new System.Drawing.Size(258, 22);
+            this.showOnlyConnectedMotorsMenu.Text = "Show Only Connected Motors";
+            this.showOnlyConnectedMotorsMenu.Click += new System.EventHandler(this.showOnlyConnectedMotorsMenu_Click);
+            // 
+            // motorSwapingOnAllGroupsSetsMenu
+            // 
+            this.motorSwapingOnAllGroupsSetsMenu.Checked = true;
+            this.motorSwapingOnAllGroupsSetsMenu.CheckOnClick = true;
+            this.motorSwapingOnAllGroupsSetsMenu.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.motorSwapingOnAllGroupsSetsMenu.Name = "motorSwapingOnAllGroupsSetsMenu";
+            this.motorSwapingOnAllGroupsSetsMenu.Size = new System.Drawing.Size(258, 22);
+            this.motorSwapingOnAllGroupsSetsMenu.Text = "Motor Swaping On All Groups/Sets";
+            // 
+            // versionMenu
+            // 
+            this.versionMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.guiVersionMenu,
+            this.firmwareVersionMenu});
+            this.versionMenu.Name = "versionMenu";
+            this.versionMenu.Size = new System.Drawing.Size(58, 20);
+            this.versionMenu.Text = "Version";
+            // 
+            // guiVersionMenu
+            // 
+            this.guiVersionMenu.Name = "guiVersionMenu";
+            this.guiVersionMenu.Size = new System.Drawing.Size(151, 22);
+            this.guiVersionMenu.Text = "GUI: 1.0";
+            // 
+            // firmwareVersionMenu
+            // 
+            this.firmwareVersionMenu.Name = "firmwareVersionMenu";
+            this.firmwareVersionMenu.Size = new System.Drawing.Size(151, 22);
+            this.firmwareVersionMenu.Text = "Firmware: N/A";
             // 
             // GUI
             // 
@@ -1187,31 +1084,32 @@ namespace HapticGUI
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(562, 313);
-            this.Controls.Add(this.ErrorLocation);
-            this.Controls.Add(this.ErrorStatus);
+            this.ClientSize = new System.Drawing.Size(852, 550);
             this.Controls.Add(this.DirectPanel);
-            this.Controls.Add(this.MainPanel);
+            this.Controls.Add(this.MagPanel);
+            this.Controls.Add(this.RhythmPanel);
+            this.Controls.Add(this.MenuStrip);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            this.MainMenuStrip = this.MenuStrip;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "GUI";
             this.Text = "Haptic Belt GUI";
             this.Load += new System.EventHandler(this.GUI_Load);
-            this.MainPanel.ResumeLayout(false);
-            this.MainPanel.PerformLayout();
             this.MagPanel.ResumeLayout(false);
             this.MagPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DutyCycle)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Period)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Percentage)).EndInit();
             this.RhythmPanel.ResumeLayout(false);
             this.RhythmPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.RhythmOff)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.RhythmOn)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Period)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Percentage)).EndInit();
             this.DirectPanel.ResumeLayout(false);
             this.DirectPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DirectDelayField)).EndInit();
+            this.MenuStrip.ResumeLayout(false);
+            this.MenuStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1219,19 +1117,10 @@ namespace HapticGUI
 
         #endregion
 
-        private System.Windows.Forms.ComboBox ModeComboBox;
-        private System.Windows.Forms.Label SelectModeLabel;
-        private System.Windows.Forms.Button ModeGo;
-        private System.Windows.Forms.Button Exit;
         private System.Windows.Forms.ComboBox RhythmComboBox;
-        private System.Windows.Forms.Button RhythmLearn;
-        private System.Windows.Forms.Button RhythmBack;
         private System.Windows.Forms.Button RhythmTest;
         private System.Windows.Forms.ListBox RhythmPatternList;
-        private System.Windows.Forms.Panel MainPanel;
         private System.Windows.Forms.Panel MagPanel;
-        private System.Windows.Forms.Button MagBack;
-        private System.Windows.Forms.Button MagLearn;
         private System.Windows.Forms.ComboBox MagComboBox;
         private System.Windows.Forms.Label MagSelLabel;
         private System.Windows.Forms.Panel RhythmPanel;
@@ -1276,16 +1165,8 @@ namespace HapticGUI
         private System.Windows.Forms.Label AddedMagLabel;
         private System.Windows.Forms.Label AddedRhythmLabel;
         private System.Windows.Forms.Button DirectStop;
-        private System.Windows.Forms.ComboBox COMComboBox;
-        private System.Windows.Forms.Label SelectPortLabel;
-        private System.Windows.Forms.Button RefreshPorts;
         private System.Windows.Forms.TextBox DirectRenameField;
         private System.Windows.Forms.Button DirectRenameSet;
-        private System.Windows.Forms.Button ClosePort;
-        private System.Windows.Forms.Button OpenPort;
-        private System.Windows.Forms.Label ErrorStatus;
-        private System.Windows.Forms.Label ErrorLocation;
-        private System.Windows.Forms.Button DirectOperationBack;
         private System.Windows.Forms.Button RhythmTestStop;
         private System.Windows.Forms.Button MagTestStop;
         private System.Windows.Forms.Button DirectRenameGroup;
@@ -1300,16 +1181,28 @@ namespace HapticGUI
         private System.Windows.Forms.Button DirectActivateMotor;
         private System.Windows.Forms.Button DirectActivateGroup;
         private System.Windows.Forms.Label DirectRenameLabel;
-        private System.Windows.Forms.Button DirectSave;
-        private System.Windows.Forms.Button DirectLoad;
         private System.Windows.Forms.Label DirectDelayLabel;
         private System.Windows.Forms.NumericUpDown DirectDelayField;
         private System.Windows.Forms.Label AddedDelayLabel;
-        private System.Windows.Forms.Button DirectProgramBack;
-        private System.Windows.Forms.CheckBox DirectShowOption;
-        private System.Windows.Forms.Label DirectShowOptionLabel;
-        private System.Windows.Forms.CheckBox DirectSwapOption;
-        private System.Windows.Forms.Label DirectSwapOptionLabel;
+        private System.Windows.Forms.OpenFileDialog loadBinaryFile;
+        private System.Windows.Forms.SaveFileDialog saveBinaryFile;
+        private System.Windows.Forms.MenuStrip MenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem fileMenu;
+        private System.Windows.Forms.ToolStripMenuItem connectMenu;
+        private System.Windows.Forms.ToolStripMenuItem disconnectMenu;
+        private System.Windows.Forms.ToolStripMenuItem loadMenu;
+        private System.Windows.Forms.ToolStripMenuItem saveMenu;
+        private System.Windows.Forms.ToolStripComboBox COMComboBoxMenu;
+        private System.Windows.Forms.ToolStripMenuItem refreshPortsMenu;
+        private System.Windows.Forms.ToolStripMenuItem optionsMenu;
+        private System.Windows.Forms.ToolStripMenuItem showOnlyConnectedMotorsMenu;
+        private System.Windows.Forms.ToolStripMenuItem motorSwapingOnAllGroupsSetsMenu;
+        private System.Windows.Forms.ToolStripMenuItem versionMenu;
+        private System.Windows.Forms.ToolStripMenuItem guiVersionMenu;
+        private System.Windows.Forms.ToolStripMenuItem firmwareVersionMenu;
+        private System.Windows.Forms.Button DirectGroupProgram;
+        private System.Windows.Forms.Button MagSet;
+        private System.Windows.Forms.Button RhythmSet;
 
     }
 }

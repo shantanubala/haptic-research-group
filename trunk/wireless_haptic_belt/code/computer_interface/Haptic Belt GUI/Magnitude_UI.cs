@@ -14,28 +14,16 @@ namespace HapticGUI
         //Handles all necessary conditions to display this panel 
         private void Show_Magnitude_Mode()
         {
-            Populate_Magnitude(MagComboBox.SelectedItem.ToString());
+            Populate_Magnitude();
             MagPanel.Show();
         }
-        //Handles all necessary conditions to hide this panel
-        private void Hide_Magnitude_Mode()
-        {
-            MagPanel.Hide();
-        }
-        //Displays the Selection Mode Panel (Main Menu)
-        private void MagBack_Click(object sender, EventArgs e)
-        {
-            Hide_Magnitude_Mode();
-            Show_Select_Mode();
-        }
+
         //Learns and plays Magnitude on belt using Magnitude "A", replaces original Magnitude "A" when finished. Learns 100% on Rhythm onto the belt memory "H" as well.
         //Note that we must use TimeSpan, so that we can replace the original Magnitude upon completion
         private void MagTest_Click(object sender, EventArgs e)
         {
             //Hide Rhythm Buttons so no interference will occur
             MagTest.Hide();
-            MagBack.Hide();
-            MagLearn.Hide();
 
             //Set pattern to full on, 64 1's in binary, or 16 F's in hex
             String pattern = "FFFFFFFFFFFFFFFF";
@@ -89,18 +77,13 @@ namespace HapticGUI
             }
             //Reset button visability to original states
             MagTest.Show();
-            MagBack.Show();
-            MagLearn.Show();
             MagTestStop.Hide();
         }
         //Calls Library function to learn Magnitude based on user values
-        private void MagLearn_Click(object sender, EventArgs e)
+        private void MagSet_Click(object sender, EventArgs e)
         {
-            //Learn Magnitude
-            if(hasError(belt.Learn_Magnitude(MagComboBox.SelectedItem.ToString(), Convert.ToUInt16(Period.Value), Convert.ToUInt16(DutyCycle.Value)),"Learn Magnitude()"))
-            {
-                //Handle Error
-            }
+            _group[_current_group].magnitude[MagComboBox.SelectedIndex].period = Convert.ToInt16(Period.Value);
+            _group[_current_group].magnitude[MagComboBox.SelectedIndex].dutycycle = Convert.ToInt16(DutyCycle.Value);
         }
         //Duty Cycle < Period, we must uphold this truth here, as well as update percentage
         private void Period_ValueChanged(object sender, EventArgs e)
@@ -128,7 +111,7 @@ namespace HapticGUI
         //Updates visable duty cycle, period and percentage box based on which mag is selected
         private void MagComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Populate_Magnitude(MagComboBox.SelectedItem.ToString());
+            Populate_Magnitude();
         }  
     }
 }

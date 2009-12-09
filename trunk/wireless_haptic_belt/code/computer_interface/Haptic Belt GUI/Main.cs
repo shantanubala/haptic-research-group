@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -26,7 +27,6 @@ namespace HapticGUI
     public partial class GUI : Form
     { 
         HapticBelt belt = new HapticBelt(); //Library functionality
-        error_t response = new error_t(); //Return array for all Library calls
         Boolean COM_Available = false; //represents availablity of a COM port
         Boolean Port_Open = true; //represents if a port has been initialized
         String hold_magnitude; //Variable to hold belt magnitude while testing
@@ -34,92 +34,24 @@ namespace HapticGUI
         public GUI()
         {
             InitializeComponent();
+            //Initialize internal data structure
+            _group = new Group[0];
         }
         //Populates COM comboBox upon GUI load
         private void GUI_Load(object sender, EventArgs e)
         {
             //Clear ComboBox
-            COMComboBox.Items.Clear();
+            COMComboBoxMenu.Items.Clear();
             //Populate ComboBox w/ COM port list
             String[] ports = belt.GetSerialPortNames();
             if (ports.Length > 0)
             {
                 for (int i = 0; i < ports.Length; i++)
-                    COMComboBox.Items.Add(ports[i]);
+                    COMComboBoxMenu.Items.Add(ports[i]);
                 COM_Available = true;
             }
         }
-        //Displays Main Panel
-        private void Show_Select_Mode()
-        {
-            MainPanel.Show();
-        }
-        //Hides Main Panel
-        private void Hide_Select_Mode()
-        {
-            MainPanel.Hide();
-        }
-        //Allows access to other modes (panels), if a port is open
-        private void ModeGo_Click(object sender, EventArgs e)
-        {
-            String mode = ModeComboBox.SelectedItem.ToString();
 
-            if (Port_Open)
-            {
-                Hide_Select_Mode();
-
-                if (mode.Equals("Rhythm Mode"))
-                    Show_Rhythm_Mode();
-                else if (mode.Equals("Magnitude Mode"))
-                    Show_Magnitude_Mode();
-                else if (mode.Equals("Direct Operation Mode"))
-                    Show_Operation_Mode();
-                else
-                    Show_Program_Mode();
-            }
-            else if (mode.Equals("Direct Program Mode"))
-                Show_Program_Mode();
-        }
-        //Calls library to Initialize a port, if none are open, and one is available
-        private void OpenPort_Click(object sender, EventArgs e)
-        {
-            //If there is a COM available, and no port is open, open a port!
-            if (!Port_Open && COM_Available && (COMComboBox.SelectedIndex > -1))
-            {
-                String com = COMComboBox.SelectedItem.ToString();
-                if (hasError(belt.SetupPorts(com, com, "9600", "8", "1", "None", "1000"), "SetupPorts()"))
-                {
-                    //Handle Error
-                }
-                else
-                {
-                    Port_Open = true;
-                    OpenPort.Hide();
-                    ClosePort.Show();
-                }
-            }
-        }
-
-        private void ClosePort_Click(object sender, EventArgs e)
-        {
-            if (Port_Open)
-            {
-                belt.ClosePorts();
-                Port_Open = false;
-                OpenPort.Show();
-                ClosePort.Hide();
-            }
-        }
-
-        private void RefreshPorts_Click(object sender, EventArgs e)
-        {
-            GUI_Load(sender, e);
-        }
-
-        private void Exit_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
         //Checks for error based on given error_t param, errorLOC param is used for specificying the location of the error for debugging
         private bool hasError(error_t error, String errorLOC)
         {
@@ -127,36 +59,91 @@ namespace HapticGUI
                 return false;
             else
             {
-                ErrorLocation.Text = "Error Location: " + errorLOC;
-                ErrorStatus.Text = belt.getErrorMsg(response);
+                ErrorForm errorForm = new ErrorForm(belt.getErrorMsg(error), errorLOC, true);
+                errorForm.ShowDialog();
                 return true;
             }
-        }
-        private void dispError(String errorLOC)
-        {
-           ErrorLocation.Text = "Error Location: " + errorLOC;
-           ErrorStatus.Text = belt.getErrorMsg(response);     
         }   
-        
-        //Check for a particular error
-        private bool hasError(error_t error, String errorLOC, error_t check)
+
+        private void refreshPortsMenu_Click(object sender, EventArgs e)
         {
-            if (error != check)
-                return false;
-            else
+            GUI_Load(sender, e);
+        }
+
+        private void disconnectMenu_Click(object sender, EventArgs e)
+        {
+            if (Port_Open)
             {
-                ErrorLocation.Text = "Error Location: " + errorLOC;
-                ErrorStatus.Text = belt.getErrorMsg(response);
-                return true;
+                belt.ClosePorts();
+                Port_Open = false;
+                
+                //Enable/Disable Corresponding options to having no port open
+                disconnectMenu.Enabled = false;
+                refreshPortsMenu.Enabled = true;
+                COMComboBoxMenu.Enabled = true;
+                DirectActivateMotor.Enabled = false;
+                DirectActivateSet.Enabled = false;
+                DirectActivateGroup.Enabled = false;
+                DirectStop.Enabled = false;
+                MagTest.Enabled = false;
+                MagTestStop.Enabled = false;
+                MagTest.Enabled = false;
+                RhythmTestStop.Enabled = false;
+            }
+        }
+        //Calls library to Initialize a port, if none are open, and one is available
+        private void COMComboBoxMenu_Click(object sender, EventArgs e)
+        {
+            //If there is a COM available, and no port is open, open a port!
+            if (!Port_Open && COM_Available && (COMComboBoxMenu.SelectedIndex > -1))
+            {
+                String com = COMComboBoxMenu.SelectedItem.ToString();
+                if (hasError(belt.SetupPorts(com, com, "9600", "8", "1", "None", "1000"), "SetupPorts()"))
+                {
+                    //Handle Error
+                }
+                else
+                {
+                    _motorcount = belt.getMotors(QueryType.SINGLE);
+                    if (hasError(belt.getStatus(), "belt.getMotors()"))
+                    {
+                        //Handle Error
+                    }
+                    else
+                    {
+                        Port_Open = true;
+                        
+                        //Enable/Disable Corresponding options to an open port
+                        disconnectMenu.Enabled = true;
+                        refreshPortsMenu.Enabled = false;
+                        COMComboBoxMenu.Enabled = false;
+                        DirectActivateMotor.Enabled = true;
+                        DirectActivateSet.Enabled = true;
+                        DirectActivateGroup.Enabled = true;
+                        DirectStop.Enabled = true;
+                        MagTest.Enabled = true;
+                        MagTestStop.Enabled = true;
+                        RhythmTest.Enabled = true;
+                        RhythmTestStop.Enabled = true;
+
+                        firmwareVersionMenu.Text = belt.getVersion(QueryType.SINGLE);
+                        if (hasError(belt.getStatus(), "belt.getVersion()"))
+                        {
+                            //Handle Error
+                        }
+                    }
+                }
             }
         }
 
-        private void DirectDelayField_ValueChanged(object sender, EventArgs e)
+        private void loadMenu_Click(object sender, EventArgs e)
         {
-            if(DirectDelayField.Value%50 != 0)
-                DirectDelayField.Value = Convert.ToInt32(DirectDelayField.Value) / 50 * 50;
+            loadBinaryFile.ShowDialog();
         }
 
-        
+        private void saveMenu_Click(object sender, EventArgs e)
+        {
+            saveBinaryFile.ShowDialog();
+        }           
     }
 }

@@ -7,3 +7,4 @@ C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\
 C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Release\HapticBeltGUI.pdb
 C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\bin\Release\HapticDriver.DLL
 C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Release\HapticGUI.GUI.resources
+C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Release\HapticGUI.ErrorForm.resources

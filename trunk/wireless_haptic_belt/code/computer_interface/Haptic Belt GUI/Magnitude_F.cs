@@ -12,20 +12,11 @@ namespace HapticGUI
     partial class GUI
     {
         //Queries Library to get the Learned magnitudes, and populate fields
-        private void Populate_Magnitude(string sel)
+        private void Populate_Magnitude()
         {
-            String[] splitMag = new String[2];
-            splitMag = belt.getMagnitude(sel,true,QueryType.SINGLE).Split(',');
-            if (hasError(belt.getStatus(), "getMagnitude()"))
-            {
-                //Handle Error
-            }
-            else
-            {
-                Period.Value = Convert.ToInt32(splitMag[0]);
-                DutyCycle.Value = Convert.ToInt32(splitMag[1]);
-                Percentage.Value = (DutyCycle.Value / Period.Value) * 100;
-            }
+            Period.Value = _group[_current_group].magnitude[MagComboBox.SelectedIndex].period;
+            DutyCycle.Value = _group[_current_group].magnitude[MagComboBox.SelectedIndex].dutycycle;
+            Percentage.Value = (DutyCycle.Value / Period.Value) * 100;
         }
         //Upholds the truth DutyCycle must be <= Period at all times, and update percentage
         private void Change_Period()
