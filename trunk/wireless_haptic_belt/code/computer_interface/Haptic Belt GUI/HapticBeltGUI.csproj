@@ -55,10 +55,10 @@
     <Compile Include="Data.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Direct_F.cs">
+    <Compile Include="Main_F.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Direct_UI.cs">
+    <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ErrorForm.cs">
@@ -67,30 +67,45 @@
     <Compile Include="ErrorForm.Designer.cs">
       <DependentUpon>ErrorForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Magnitude_F.cs">
+    <Compile Include="RhythmForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Magnitude_UI.cs">
+    <Compile Include="RhythmForm.Designer.cs">
+      <DependentUpon>RhythmForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MagnitudeForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Main.cs">
+    <Compile Include="MagnitudeForm.Designer.cs">
+      <DependentUpon>MagnitudeForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MagnitudeForm_F.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Main.designer.cs">
-      <DependentUpon>Main.cs</DependentUpon>
+    <Compile Include="ToolBar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ToolBar.designer.cs">
+      <DependentUpon>ToolBar.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="ErrorForm.resx">
       <DependentUpon>ErrorForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Main.resx">
-      <DependentUpon>Main.cs</DependentUpon>
+    <EmbeddedResource Include="MagnitudeForm.resx">
+      <DependentUpon>MagnitudeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ToolBar.resx">
+      <DependentUpon>ToolBar.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RhythmForm.resx">
+      <DependentUpon>RhythmForm.cs</DependentUpon>
     </EmbeddedResource>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -105,10 +120,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Rhythm_F.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Rhythm_UI.cs">
+    <Compile Include="RhythmForm_F.cs">
       <SubType>Form</SubType>
     </Compile>
   </ItemGroup>
