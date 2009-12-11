@@ -9,7 +9,7 @@ using HapticDriver;
 
 namespace HapticGUI
 {
-    partial class GUI  
+    partial class RhythmForm
     {
         Graphics RhythmGraphics;
         String[] rhythmItems = new String[64];
@@ -143,48 +143,52 @@ namespace HapticGUI
          */
         private void Populate_Rhythm()
         {
-            String pattern = _group[_current_group].rhythm[RhythmComboBox.SelectedIndex].pattern;
-            String currChar = "";
-            String prevChar = "";
-            int duration = 0;    //Accumulates successive 1's or 0's as 50ms increments
+            int i = 0;
+            String pattern = rhythm[RhythmComboBox.SelectedIndex].pattern;
+            int length = rhythm[RhythmComboBox.SelectedIndex].time;
+            int on_duration = 0;
+            int off_duration = 0;
 
             rhythmItems = new String[64]; //Clear old rhythmItems
             pairs = 0;       //Number of On,Off pairs
-            //We set these parameters to make the loop logic more simple
-            prevChar = pattern.Substring(0, 1);
+            //Set Total Duration Time
+            total_duration = length * 50;
 
-            //Creates a string array of pairs of on,off durations, based on string pattern
-            for (int i = 0; i < pattern.Length; i++)
+            //Creates a string array of pairs of on,off durations, based on the String pattern
+            while (i < length)
             {
-                currChar = pattern.Substring(i, 1);
-                if (prevChar == currChar)
+                on_duration = 0;
+                off_duration = 0;
+
+                while(i < length)
                 {
-                    duration += 50;
-                }
-                else
-                {
-                    if (currChar == "1")
+                    //This if statement is not appart of the above while loop to avoid an indexing out of bounds error
+                    if(pattern.Substring(i, 1).Equals("1"))
                     {
-                        rhythmItems[pairs] = rhythmItems[pairs] + duration.ToString();
-                        pairs++;
+                        on_duration += 50;
+                        i++;
                     }
                     else
                     {
-                        rhythmItems[pairs] = duration.ToString() + ",";
+                        break;
                     }
-                    total_duration += duration; //accumulate duration
-                    duration = 50; //reset duration
                 }
-                prevChar = currChar; //Set the new previous character
-            }
-            //Adds last of the pairs after loop completes
-            rhythmItems[pairs] = rhythmItems[pairs] + duration.ToString();
-            total_duration += duration;
-            pairs++;
-            //Adds items to collection of RhythmPattern Box Display
-            for (int i = 0; i < pairs; i++)
-            {
-                RhythmPatternList.Items.Add(rhythmItems[i]);
+                while (i < length)
+                {
+                    //This if statement is not appart of the above while loop to avoid an indexing out of bounds error
+                    if (pattern.Substring(i, 1).Equals("0"))
+                    {
+                        off_duration += 50;
+                        i++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                rhythmItems[pairs] = on_duration.ToString() + "," + off_duration.ToString();
+                RhythmPatternList.Items.Add(rhythmItems[pairs]);
+                pairs++;
             }
         }
         /*Paints Rythm based on String[] rhythmItems's contents
