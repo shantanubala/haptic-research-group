@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,143 +6,163 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using HapticDriver;
-/* Description: This class, along with all its partial classes provides a
- * front end to the Haptic_Belt_Library to program the Haptic Belt. A user
- * may define multiple Magnitudes, Rhythms, and activate motors in group
- * configurations.
- * 
- * Style: There are multiple Partial Classes for the GUI Class. There are two
- * partial classes per panel (with the exception of the main panel having one).
- * 
- * User Interaction(UI): action events, listeners, call learning functions (DLL).
- * Functionality(F): parsing, maintain visuals, call querry functions (DLL).
- * 
- * The purpose of this style is so somone can view the (UI) extension and
- * obtain a good idea of how the class works without understanding the
- * implementation (F).
+
+/* Handle's both Direct Program Mode and Direct Operation Mode.
+ * The reason for this is because of the similarities of the two modes.
+ * The only difference between these two modes is the ability to interact
+ * with the belt via the COM port, which Program Mode lacks. The reason
+ * for this mode is to allow the GUI user to program motors and without
+ * having to have the belt connected to the GUI.
  */
 namespace HapticGUI
-{        
-    public partial class GUI : Form
-    { 
-        HapticBelt belt = new HapticBelt(); //Library functionality
-        Boolean COM_Available = false; //represents availablity of a COM port
-        Boolean Port_Open = true; //represents if a port has been initialized
-        String hold_magnitude; //Variable to hold belt magnitude while testing
-
-        public GUI()
+{
+    partial class GUI
+    {
+ //Button Events: Motors: Add, Delete, Clear, Activate
+        //Adds a new activation to selected set, based on comboBox parameters
+        private void DirectSetMotor_Click(object sender, EventArgs e)
         {
-            InitializeComponent();
-            //Initialize internal data structure
-            _group = new Group[0];
+            Set_Activation(AddRhythmBox.SelectedItem.ToString(), AddMagBox.SelectedItem.ToString(), AddCyclesBox.SelectedItem.ToString(), Convert.ToInt16(AddDelayField.Value));
         }
-        //Populates COM comboBox upon GUI load
-        private void GUI_Load(object sender, EventArgs e)
+        //Removes selected activation request from selected set
+        private void DirectDeleteMotor_Click(object sender, EventArgs e)
         {
-            //Clear ComboBox
-            COMComboBoxMenu.Items.Clear();
-            //Populate ComboBox w/ COM port list
-            String[] ports = belt.GetSerialPortNames();
-            if (ports.Length > 0)
+            Delete_Activation();
+        }
+        //Removes all activation request from the selected set
+        private void DirectClearMotor_Click(object sender, EventArgs e)
+        {
+            Clear_Activations();
+        }
+        //Activate a single motor from AddedList
+        private void DirectActivateMotor_Click(object sender, EventArgs e)
+        {
+            Activate_Motor();
+        }
+//Button Events: Sets: Add, Delete, Clear, Activate 
+        private void DirectAddSet_Click(object sender, EventArgs e)
+        {
+            Add_Set();
+        }
+
+        private void DirectDeleteSet_Click(object sender, EventArgs e)
+        {
+            Delete_Set();
+        }
+
+        private void DirectClearSets_Click(object sender, EventArgs e)
+        {
+            Clear_Sets();
+        }
+
+        //Activates all motors in a set from a selected group
+        private void DirectActivateSet_Click(object sender, EventArgs e)
+        {
+            Activate_Set();
+        }
+
+//Button Events: Groups: Add, Delete, Clear, Activate    
+        private void DirectAddGroup_Click(object sender, EventArgs e)
+        {
+            Add_Group();
+        }
+
+        private void DirectDeleteGroup_Click(object sender, EventArgs e)
+        {
+            Delete_Group();
+        }
+
+        private void DirectClearGroups_Click(object sender, EventArgs e)
+        {
+            Clear_Groups();
+        }
+        //Activates the selected group
+        private void DirectActivateGroup_Click(object sender, EventArgs e)
+        {
+            Activate_Group();
+        }      
+//Other Button Events: OK's, Rename's, Stop
+        private void RhythmEditOK_Click(object sender, EventArgs e)
+        {
+            if (GroupList.SelectedIndex > -1)
             {
-                for (int i = 0; i < ports.Length; i++)
-                    COMComboBoxMenu.Items.Add(ports[i]);
-                COM_Available = true;
+                Set_Rhythms();
             }
-        }
-
-        //Checks for error based on given error_t param, errorLOC param is used for specificying the location of the error for debugging
-        private bool hasError(error_t error, String errorLOC)
-        {
-            if (error == error_t.ESUCCESS)
-                return false;
             else
             {
-                ErrorForm errorForm = new ErrorForm(belt.getErrorMsg(error), errorLOC, true);
+                ErrorForm errorForm = new ErrorForm("You must have a group created and selected to use this function", "RhythmEditOK_Click()", false);
                 errorForm.ShowDialog();
-                return true;
-            }
-        }   
-
-        private void refreshPortsMenu_Click(object sender, EventArgs e)
-        {
-            GUI_Load(sender, e);
+            } 
         }
 
-        private void disconnectMenu_Click(object sender, EventArgs e)
+        private void MagnitudeEditOK_Click(object sender, EventArgs e)
         {
-            if (Port_Open)
+            if (GroupList.SelectedIndex > -1)
             {
-                belt.ClosePorts();
-                Port_Open = false;
-                
-                //Enable/Disable Corresponding options to having no port open
-                disconnectMenu.Enabled = false;
-                refreshPortsMenu.Enabled = true;
-                COMComboBoxMenu.Enabled = true;
-                DirectActivateMotor.Enabled = false;
-                DirectActivateSet.Enabled = false;
-                DirectActivateGroup.Enabled = false;
-                DirectStop.Enabled = false;
-                MagTest.Enabled = false;
-                MagTestStop.Enabled = false;
-                MagTest.Enabled = false;
-                RhythmTestStop.Enabled = false;
+                Set_Magnitudes();
             }
-        }
-        //Calls library to Initialize a port, if none are open, and one is available
-        private void COMComboBoxMenu_Click(object sender, EventArgs e)
-        {
-            //If there is a COM available, and no port is open, open a port!
-            if (!Port_Open && COM_Available && (COMComboBoxMenu.SelectedIndex > -1))
+            else
             {
-                String com = COMComboBoxMenu.SelectedItem.ToString();
-                if (hasError(belt.SetupPorts(com, com, "9600", "8", "1", "None", "1000"), "SetupPorts()"))
-                {
-                    //Handle Error
-                }
-                else
-                {
-                    _motorcount = belt.getMotors(QueryType.SINGLE);
-                    if (hasError(belt.getStatus(), "belt.getMotors()"))
-                    {
-                        //Handle Error
-                    }
-                    else
-                    {
-                        Port_Open = true;
-                        
-                        //Enable/Disable Corresponding options to an open port
-                        disconnectMenu.Enabled = true;
-                        refreshPortsMenu.Enabled = false;
-                        COMComboBoxMenu.Enabled = false;
-                        DirectActivateMotor.Enabled = true;
-                        DirectActivateSet.Enabled = true;
-                        DirectActivateGroup.Enabled = true;
-                        DirectStop.Enabled = true;
-                        MagTest.Enabled = true;
-                        MagTestStop.Enabled = true;
-                        RhythmTest.Enabled = true;
-                        RhythmTestStop.Enabled = true;
-
-                        firmwareVersionMenu.Text = belt.getVersion(QueryType.SINGLE);
-                        if (hasError(belt.getStatus(), "belt.getVersion()"))
-                        {
-                            //Handle Error
-                        }
-                    }
-                }
-            }
+                ErrorForm errorForm = new ErrorForm("You must have a group created and selected to use this function", "MagnitudeEditOK_Click()", false);
+                errorForm.ShowDialog();
+            } 
+        }
+        //Stops all motors from vibrating
+        private void DirectStop_Click(object sender, EventArgs e)
+        {
+            StopMotors();
+        }
+        //Renames a set with any characters in the Text Field.
+        private void DirectRenameSet_Click(object sender, EventArgs e)
+        {
+            Rename_Set(); 
+        }
+        //Renames a set with any characters in the DirectRenameField (text field).
+        private void DirectRenameGroup_Click(object sender, EventArgs e)
+        {
+            Rename_Group();
+        }
+//Selected Index Changed Events
+        //Refreshes SetList, Available List and Added List according to the selected group
+        private void GroupList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (GroupList.SelectedIndices.Count == 1)
+                Change_Group();
+            else if (GroupList.SelectedIndices.Count == 2)
+                Swap_Groups();
         }
 
-        private void loadMenu_Click(object sender, EventArgs e)
+        //Refreshes AvailableList and AddedList with according to the selected set
+        private void SetList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            loadBinaryFile.ShowDialog();
+            if (SetList.SelectedIndices.Count == 1)
+                Change_Set();
+            else if (SetList.SelectedIndices.Count == 2)
+                Swap_Sets();
         }
-
-        private void saveMenu_Click(object sender, EventArgs e)
+        //Changes the display labels on the GUI
+        private void MotorList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            saveBinaryFile.ShowDialog();
-        }           
+            if (MotorList.SelectedIndices.Count == 1)
+                Change_Motor();
+            else if (MotorList.SelectedIndices.Count == 2)
+                Swap_Motors(motorSwapingOnAllGroupsSetsMenu.Checked);
+        }
+        //Limits viewing to available motors only if checked
+        private void showOnlyConnectedMotorsMenu_Click(object sender, EventArgs e)
+        {
+            if (showOnlyConnectedMotorsMenu.Checked)
+                _viewableMotors = _motorcount;
+            else
+                _viewableMotors = _maxmotors;
+
+            Change_Set();
+        }
+        //Assures that the value is a multiple of 50
+        private void DirectDelayField_ValueChanged(object sender, EventArgs e)
+        {
+            if (AddDelayField.Value % 50 != 0)
+                AddDelayField.Value = Convert.ToInt32(AddDelayField.Value) / 50 * 50;
+        }
     }
 }
