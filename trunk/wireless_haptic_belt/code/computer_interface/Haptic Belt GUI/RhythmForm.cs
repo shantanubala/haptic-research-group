@@ -1,37 +1,77 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using HapticDriver;
 
-
 namespace HapticGUI
-{ 
-    partial class GUI
+{
+    partial class RhythmForm : Form
     {
-        //Handles all necessary conditions to display this panel
-        private void Show_Rhythm_Mode()
+        String hold_magnitude; //Variable to hold belt magnitude while testing
+        GUI.Rhythm[] rhythm;
+        HapticBelt belt;
+        int _motorcount;
+        
+        public RhythmForm(GUI.Rhythm[] incoming_rhythms,HapticBelt incoming_belt, Boolean connected)
+        {
+            InitializeComponent();
+
+            //Sets Globals from parameters
+            rhythm = incoming_rhythms;
+            belt = incoming_belt;
+            _motorcount = 0;
+
+            //Disables/Enables functions based on connectivity boolean passed
+            RhythmTest.Enabled = connected;
+            RhythmTestStop.Enabled = connected;     
+        }
+
+        //graphics can only be written when the Form is visable, thus Shown event is perfect for such a case. 
+        private void RhythmForm_Shown(object sender, EventArgs e)
         {
             //Initiates the Rhythm Panel by Clearing then Populating the 
-            //selection box and painting the represented patern.
+            //selection box and painting the represented patern.     
             Clear_Rhythm();
             Populate_Rhythm();
             Paint_Rythm();
-            RhythmPanel.Show();
         }
 
+
+        public GUI.Rhythm[] getRhythms()
+        {
+            return rhythm;
+        }
+
+        //Checks for error based on given error_t param, errorLOC param is used for specificying the location of the error for debugging
+        private bool hasError(error_t error, String errorLOC)
+        {
+            if (error == error_t.ESUCCESS)
+                return false;
+            else
+            {
+                ErrorForm errorForm = new ErrorForm(belt.getErrorMsg(error), errorLOC, true);
+                errorForm.ShowDialog();
+                return true;
+            }
+        }
+        //Exits
+        private void RhythmDone_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
         //Calls the Library to learn the Rhythm specified by the listBox
         private void RhythmSet_Click(object sender, EventArgs e)
         {
             if (pairs != 0)
             {
                 String[] pattern = Get_Pattern().Split(',');
-
-                _group[_current_group].rhythm[RhythmComboBox.SelectedIndex].pattern = pattern[0];
-                _group[_current_group].rhythm[RhythmComboBox.SelectedIndex].time = Convert.ToInt16(pattern[1]);
+                rhythm[RhythmComboBox.SelectedIndex].pattern = pattern[0];
+                rhythm[RhythmComboBox.SelectedIndex].time = Convert.ToInt16(pattern[1]);
             }
             else
             {
@@ -47,6 +87,8 @@ namespace HapticGUI
             {
                 //Hide Rhythm Buttons so no interference will occur
                 RhythmTest.Hide();
+                ControlBox = false;
+                RhythmDone.Enabled = false;
 
                 //Get the User Inputed Pattern
                 String[] pattern = Get_Pattern().Split(',');
@@ -101,6 +143,8 @@ namespace HapticGUI
                 //Handle Error
             }
             //Reset button visability to original states
+            ControlBox = true;
+            RhythmDone.Enabled = true;
             RhythmTest.Show();
             RhythmTestStop.Hide();
         }

@@ -1,21 +1,58 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using HapticDriver;
 
 namespace HapticGUI
 {
-    partial class GUI
+    partial class MagnitudeForm : Form
     {
-        //Handles all necessary conditions to display this panel 
-        private void Show_Magnitude_Mode()
+        String hold_magnitude; //Variable to hold belt magnitude while testing
+        GUI.Magnitude[] magnitude;
+        HapticBelt belt;
+        int _motorcount;
+        
+        public MagnitudeForm(GUI.Magnitude[] incoming_mags, HapticBelt incoming_belt, Boolean connected)
         {
-            Populate_Magnitude();
-            MagPanel.Show();
+            InitializeComponent();
+            
+            //Sets Globals from parameters
+            magnitude = incoming_mags;
+            belt = incoming_belt;
+            _motorcount = 0;
+
+            //Disables/Enables functions based on connectivity boolean passed
+            MagTest.Enabled = connected;
+            MagTestStop.Enabled = connected;
+        }
+
+        public GUI.Magnitude[] getMagnitudes()
+        {
+            return magnitude;
+        }
+
+        //Checks for error based on given error_t param, errorLOC param is used for specificying the location of the error for debugging
+        private bool hasError(error_t error, String errorLOC)
+        {
+            if (error == error_t.ESUCCESS)
+                return false;
+            else
+            {
+                ErrorForm errorForm = new ErrorForm(belt.getErrorMsg(error), errorLOC, true);
+                errorForm.ShowDialog();
+                return true;
+            }
+        }
+
+        //Exits
+        private void MagDone_Click(object sender, EventArgs e)
+        {
+            Close();
         }
 
         //Learns and plays Magnitude on belt using Magnitude "A", replaces original Magnitude "A" when finished. Learns 100% on Rhythm onto the belt memory "H" as well.
@@ -24,6 +61,8 @@ namespace HapticGUI
         {
             //Hide Rhythm Buttons so no interference will occur
             MagTest.Hide();
+            ControlBox = false;
+            MagDone.Enabled = false;
 
             //Set pattern to full on, 64 1's in binary, or 16 F's in hex
             String pattern = "FFFFFFFFFFFFFFFF";
@@ -59,7 +98,7 @@ namespace HapticGUI
                 }
             }
             //Wait for motors to finish vibrating or user to click "Stop" on MagTestStop Button
-            MagTestStop.Show(); 
+            MagTestStop.Show();
         }
         private void MagTestStop_Click(object sender, EventArgs e)
         {
@@ -76,19 +115,21 @@ namespace HapticGUI
                 //Handle Error
             }
             //Reset button visability to original states
+            ControlBox = true;
+            MagDone.Enabled = true;
             MagTest.Show();
             MagTestStop.Hide();
         }
         //Calls Library function to learn Magnitude based on user values
         private void MagSet_Click(object sender, EventArgs e)
         {
-            _group[_current_group].magnitude[MagComboBox.SelectedIndex].period = Convert.ToInt16(Period.Value);
-            _group[_current_group].magnitude[MagComboBox.SelectedIndex].dutycycle = Convert.ToInt16(DutyCycle.Value);
+            magnitude[MagComboBox.SelectedIndex].period = Convert.ToInt16(Period.Value);
+            magnitude[MagComboBox.SelectedIndex].dutycycle = Convert.ToInt16(DutyCycle.Value);
         }
         //Duty Cycle < Period, we must uphold this truth here, as well as update percentage
         private void Period_ValueChanged(object sender, EventArgs e)
         {
-            Change_Period();         
+            Change_Period();
         }
         //A change in duty cycle relates to a change in the percentage, update percentage
         private void DutyCycle_ValueChanged(object sender, EventArgs e)
@@ -112,6 +153,6 @@ namespace HapticGUI
         private void MagComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             Populate_Magnitude();
-        }  
+        }
     }
 }

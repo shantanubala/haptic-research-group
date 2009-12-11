@@ -9,13 +9,13 @@ using HapticDriver;
 
 namespace HapticGUI
 {
-    partial class GUI
+    partial class MagnitudeForm
     {
         //Queries Library to get the Learned magnitudes, and populate fields
         private void Populate_Magnitude()
         {
-            Period.Value = _group[_current_group].magnitude[MagComboBox.SelectedIndex].period;
-            DutyCycle.Value = _group[_current_group].magnitude[MagComboBox.SelectedIndex].dutycycle;
+            Period.Value = magnitude[MagComboBox.SelectedIndex].period;
+            DutyCycle.Value = magnitude[MagComboBox.SelectedIndex].dutycycle;
             Percentage.Value = (DutyCycle.Value / Period.Value) * 100;
         }
         //Upholds the truth DutyCycle must be <= Period at all times, and update percentage
