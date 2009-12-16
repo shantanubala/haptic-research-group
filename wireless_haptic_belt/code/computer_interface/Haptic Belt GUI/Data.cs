@@ -27,8 +27,8 @@ namespace HapticGUI
         public struct Magnitude
         {
             public String id;
-            public Int16 period;
-            public Int16 dutycycle;
+            public UInt16 period;
+            public UInt16 dutycycle;
         }
         //Set Data Structure has a name String, a motor String[], and delay int[].
         private struct Set
@@ -207,8 +207,8 @@ namespace HapticGUI
                         for (int j = 0; j < _group[i].magnitude.Length; j++)
                         {
                             _group[i].magnitude[j].id = readBinary.ReadString();
-                            _group[i].magnitude[j].period = readBinary.ReadInt16();
-                            _group[i].magnitude[j].dutycycle = readBinary.ReadInt16();
+                            _group[i].magnitude[j].period = readBinary.ReadUInt16();
+                            _group[i].magnitude[j].dutycycle = readBinary.ReadUInt16();
                         }
                         _group[i].set = new Set[readBinary.ReadInt32()];
                         //Populate Sets
