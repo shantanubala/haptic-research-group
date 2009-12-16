@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using HapticDriver;
@@ -123,8 +122,8 @@ namespace HapticGUI
         //Calls Library function to learn Magnitude based on user values
         private void MagSet_Click(object sender, EventArgs e)
         {
-            magnitude[MagComboBox.SelectedIndex].period = Convert.ToInt16(Period.Value);
-            magnitude[MagComboBox.SelectedIndex].dutycycle = Convert.ToInt16(DutyCycle.Value);
+            magnitude[MagComboBox.SelectedIndex].period = Convert.ToUInt16(Period.Value);
+            magnitude[MagComboBox.SelectedIndex].dutycycle = Convert.ToUInt16(DutyCycle.Value);
         }
         //Duty Cycle < Period, we must uphold this truth here, as well as update percentage
         private void Period_ValueChanged(object sender, EventArgs e)

@@ -29,11 +29,11 @@ namespace HapticGUI
         private void InitializeComponent()
         {
             this.MainPanel = new System.Windows.Forms.Panel();
+            this.Initialize = new System.Windows.Forms.Button();
             this.MagnitudeEditOK = new System.Windows.Forms.Button();
             this.RhythmEditOK = new System.Windows.Forms.Button();
             this.EditMagnitudeBox = new System.Windows.Forms.ComboBox();
             this.EditRhythmBox = new System.Windows.Forms.ComboBox();
-            this.AddedDelayLabel = new System.Windows.Forms.Label();
             this.DelayLabel = new System.Windows.Forms.Label();
             this.AddDelayField = new System.Windows.Forms.NumericUpDown();
             this.RenameLabel = new System.Windows.Forms.Label();
@@ -52,9 +52,6 @@ namespace HapticGUI
             this.RenameSet = new System.Windows.Forms.Button();
             this.Stop = new System.Windows.Forms.Button();
             this.DirectSetLabel = new System.Windows.Forms.Label();
-            this.AddedCycleLabel = new System.Windows.Forms.Label();
-            this.AddedMagLabel = new System.Windows.Forms.Label();
-            this.AddedRhythmLabel = new System.Windows.Forms.Label();
             this.ClearMotor = new System.Windows.Forms.Button();
             this.ActivateSet = new System.Windows.Forms.Button();
             this.DeleteMotor = new System.Windows.Forms.Button();
@@ -73,11 +70,13 @@ namespace HapticGUI
             this.MenuStrip = new System.Windows.Forms.MenuStrip();
             this.fileMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.connectMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.disconnectMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.refreshPortsMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.COMComboBoxMenu = new System.Windows.Forms.ToolStripComboBox();
-            this.loadMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.connect = new System.Windows.Forms.ToolStripMenuItem();
+            this.disconnect = new System.Windows.Forms.ToolStripMenuItem();
+            this.refreshPorts = new System.Windows.Forms.ToolStripMenuItem();
+            this.outgoingCOMComboBox = new System.Windows.Forms.ToolStripComboBox();
+            this.incomingCOMComboBox = new System.Windows.Forms.ToolStripComboBox();
+            this.load = new System.Windows.Forms.ToolStripMenuItem();
+            this.save = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.showOnlyConnectedMotorsMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.motorSwapingOnAllGroupsSetsMenu = new System.Windows.Forms.ToolStripMenuItem();
@@ -91,11 +90,11 @@ namespace HapticGUI
             // 
             // MainPanel
             // 
+            this.MainPanel.Controls.Add(this.Initialize);
             this.MainPanel.Controls.Add(this.MagnitudeEditOK);
             this.MainPanel.Controls.Add(this.RhythmEditOK);
             this.MainPanel.Controls.Add(this.EditMagnitudeBox);
             this.MainPanel.Controls.Add(this.EditRhythmBox);
-            this.MainPanel.Controls.Add(this.AddedDelayLabel);
             this.MainPanel.Controls.Add(this.DelayLabel);
             this.MainPanel.Controls.Add(this.AddDelayField);
             this.MainPanel.Controls.Add(this.RenameLabel);
@@ -114,9 +113,6 @@ namespace HapticGUI
             this.MainPanel.Controls.Add(this.RenameSet);
             this.MainPanel.Controls.Add(this.Stop);
             this.MainPanel.Controls.Add(this.DirectSetLabel);
-            this.MainPanel.Controls.Add(this.AddedCycleLabel);
-            this.MainPanel.Controls.Add(this.AddedMagLabel);
-            this.MainPanel.Controls.Add(this.AddedRhythmLabel);
             this.MainPanel.Controls.Add(this.ClearMotor);
             this.MainPanel.Controls.Add(this.ActivateSet);
             this.MainPanel.Controls.Add(this.DeleteMotor);
@@ -134,6 +130,17 @@ namespace HapticGUI
             this.MainPanel.Name = "MainPanel";
             this.MainPanel.Size = new System.Drawing.Size(539, 263);
             this.MainPanel.TabIndex = 27;
+            // 
+            // Initialize
+            // 
+            this.Initialize.Enabled = false;
+            this.Initialize.Location = new System.Drawing.Point(16, 237);
+            this.Initialize.Name = "Initialize";
+            this.Initialize.Size = new System.Drawing.Size(75, 23);
+            this.Initialize.TabIndex = 48;
+            this.Initialize.Text = "Initialize";
+            this.Initialize.UseVisualStyleBackColor = true;
+            this.Initialize.Click += new System.EventHandler(this.Initialize_Click);
             // 
             // MagnitudeEditOK
             // 
@@ -176,15 +183,6 @@ namespace HapticGUI
             this.EditRhythmBox.Size = new System.Drawing.Size(100, 21);
             this.EditRhythmBox.TabIndex = 44;
             this.EditRhythmBox.Text = "Edit Rhythms";
-            // 
-            // AddedDelayLabel
-            // 
-            this.AddedDelayLabel.AutoSize = true;
-            this.AddedDelayLabel.Location = new System.Drawing.Point(271, 43);
-            this.AddedDelayLabel.Name = "AddedDelayLabel";
-            this.AddedDelayLabel.Size = new System.Drawing.Size(27, 13);
-            this.AddedDelayLabel.TabIndex = 42;
-            this.AddedDelayLabel.Text = "N/A";
             // 
             // DelayLabel
             // 
@@ -337,7 +335,7 @@ namespace HapticGUI
             // RenameField
             // 
             this.RenameField.Location = new System.Drawing.Point(341, 16);
-            this.RenameField.MaxLength = 10;
+            this.RenameField.MaxLength = 14;
             this.RenameField.Name = "RenameField";
             this.RenameField.Size = new System.Drawing.Size(89, 20);
             this.RenameField.TabIndex = 25;
@@ -373,33 +371,6 @@ namespace HapticGUI
             this.DirectSetLabel.Size = new System.Drawing.Size(23, 13);
             this.DirectSetLabel.TabIndex = 5;
             this.DirectSetLabel.Text = "Set";
-            // 
-            // AddedCycleLabel
-            // 
-            this.AddedCycleLabel.AutoSize = true;
-            this.AddedCycleLabel.Location = new System.Drawing.Point(207, 43);
-            this.AddedCycleLabel.Name = "AddedCycleLabel";
-            this.AddedCycleLabel.Size = new System.Drawing.Size(27, 13);
-            this.AddedCycleLabel.TabIndex = 22;
-            this.AddedCycleLabel.Text = "N/A";
-            // 
-            // AddedMagLabel
-            // 
-            this.AddedMagLabel.AutoSize = true;
-            this.AddedMagLabel.Location = new System.Drawing.Point(144, 43);
-            this.AddedMagLabel.Name = "AddedMagLabel";
-            this.AddedMagLabel.Size = new System.Drawing.Size(27, 13);
-            this.AddedMagLabel.TabIndex = 21;
-            this.AddedMagLabel.Text = "N/A";
-            // 
-            // AddedRhythmLabel
-            // 
-            this.AddedRhythmLabel.AutoSize = true;
-            this.AddedRhythmLabel.Location = new System.Drawing.Point(78, 43);
-            this.AddedRhythmLabel.Name = "AddedRhythmLabel";
-            this.AddedRhythmLabel.Size = new System.Drawing.Size(27, 13);
-            this.AddedRhythmLabel.TabIndex = 20;
-            this.AddedRhythmLabel.Text = "N/A";
             // 
             // ClearMotor
             // 
@@ -573,57 +544,71 @@ namespace HapticGUI
             // 
             this.fileMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.connectMenu,
-            this.loadMenu,
-            this.saveMenu});
+            this.load,
+            this.save});
             this.fileMenu.Name = "fileMenu";
-            this.fileMenu.Size = new System.Drawing.Size(37, 20);
+            this.fileMenu.Size = new System.Drawing.Size(35, 20);
             this.fileMenu.Text = "File";
             // 
             // connectMenu
             // 
             this.connectMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.disconnectMenu,
-            this.refreshPortsMenu,
-            this.COMComboBoxMenu});
+            this.connect,
+            this.disconnect,
+            this.refreshPorts,
+            this.outgoingCOMComboBox,
+            this.incomingCOMComboBox});
             this.connectMenu.Name = "connectMenu";
-            this.connectMenu.Size = new System.Drawing.Size(119, 22);
+            this.connectMenu.Size = new System.Drawing.Size(114, 22);
             this.connectMenu.Text = "Connect";
             // 
-            // disconnectMenu
+            // connect
             // 
-            this.disconnectMenu.Enabled = false;
-            this.disconnectMenu.Name = "disconnectMenu";
-            this.disconnectMenu.Size = new System.Drawing.Size(181, 22);
-            this.disconnectMenu.Text = "Disconnect";
-            this.disconnectMenu.Click += new System.EventHandler(this.disconnectMenu_Click);
+            this.connect.Name = "connect";
+            this.connect.Size = new System.Drawing.Size(181, 22);
+            this.connect.Text = "Connect";
+            this.connect.Click += new System.EventHandler(this.connect_Click);
             // 
-            // refreshPortsMenu
+            // disconnect
             // 
-            this.refreshPortsMenu.Name = "refreshPortsMenu";
-            this.refreshPortsMenu.Size = new System.Drawing.Size(181, 22);
-            this.refreshPortsMenu.Text = "Refresh Ports";
-            this.refreshPortsMenu.Click += new System.EventHandler(this.refreshPortsMenu_Click);
+            this.disconnect.Enabled = false;
+            this.disconnect.Name = "disconnect";
+            this.disconnect.Size = new System.Drawing.Size(181, 22);
+            this.disconnect.Text = "Disconnect";
+            this.disconnect.Click += new System.EventHandler(this.disconnectMenu_Click);
             // 
-            // COMComboBoxMenu
+            // refreshPorts
             // 
-            this.COMComboBoxMenu.Name = "COMComboBoxMenu";
-            this.COMComboBoxMenu.Size = new System.Drawing.Size(121, 23);
-            this.COMComboBoxMenu.Text = "Port List";
-            this.COMComboBoxMenu.Click += new System.EventHandler(this.COMComboBoxMenu_Click);
+            this.refreshPorts.Name = "refreshPorts";
+            this.refreshPorts.Size = new System.Drawing.Size(181, 22);
+            this.refreshPorts.Text = "Refresh Ports";
+            this.refreshPorts.Click += new System.EventHandler(this.refreshPortsMenu_Click);
             // 
-            // loadMenu
+            // outgoingCOMComboBox
             // 
-            this.loadMenu.Name = "loadMenu";
-            this.loadMenu.Size = new System.Drawing.Size(119, 22);
-            this.loadMenu.Text = "Load";
-            this.loadMenu.Click += new System.EventHandler(this.loadMenu_Click);
+            this.outgoingCOMComboBox.Name = "outgoingCOMComboBox";
+            this.outgoingCOMComboBox.Size = new System.Drawing.Size(121, 21);
+            this.outgoingCOMComboBox.Text = "Outgoing Port";
             // 
-            // saveMenu
+            // incomingCOMComboBox
             // 
-            this.saveMenu.Name = "saveMenu";
-            this.saveMenu.Size = new System.Drawing.Size(119, 22);
-            this.saveMenu.Text = "Save";
-            this.saveMenu.Click += new System.EventHandler(this.saveMenu_Click);
+            this.incomingCOMComboBox.Name = "incomingCOMComboBox";
+            this.incomingCOMComboBox.Size = new System.Drawing.Size(121, 21);
+            this.incomingCOMComboBox.Text = "Incoming Port";
+            // 
+            // load
+            // 
+            this.load.Name = "load";
+            this.load.Size = new System.Drawing.Size(114, 22);
+            this.load.Text = "Load";
+            this.load.Click += new System.EventHandler(this.loadMenu_Click);
+            // 
+            // save
+            // 
+            this.save.Name = "save";
+            this.save.Size = new System.Drawing.Size(114, 22);
+            this.save.Text = "Save";
+            this.save.Click += new System.EventHandler(this.saveMenu_Click);
             // 
             // optionsMenu
             // 
@@ -631,7 +616,7 @@ namespace HapticGUI
             this.showOnlyConnectedMotorsMenu,
             this.motorSwapingOnAllGroupsSetsMenu});
             this.optionsMenu.Name = "optionsMenu";
-            this.optionsMenu.Size = new System.Drawing.Size(61, 20);
+            this.optionsMenu.Size = new System.Drawing.Size(56, 20);
             this.optionsMenu.Text = "Options";
             // 
             // showOnlyConnectedMotorsMenu
@@ -640,7 +625,7 @@ namespace HapticGUI
             this.showOnlyConnectedMotorsMenu.CheckOnClick = true;
             this.showOnlyConnectedMotorsMenu.CheckState = System.Windows.Forms.CheckState.Checked;
             this.showOnlyConnectedMotorsMenu.Name = "showOnlyConnectedMotorsMenu";
-            this.showOnlyConnectedMotorsMenu.Size = new System.Drawing.Size(258, 22);
+            this.showOnlyConnectedMotorsMenu.Size = new System.Drawing.Size(238, 22);
             this.showOnlyConnectedMotorsMenu.Text = "Show Only Connected Motors";
             this.showOnlyConnectedMotorsMenu.Click += new System.EventHandler(this.showOnlyConnectedMotorsMenu_Click);
             // 
@@ -650,7 +635,7 @@ namespace HapticGUI
             this.motorSwapingOnAllGroupsSetsMenu.CheckOnClick = true;
             this.motorSwapingOnAllGroupsSetsMenu.CheckState = System.Windows.Forms.CheckState.Checked;
             this.motorSwapingOnAllGroupsSetsMenu.Name = "motorSwapingOnAllGroupsSetsMenu";
-            this.motorSwapingOnAllGroupsSetsMenu.Size = new System.Drawing.Size(258, 22);
+            this.motorSwapingOnAllGroupsSetsMenu.Size = new System.Drawing.Size(238, 22);
             this.motorSwapingOnAllGroupsSetsMenu.Text = "Motor Swaping On All Groups/Sets";
             // 
             // versionMenu
@@ -659,19 +644,19 @@ namespace HapticGUI
             this.guiVersionMenu,
             this.firmwareVersionMenu});
             this.versionMenu.Name = "versionMenu";
-            this.versionMenu.Size = new System.Drawing.Size(58, 20);
+            this.versionMenu.Size = new System.Drawing.Size(54, 20);
             this.versionMenu.Text = "Version";
             // 
             // guiVersionMenu
             // 
             this.guiVersionMenu.Name = "guiVersionMenu";
-            this.guiVersionMenu.Size = new System.Drawing.Size(151, 22);
+            this.guiVersionMenu.Size = new System.Drawing.Size(143, 22);
             this.guiVersionMenu.Text = "GUI: 1.0";
             // 
             // firmwareVersionMenu
             // 
             this.firmwareVersionMenu.Name = "firmwareVersionMenu";
-            this.firmwareVersionMenu.Size = new System.Drawing.Size(151, 22);
+            this.firmwareVersionMenu.Size = new System.Drawing.Size(143, 22);
             this.firmwareVersionMenu.Text = "Firmware: N/A";
             // 
             // GUI
@@ -717,9 +702,6 @@ namespace HapticGUI
         private System.Windows.Forms.Button SetMotor;
         private System.Windows.Forms.Button ActivateSet;
         private System.Windows.Forms.Button ClearMotor;
-        private System.Windows.Forms.Label AddedCycleLabel;
-        private System.Windows.Forms.Label AddedMagLabel;
-        private System.Windows.Forms.Label AddedRhythmLabel;
         private System.Windows.Forms.Button Stop;
         private System.Windows.Forms.TextBox RenameField;
         private System.Windows.Forms.Button RenameSet;
@@ -737,17 +719,16 @@ namespace HapticGUI
         private System.Windows.Forms.Label RenameLabel;
         private System.Windows.Forms.Label DelayLabel;
         private System.Windows.Forms.NumericUpDown AddDelayField;
-        private System.Windows.Forms.Label AddedDelayLabel;
         private System.Windows.Forms.OpenFileDialog loadBinaryFile;
         private System.Windows.Forms.SaveFileDialog saveBinaryFile;
         private System.Windows.Forms.MenuStrip MenuStrip;
         private System.Windows.Forms.ToolStripMenuItem fileMenu;
         private System.Windows.Forms.ToolStripMenuItem connectMenu;
-        private System.Windows.Forms.ToolStripMenuItem disconnectMenu;
-        private System.Windows.Forms.ToolStripMenuItem loadMenu;
-        private System.Windows.Forms.ToolStripMenuItem saveMenu;
-        private System.Windows.Forms.ToolStripComboBox COMComboBoxMenu;
-        private System.Windows.Forms.ToolStripMenuItem refreshPortsMenu;
+        private System.Windows.Forms.ToolStripMenuItem disconnect;
+        private System.Windows.Forms.ToolStripMenuItem load;
+        private System.Windows.Forms.ToolStripMenuItem save;
+        private System.Windows.Forms.ToolStripComboBox outgoingCOMComboBox;
+        private System.Windows.Forms.ToolStripMenuItem refreshPorts;
         private System.Windows.Forms.ToolStripMenuItem optionsMenu;
         private System.Windows.Forms.ToolStripMenuItem showOnlyConnectedMotorsMenu;
         private System.Windows.Forms.ToolStripMenuItem motorSwapingOnAllGroupsSetsMenu;
@@ -758,6 +739,9 @@ namespace HapticGUI
         private System.Windows.Forms.ComboBox EditRhythmBox;
         private System.Windows.Forms.Button RhythmEditOK;
         private System.Windows.Forms.Button MagnitudeEditOK;
+        private System.Windows.Forms.ToolStripComboBox incomingCOMComboBox;
+        private System.Windows.Forms.ToolStripMenuItem connect;
+        private System.Windows.Forms.Button Initialize;
 
     }
 }

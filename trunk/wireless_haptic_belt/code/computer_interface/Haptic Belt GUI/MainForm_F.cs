@@ -49,11 +49,6 @@ namespace HapticGUI
             GroupList.Items.Clear();
             for (int i = 0; i < _group.Length; i++)
                 GroupList.Items.Add(_group[i].name);
-            
-            AddedRhythmLabel.Text = "N/A";
-            AddedMagLabel.Text = "N/A";
-            AddedCycleLabel.Text = "N/A";
-            AddedDelayLabel.Text = "N/A";
         }
 
 
@@ -69,37 +64,14 @@ namespace HapticGUI
 
                 if (breakUp.Length == 4)
                 {
-                    AddedRhythmLabel.Text = breakUp[0];
-                    AddedMagLabel.Text = breakUp[1];
-                    //Change cycle 7 to Infinity notation for user visability
-                    if (breakUp[2].Equals("7"))
-                        AddedCycleLabel.Text = "Inf";
-                    else
-                        AddedCycleLabel.Text = breakUp[2];
-
-                    AddedDelayLabel.Text = breakUp[3];
-
                     //Change comboBoxes
                     AddRhythmBox.SelectedIndex = (int)(Convert.ToChar(breakUp[0])) - 65;
                     AddMagBox.SelectedIndex = (int)(Convert.ToChar(breakUp[1])) - 65;
                     AddCyclesBox.SelectedIndex = Convert.ToInt32(breakUp[2]);
                     AddDelayField.Value = Convert.ToInt32(breakUp[3]);
                 }
-                else
-                {
-                    AddedRhythmLabel.Text = "N/A";
-                    AddedMagLabel.Text = "N/A";
-                    AddedCycleLabel.Text = "N/A";
-                    AddedDelayLabel.Text = "N/A";
-                }
             }
-            else
-            {
-                AddedRhythmLabel.Text = "N/A";
-                AddedMagLabel.Text = "N/A";
-                AddedCycleLabel.Text = "N/A";
-                AddedDelayLabel.Text = "N/A";
-            }
+
         }
         //Re-populates AvailableList and AddedList. Called when a setList index change occurs
         private void Change_Set()
@@ -119,7 +91,7 @@ namespace HapticGUI
             }
         }
 
-        //Re-populates SetList, AvailableList and AddedList from selected Group
+        //Re-populates SetList, AvailableList and AddedList from selected Group, also learns rhythms/mags onto belt if connected
         private void Change_Group()
         {
             if (GroupList.SelectedIndex > -1)
@@ -130,7 +102,11 @@ namespace HapticGUI
                 //Populate SetList based on newly selected group
                 for (int i = 0; i < _group[_current_group].set.Length; i++)
                     SetList.Items.Add(_group[_current_group].set[i].name);
+
+                //Learn Magnitudes and Rhythms onto belt
+                LoadBelt();
             }
+            
         }
         //Swaps the two selected sets on all groups/sets if true, otherwise just the current set if false
         private void Swap_Motors(bool swapAll)
@@ -274,11 +250,6 @@ namespace HapticGUI
                 MotorList.Items.Add((i + 1).ToString());
                 _group[_current_group].set[_current_set].motor[i] = "";
             }
-            //Set labels to N/A
-            AddedRhythmLabel.Text = "N/A";
-            AddedCycleLabel.Text = "N/A";
-            AddedMagLabel.Text = "N/A";
-            AddedDelayLabel.Text = "N/A";
         }
         //Activates selected motor from AddedList
         private void Activate_Motor()
@@ -302,7 +273,7 @@ namespace HapticGUI
         //Adds a set with the inputed name parameter from DirectRenameField
         private void Add_Set()
         {
-            if (!RenameField.Text.Equals(""))
+            if (!RenameField.Text.Equals("") && GroupList.SelectedIndex > -1)
             {
                 _group[_current_group].set = increaseSet(_group[_current_group].set, RenameField.Text);
                 //Add item to SetList
@@ -326,11 +297,6 @@ namespace HapticGUI
                 SetList.Items.RemoveAt(SetList.SelectedIndex);
                 //Clear out AddedList and AvailableList
                 MotorList.Items.Clear();
-                //Set labels to N/A
-                AddedRhythmLabel.Text = "N/A";
-                AddedCycleLabel.Text = "N/A";
-                AddedMagLabel.Text = "N/A";
-                AddedDelayLabel.Text = "N/A";
             }
         }
         //Deletes all sets
@@ -341,12 +307,6 @@ namespace HapticGUI
             //Clear out SetList, AddedList and AvailableList
             MotorList.Items.Clear();
             SetList.Items.Clear();
-
-            //Set labels to N/A
-            AddedRhythmLabel.Text = "N/A";
-            AddedCycleLabel.Text = "N/A";
-            AddedMagLabel.Text = "N/A";
-            AddedDelayLabel.Text = "N/A";
         }
         // Activates selected set from SetList, all motors in sed set are activated based
         // on the parameters entered by the user upon adding that motor to the set.
@@ -435,11 +395,6 @@ namespace HapticGUI
                 //Clear out SetList, AddedList and AvailableList
                 SetList.Items.Clear();
                 MotorList.Items.Clear();
-                //Set labels to N/A
-                AddedRhythmLabel.Text = "N/A";
-                AddedCycleLabel.Text = "N/A";
-                AddedMagLabel.Text = "N/A";
-                AddedDelayLabel.Text = "N/A";
             }
         }
         //Deletes all groups
@@ -559,6 +514,43 @@ namespace HapticGUI
         //Issues a break to stop all activations, then waits for activations to stop
         //Note that if we don't wait till we are done activating we can issue a stop command
         //and then have another activation come along and start them back up!
+        private void GetMotors()
+        {
+            _motorcount = belt.getMotors(QueryType.SINGLE);
+            if (hasError(belt.getStatus(), "belt.getMotors()"))
+            {
+                //Handle Error
+            }
+        }
+
+        private void GetVersion()
+        {
+            firmwareVersionMenu.Text = belt.getVersion(QueryType.SINGLE);
+            if (hasError(belt.getStatus(), "belt.getVersion()"))
+            {
+                //Handle Error
+            }
+        }
+
+        private void LoadBelt()
+        {
+            //Group selected when connected, load current group into belt
+            if (Port_Open)
+            {
+                Magnitude[] magnitude = _group[_current_group].magnitude;
+                Rhythm[] rhythm = _group[_current_group].rhythm;
+
+                for (int i = 0; i < 5; i++)
+                {
+                    //Last parameter true means "pattern" is in binary string format (0's and 1's only)
+                    belt.Learn_Rhythm(rhythm[i].id, rhythm[i].pattern, rhythm[i].time, true);
+                    if (i != 4)
+                        belt.Learn_Magnitude(magnitude[i].id, magnitude[i].period, magnitude[i].dutycycle);
+
+                }
+            }
+        }
+
         private void StopMotors()
         {
             _stop = true; //activate stop command

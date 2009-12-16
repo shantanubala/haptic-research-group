@@ -107,6 +107,15 @@ namespace HapticGUI
                 errorForm.ShowDialog();
             } 
         }
+        //Updates _motorCount, loads rhythms and magnitudes, and updates the version of the belt
+        private void Initialize_Click(object sender, EventArgs e)
+        {
+            GetMotors();
+            GetVersion();
+
+            if(GroupList.SelectedIndex > -1)
+                LoadBelt();
+        }
         //Stops all motors from vibrating
         private void DirectStop_Click(object sender, EventArgs e)
         {

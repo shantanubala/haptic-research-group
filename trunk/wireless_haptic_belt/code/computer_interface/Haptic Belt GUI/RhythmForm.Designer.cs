@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.RhythmPanel = new System.Windows.Forms.Panel();
-            this.label1 = new System.Windows.Forms.Label();
             this.RhythmDone = new System.Windows.Forms.Button();
             this.RhythmSet = new System.Windows.Forms.Button();
             this.RhythmTestStop = new System.Windows.Forms.Button();
@@ -57,7 +56,6 @@
             // RhythmPanel
             // 
             this.RhythmPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.RhythmPanel.Controls.Add(this.label1);
             this.RhythmPanel.Controls.Add(this.RhythmDone);
             this.RhythmPanel.Controls.Add(this.RhythmSet);
             this.RhythmPanel.Controls.Add(this.RhythmTestStop);
@@ -82,15 +80,6 @@
             this.RhythmPanel.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.RhythmPanel.Size = new System.Drawing.Size(270, 248);
             this.RhythmPanel.TabIndex = 32;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(16, 56);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(35, 13);
-            this.label1.TabIndex = 41;
-            this.label1.Text = "label1";
             // 
             // RhythmDone
             // 
@@ -296,6 +285,7 @@
             this.RhythmPatternList.Name = "RhythmPatternList";
             this.RhythmPatternList.Size = new System.Drawing.Size(97, 95);
             this.RhythmPatternList.TabIndex = 4;
+            this.RhythmPatternList.SelectedIndexChanged += new System.EventHandler(this.RhythmPatternList_SelectedIndexChanged);
             // 
             // RhythmForm
             // 
@@ -312,7 +302,6 @@
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Rhythm Mode";
-            this.TopMost = true;
             this.Shown += new System.EventHandler(this.RhythmForm_Shown);
             this.RhythmPanel.ResumeLayout(false);
             this.RhythmPanel.PerformLayout();
@@ -344,6 +333,5 @@
         private System.Windows.Forms.Label RhythmLabel;
         private System.Windows.Forms.ComboBox RhythmComboBox;
         private System.Windows.Forms.ListBox RhythmPatternList;
-        private System.Windows.Forms.Label label1;
     }
 }

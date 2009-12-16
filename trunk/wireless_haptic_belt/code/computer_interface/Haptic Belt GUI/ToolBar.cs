@@ -1,4 +1,5 @@
 using System;
+using System.IO.Ports;
 using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -44,13 +45,18 @@ namespace HapticGUI
         private void GUI_Load(object sender, EventArgs e)
         {
             //Clear ComboBox
-            COMComboBoxMenu.Items.Clear();
+            outgoingCOMComboBox.Items.Clear();
+            incomingCOMComboBox.Items.Clear();
             //Populate ComboBox w/ COM port list
+            
             String[] ports = belt.GetSerialPortNames();
             if (ports.Length > 0)
             {
                 for (int i = 0; i < ports.Length; i++)
-                    COMComboBoxMenu.Items.Add(ports[i]);
+                {
+                    outgoingCOMComboBox.Items.Add(ports[i]);
+                    incomingCOMComboBox.Items.Add(ports[i]);
+                }
                 COM_Available = true;
             }
         }
@@ -81,53 +87,16 @@ namespace HapticGUI
                 Port_Open = false;
                 
                 //Enable/Disable Corresponding options to having no port open
-                disconnectMenu.Enabled = false;
-                refreshPortsMenu.Enabled = true;
-                COMComboBoxMenu.Enabled = true;
+                connect.Enabled = true;
+                disconnect.Enabled = false;
+                refreshPorts.Enabled = true;
+                outgoingCOMComboBox.Enabled = true;
+                incomingCOMComboBox.Enabled = true;
                 ActivateMotor.Enabled = false;
                 ActivateSet.Enabled = false;
                 ActivateGroup.Enabled = false;
                 Stop.Enabled = false;
-            }
-        }
-        //Calls library to Initialize a port, if none are open, and one is available
-        private void COMComboBoxMenu_Click(object sender, EventArgs e)
-        {
-            //If there is a COM available, and no port is open, open a port!
-            if (!Port_Open && COM_Available && (COMComboBoxMenu.SelectedIndex > -1))
-            {
-                String com = COMComboBoxMenu.SelectedItem.ToString();
-                if (hasError(belt.SetupPorts(com, com, "9600", "8", "1", "None", "1000"), "SetupPorts()"))
-                {
-                    //Handle Error
-                }
-                else
-                {
-                    _motorcount = belt.getMotors(QueryType.SINGLE);
-                    if (hasError(belt.getStatus(), "belt.getMotors()"))
-                    {
-                        //Handle Error
-                    }
-                    else
-                    {
-                        Port_Open = true;
-                        
-                        //Enable/Disable Corresponding options to an open port
-                        disconnectMenu.Enabled = true;
-                        refreshPortsMenu.Enabled = false;
-                        COMComboBoxMenu.Enabled = false;
-                        ActivateMotor.Enabled = true;
-                        ActivateSet.Enabled = true;
-                        ActivateGroup.Enabled = true;
-                        Stop.Enabled = true;
-
-                        firmwareVersionMenu.Text = belt.getVersion(QueryType.SINGLE);
-                        if (hasError(belt.getStatus(), "belt.getVersion()"))
-                        {
-                            //Handle Error
-                        }
-                    }
-                }
+                Initialize.Enabled = false;
             }
         }
 
@@ -140,5 +109,44 @@ namespace HapticGUI
         {
             saveBinaryFile.ShowDialog();
         }
+        //Calls library to Initialize and open a port, if none are open, and one is available
+        private void connect_Click(object sender, EventArgs e)
+        {
+            if (!Port_Open && COM_Available && (outgoingCOMComboBox.SelectedIndex > -1) && (incomingCOMComboBox.SelectedIndex > -1))
+            {     
+                String out_com = outgoingCOMComboBox.SelectedItem.ToString();
+                String in_com = incomingCOMComboBox.SelectedItem.ToString();
+
+                if (hasError(belt.SetupPorts(in_com, out_com, "9600", "8", "1", "None", 1000), "belt.SetupPorts()"))
+                {
+                    //Handle Error
+                }
+                else
+                {
+                    if (hasError(belt.OpenPorts(), "belt.OpenPorts()"))
+                    {
+                        //Handle Error
+                    }
+                    else
+                    {
+                        Port_Open = true;
+
+                        //Enable/Disable Corresponding options to an open port
+                        connect.Enabled = false;
+                        disconnect.Enabled = true;
+                        refreshPorts.Enabled = false;
+                        outgoingCOMComboBox.Enabled = false;
+                        incomingCOMComboBox.Enabled = false;
+                        ActivateMotor.Enabled = true;
+                        ActivateSet.Enabled = true;
+                        ActivateGroup.Enabled = true;
+                        Stop.Enabled = true;
+                        Initialize.Enabled = true;
+                    }
+                }
+            }
+        }
+
+        
     }
 }
