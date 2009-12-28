@@ -1,11 +1,4 @@
 using System;
-using System.IO.Ports;
-using System.IO;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using HapticDriver;
 /* Description: This class, along with all its partial classes provides a
@@ -30,6 +23,7 @@ namespace HapticGUI
         HapticBelt belt; //Library functionality
         Boolean COM_Available; //represents availablity of a COM port
         Boolean Port_Open; //represents if a port has been initialized
+        int sleepTime;
 
         public GUI()
         {
@@ -40,6 +34,7 @@ namespace HapticGUI
             belt = new HapticBelt();
             Port_Open = false;
             COM_Available = false;
+            sleepTime = 1;
         }
         //Populates COM comboBox upon GUI load
         private void GUI_Load(object sender, EventArgs e)
@@ -92,8 +87,7 @@ namespace HapticGUI
                 refreshPorts.Enabled = true;
                 outgoingCOMComboBox.Enabled = true;
                 incomingCOMComboBox.Enabled = true;
-                ActivateMotor.Enabled = false;
-                ActivateSet.Enabled = false;
+                ActivateActivation.Enabled = false;
                 ActivateGroup.Enabled = false;
                 Stop.Enabled = false;
                 Initialize.Enabled = false;
@@ -131,14 +125,13 @@ namespace HapticGUI
                     {
                         Port_Open = true;
 
-                        //Enable/Disable Corresponding options to an open port
+                        //Enable/Disable  Corresponding options to an open port
                         connect.Enabled = false;
                         disconnect.Enabled = true;
                         refreshPorts.Enabled = false;
                         outgoingCOMComboBox.Enabled = false;
                         incomingCOMComboBox.Enabled = false;
-                        ActivateMotor.Enabled = true;
-                        ActivateSet.Enabled = true;
+                        ActivateActivation.Enabled = true;
                         ActivateGroup.Enabled = true;
                         Stop.Enabled = true;
                         Initialize.Enabled = true;
@@ -147,6 +140,16 @@ namespace HapticGUI
             }
         }
 
-        
+        private void realTimeDelayValueMenu_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                sleepTime = Convert.ToInt32(realTimeDelayValueMenu.Text);
+            }
+            catch(FormatException)
+            {
+                realTimeDelayValueMenu.Text = "";
+            }
+        }      
     }
 }

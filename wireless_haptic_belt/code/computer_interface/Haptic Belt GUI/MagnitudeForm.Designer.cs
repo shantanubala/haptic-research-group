@@ -127,7 +127,7 @@
             // 
             this.Period.Location = new System.Drawing.Point(107, 99);
             this.Period.Maximum = new decimal(new int[] {
-            2000,
+            50000,
             0,
             0,
             0});
@@ -240,7 +240,6 @@
             this.MinimizeBox = false;
             this.Name = "MagnitudeForm";
             this.ShowIcon = false;
-            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Magnitude Mode";
             this.MagPanel.ResumeLayout(false);

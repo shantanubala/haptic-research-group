@@ -1,143 +1,512 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using System.Threading;
 using HapticDriver;
 
 namespace HapticGUI
 {
     partial class GUI
     {
-        Group[] _group;
+        static Group[] _group;
 
 //Data structures
+        //Activations represent the data to be sent as a vibrate command to the belt
+        public struct Activation
+        {
+            public byte motor;
+            public byte rhythm;
+            public byte magnitude;
+            public byte cycles;
+            public Int32 delay;
+
+            public Activation(Activation toClone)
+            {
+                motor = toClone.motor;
+                rhythm = toClone.rhythm;
+                magnitude = toClone.magnitude;
+                cycles = toClone.cycles;
+                delay = toClone.delay;
+            }
+        }
+
         //Represents the data required to specify a Rhythm
         public struct Rhythm
         {
-            public String id;
             public String pattern;
             public Int16 time;
         }
         //Represents the data required to specify a Magnitude
         public struct Magnitude
         {
-            public String id;
             public UInt16 period;
             public UInt16 dutycycle;
         }
-        //Set Data Structure has a name String, a motor String[], and delay int[].
-        private struct Set
+        //Represents an Event, in time which may have multiple Activations
+        public struct Event
         {
-            public String name;
-            public String[] motor;
+            public Int32 time;
+            public Activation[] activations;
 
-            //Allocates and copies into new memory with a deep copy
-            public Set(Set toClone)
+            public Event(Event toClone)
             {
-                motor = (String[])toClone.motor.Clone();
-                name = (String)toClone.name.Clone();
+                time = toClone.time;
+                activations = (Activation[])toClone.activations.Clone();
+            }
+            //Replaces previous matching Activation with the same motor number
+            //If one doesn't exist we make room for it
+            //Return: index of where motor was replaced, or -1 if it wasnt
+            public void addActivation(Activation add)
+            {
+                Activation[] new_activations;
+
+                int i;
+                //Search for motor in the activations
+                for (i = 0; i < activations.Length; i++)
+                {
+                    if (activations[i].motor == add.motor)
+                    {
+                        //motor activation found in this event instance, replace the actiavtion
+                        activations[i] = new Activation(add);
+                        break;
+                    }
+                }
+                if (i == activations.Length) //no matched motor found, insert at end
+                {
+                    // Increase size of the Activation array that is held by current (jth) event
+                    new_activations = new Activation[activations.Length + 1];
+                    for (i = 0; i < activations.Length; i++)
+                        new_activations[i] = activations[i];
+
+                    new_activations[i] = new Activation(add);
+
+                    activations = new_activations;
+                }
+            }
+
+            public void removeActivation(int motor_num)
+            {
+                int i, index;
+
+                Activation[] new_activations;
+
+                //Search through all activations matching motor parameter
+                for (index = 0; index < activations.Length; index++)
+                {
+                    if (activations[index].motor == (byte)motor_num) //Delete activation at index j
+                    {
+                        new_activations = new Activation[activations.Length - 1];
+
+                        //Copy old contents into new contents up to j (not including j)
+                        for (i = 0; i < index; i++)
+                            new_activations[i] = activations[i];
+
+                        //Copy old contents into new contents starting after j
+                        for (i = i + 1; i < activations.Length; i++)
+                            new_activations[i - 1] = activations[i];
+
+                        activations = new_activations;
+
+                        break; // Item removed, break
+                    }
+                }
             }
         }
+        
+        //Represents all activations on a single motor
+        public struct Motor
+        {
+            public Int32 endTime;
+            public Activation[] activations;
+
+            public Motor(Motor toClone)
+            {
+                endTime = toClone.endTime;
+                activations = (Activation[])toClone.activations;
+            }
+
+            //Replaces previous matching Activation with the same delay time
+            //If one doesn't exist we make room for it
+            //Return: index of where motor was replaced, or -1 if it wasnt
+            public void addActivation(Activation add)
+            {
+                //Insert activation into motor list
+                int i;
+                Activation[] new_activations;
+
+                //Search for delay in the activations
+                for (i = 0; i < activations.Length; i++)
+                {
+                    if (activations[i].delay == add.delay)
+                    {
+                        activations[i] = new Activation(add);
+                        break; 
+                    }
+                }
+                if (i == activations.Length) //no matched delay found, insert at end
+                {
+                    new_activations = new Activation[activations.Length + 1];
+
+                    for (i = 0; i < activations.Length; i++)
+                        new_activations[i] = activations[i];
+
+                    new_activations[i] = new Activation(add);
+
+                    activations = new_activations;
+                }
+            }
+
+            //Matches specified Activation's delay with one currently in the activations array
+            //If a match is found it is removed, otherwise this does nothing
+            public void removeActivation(int delay)
+            {
+                int i,index;
+
+                Activation[] new_activations; 
+
+                //Find the index of the matching delays
+                for (index = 0; index < activations.Length; index++)
+                {
+                    if (activations[index].delay == delay)
+                    {
+                        new_activations = new Activation[activations.Length - 1];
+
+                        for (i = 0; i < index; i++)
+                            new_activations[i] = activations[i];
+
+                        for (i = i + 1; i < activations.Length; i++)
+                            new_activations[i - 1] = activations[i];
+
+                        activations = new_activations;
+
+                        break; // Item removed, break
+                    }
+                }
+            }
+        }
+       
         //Group Data Structure, has a name and a String[]
         private struct Group
         {
             public String name;
+            public Int32 cycles;
+            public Motor[] motors;
+            public Event[] events;
             public Rhythm[] rhythm;
             public Magnitude[] magnitude;
-            public Set[] set;
 
             //Allocates and copies into new memory with a deep copy
             public Group(Group toClone)
             {
-                set = (Set[])toClone.set.Clone();
                 name = (String)toClone.name.Clone();
+                cycles = toClone.cycles;
+                events = (Event[])toClone.events.Clone();
+                motors = (Motor[])toClone.motors.Clone();
                 rhythm = (Rhythm[])toClone.rhythm.Clone();
                 magnitude = (Magnitude[])toClone.magnitude.Clone();
             }
+            //adds activation to motors and events arrays, or replaces the motor activation
+            //if there is already a motor # activation for a particular event (for both motors[] and events[])
+            //Return: True: activation was replaced in events[], False: activation wasn't replaced.
+            public void addActivation(int motor_num, int rhythm, int magnitude, int cycles ,int delay)
+            {
+                int j, k;
+                Activation insert;
+
+                //Setup the activation to insert into the event array
+                insert.motor = (byte)motor_num;
+                insert.rhythm = (byte)rhythm;
+                insert.magnitude = (byte)magnitude;
+                insert.cycles = (byte)cycles;
+                insert.delay = delay;
+
+                //set the new endTime for the specified motor
+                if (cycles != 7)
+                {
+                    j = this.rhythm[rhythm].time * 50 * cycles + delay;
+                    if (motors[motor_num].endTime < j)
+                        motors[motor_num].endTime = j;
+                }
+
+                //Pass a new copy of the activation insert, so the system does a deep copy.
+                motors[motor_num].addActivation(new Activation(insert));
+
+                //Try to find a pre-existing event time that matches this request and insert it
+                //If a time event is found, and an activation already exists for this specific motor, replace it
+                for (j = 0; j < events.Length; j++)
+                {
+                    if (events[j].time == insert.delay) // There is already an instance of this time add activation
+                    {
+                        events[j].addActivation(new Activation(insert));
+                        break;
+                    }
+                }
+                if (j == events.Length) //Event time didn't exist, we must create a new event and insert it
+                {
+                    //Create space for a new event
+                    Event[] new_events = new Event[events.Length + 1];
+
+                    //Maintain property of first time to last time (ascending time property)
+                    //Find inserting point
+                    for (k = 0; k < j; k++)
+                    {
+                        //Copy elements until we find inserting point
+                        if (events[k].time > delay) 
+                            break;
+                        
+                        new_events[k] = events[k];
+                    }
+
+                    //Insert at spot k in the new array - must be outside of loop
+                    new_events[k].time = delay;
+                    new_events[k].activations = new Activation[1];
+                    new_events[k].activations[0] = insert;
+
+                    //Continue copying the rest of the array
+                    while (k < j)
+                    {
+                        new_events[k + 1] = events[k];
+                        k++;
+                    }
+
+                    events = new_events;
+                }
+            }
+            /* 
+            //Remove activation from motors, and events arrays
+            public void removeActivation(int motor_num, int delay)
+            {
+                int i, j;
+
+                //Remove from motors array
+                motors[motor_num].removeActivation(delay);
+
+                //Reset endTime for specified motor activations
+                motors[motor_num].endTime = 0;
+
+                //Recalculate motor activations endtime
+                for (i = 0; i < motors[motor_num].activations.Length; i++)
+                {
+                    if(motors[motor_num].activations[i].cycles != 7)
+                    {
+                        //j = rhythm.time * 50 * cycles + delay
+                        j = this.rhythm[motors[motor_num].activations[i].rhythm].time * 50 * motors[motor_num].activations[i].cycles + motors[motor_num].activations[i].delay;
+                        if(motors[motor_num].endTime < j)
+                            motors[motor_num].endTime = j;
+                    }
+                }
+                
+                //Search through all events matching time paramteter
+                for (i = 0; i < events.Length; i++)
+                {
+                    if (events[i].time == delay) //matched time
+                    {
+                        // remove the motor
+                        events[i].removeActivation(motor_num);
+                        // Item removed, break
+                        break;
+                    }
+                }
+            }
+             */
+            //Remove activation from motors, and events arrays much quicker than previous method
+            public void removeActivation(int event_num, int activation_num)
+            {
+                int i, j, motor_num, delay;
+                Activation[] new_activations;
+
+                //Check to see if the numbers are valid parameters
+                if (events.Length > event_num) 
+                {
+                    if (events[event_num].activations.Length > activation_num)
+                    {
+                        //find motor number of this event's activation
+                        motor_num = events[event_num].activations[activation_num].motor;
+
+                        //find the delay of this event's activation
+                        delay = events[event_num].activations[activation_num].delay;
+
+                        //Remove from motors array using the two fields we just got
+                        motors[motor_num].removeActivation(delay);
+
+                        //Reset endTime for specified motor activations
+                        motors[motor_num].endTime = 0;
+
+                        //Recalculate motor activations endtime
+                        for (i = 0; i < motors[motor_num].activations.Length; i++)
+                        {
+                            if (motors[motor_num].activations[i].cycles != 7)
+                            {
+                                //j = rhythm.time * 50 * cycles + delay
+                                j = this.rhythm[motors[motor_num].activations[i].rhythm].time * 50 * motors[motor_num].activations[i].cycles + motors[motor_num].activations[i].delay;
+                                if (motors[motor_num].endTime < j)
+                                    motors[motor_num].endTime = j;
+                            }
+                        }
+
+                        new_activations = new Activation[events[event_num].activations.Length - 1];
+
+                        for (i = 0; i < activation_num; i++)
+                            new_activations[i] = events[event_num].activations[i];
+
+                        for (i = i + 1; i < events[event_num].activations.Length; i++)
+                            new_activations[i - 1] = events[event_num].activations[i];
+
+                        events[event_num].activations = new_activations;
+                    }
+                }
+            }
+            //Deletes the specified event, and resizes events array
+            public void deleteEvent(int event_num)
+            {
+                int i;
+                Event[] new_events = new Event[events.Length - 1];
+
+                // Delete all activations from motors[]
+                for (i = 0; i < events[event_num].activations.Length; i++)
+                    motors[events[event_num].activations[i].motor].removeActivation(events[event_num].activations[i].delay);
+
+                //Shrink event array
+                for (i = 0; i < event_num; i++)
+                    new_events[i] = events[i];
+
+                for (i = i + 1; i < events.Length; i++)
+                    new_events[i - 1] = events[i];
+
+                events = new_events;
+
+            }
+            //Clears out all events
+            public void clearEvents()
+            {
+                //Clear out all activations
+                motors = new Motor[16];
+
+                for (int i = 0; i < 16; i++)
+                {
+                    //Motor initialization
+                    motors[i].endTime = 0;
+                    motors[i].activations = new Activation[0];
+                }
+
+                events = new Event[0];
+            }
+            //Calls refreshActivation for each independent activation in this.motors dat,a renewing this.events data.
+            //Should be only called after the user reconfigures the motor order.
+            public void refreshEvents()
+            {
+                int i, j;
+                events = new Event[0];
+
+                for (i = 0; i < motors.Length; i++)
+                {
+                    for (j = 0; j < motors[i].activations.Length; j++ )
+                    {
+                        refreshActivation(i, motors[i].activations[j].rhythm, motors[i].activations[j].magnitude, motors[i].activations[j].cycles, motors[i].activations[j].delay);
+                    }
+                }
+            }
+
+            private void refreshActivation(int motor_num, int rhythm, int magnitude, int cycles ,int delay)
+            {
+                int j, k;
+                Activation insert;
+
+                //Setup the activation to insert into the event array
+                insert.motor = (byte)motor_num;
+                insert.rhythm = (byte)rhythm;
+                insert.magnitude = (byte)magnitude;
+                insert.cycles = (byte)cycles;
+                insert.delay = delay;
+
+                //Try to find a pre-existing event time that matches this request and insert it
+                //If a time event is found, and an activation already exists for this specific motor, replace it
+                for (j = 0; j < events.Length; j++)
+                {
+                    if (events[j].time == insert.delay) // There is already an instance of this time add activation
+                    {
+                        events[j].addActivation(new Activation(insert));
+                        break;
+                    }
+                }
+                if (j == events.Length) //Event time didn't exist, we must insert it somewhere
+                {
+                    //Create space for a new event
+                    Event[] new_events = new Event[events.Length + 1];
+
+                    //Maintain property of first time to last time (ascending time property)
+                    //Find inserting point
+                    for (k = 0; k < j; k++)
+                    {
+                        //Copy elements until we find inserting point
+                        if (events[k].time > delay) 
+                            break;
+                        
+                        new_events[k] = events[k];
+                    }
+
+                    //Insert at spot k in the new array - must be outside of loop
+                    new_events[k].time = delay;
+                    new_events[k].activations = new Activation[1];
+                    new_events[k].activations[0] = insert;
+
+                    //Continue copying the rest of the array
+                    while (k < j)
+                    {
+                        new_events[k + 1] = events[k];
+                        k++;
+                    }
+
+                    events = new_events;
+                }
+            }
         }
+        
         //Data structure functions
-        //Increases the given Set[] size by 1, and copies all data from old_set into the returned set.
-        private Set[] increaseSet(Set[] old_set, String name)
-        {
-            int last_index;
-
-            Set[] new_set = new Set[old_set.Length + 1];
-
-            //Copy old contents into new contents (uses deep copy)
-            for (int i = 0; i < old_set.Length; i++)
-                new_set[i] = new Set(old_set[i]);
-
-            //last index of the new array
-            last_index = new_set.Length - 1;
-            
-            //Instantiate the Name and motor array of the last indexed newly created set
-            new_set[last_index].motor = new String[_maxmotors];
-            new_set[last_index].name = name;
-
-            //Initialize newly created Set's motor array to "";
-            for (int i = 0; i < _maxmotors; i++)
-                new_set[last_index].motor[i] = "";
-
-            return new_set;
-        }
+        
         //Increases the given Group[] size by 1, and copies all data from old_set into the returned set.
         private Group[] increaseGroup(Group[] old_group, String name)
         {
-            int last_index;
+            int i;
             char id;
 
             Group[] new_group = new Group[old_group.Length + 1];
 
             //Copy old contents into new contents (uses deep copy)
-            for (int i = 0; i < old_group.Length; i++)
+            for (i = 0; i < old_group.Length; i++)
                 new_group[i] = new Group(old_group[i]);
 
-            //last index of the new array
-            last_index = new_group.Length - 1;
-
             //Initialize the name of the new group
-            new_group[last_index].name = name;
-            new_group[last_index].set = new Set[0];
-            new_group[last_index].rhythm = new Rhythm[5];
-            new_group[last_index].magnitude = new Magnitude[4];
+            new_group[i].name = name;
+            new_group[i].cycles = 1;
+            new_group[i].motors = new Motor[_maxmotors];
+            new_group[i].events = new Event[0];
+            new_group[i].rhythm = new Rhythm[_maxrhythms];
+            new_group[i].magnitude = new Magnitude[_maxmagnitudes];
 
-            for (int i = 0; i < 5; i++)
+            //Initialize rhythm and magnitude arrays
+            for (int j = 0; j < _maxmotors; j++)
             {
-                id = (char)(i + 65); //ASCII 65-69 = A-E
+                id = (char)(j + 65); //ASCII 65-69 = A-E
+                
+                //Motor initialization
+                new_group[i].motors[j].endTime = 0;
+                new_group[i].motors[j].activations = new Activation[0];
 
-                new_group[last_index].rhythm[i].id = id.ToString(); //A B C D E
-                new_group[last_index].rhythm[i].pattern = "0"; /* Default to Rythm of OFF for 50ms */
-                new_group[last_index].rhythm[i].time = 1;
-                if (i != 4) //Magnitude is only of size 4, so skip on last index
+                if (j < _maxrhythms) //Rhythm initializations
                 {
-                    new_group[last_index].magnitude[i].id = id.ToString(); //A B C D
-                    new_group[last_index].magnitude[i].period = 2000; // Default to Magnitude of 0% 
-                    new_group[last_index].magnitude[i].dutycycle = 0;
+                    new_group[i].rhythm[j].pattern = "0"; /* Default to Rythm of OFF for 50ms */
+                    new_group[i].rhythm[j].time = 1; 
+                }
+                if (j < _maxmagnitudes) //Magnitude initialization
+                {
+                    new_group[i].magnitude[j].period = 2000; // Default to Magnitude of 0% 
+                    new_group[i].magnitude[j].dutycycle = 0;
                 }
             }
 
             return new_group;
         }
-        //Deletes the specified Set via index from the specified Set[], and shifts and shrinks the Set[] data to fill gap.
-        private Set[] decreaseSet(Set[] old_set, int index)
-        {
-            Set[] new_set = new Set[old_set.Length - 1];
-
-            //Copy old contents into new contents up to index (using deep copy)
-            for (int i = 0; i < index; i++)
-                new_set[i] = new Set(old_set[i]);
-
-            //Copy old contents into new contents starting after index (using deep copy)
-            for (int i = index + 1; i < old_set.Length; i++)
-                new_set[i - 1] = new Set(old_set[i]);
-
-            return new_set;
-        }
+       
 
         //Deletes the specified Group via index from the specified Group[], and shifts and shrinks the Group[] data to fill gap.
         private Group[] decreaseGroup(Group[] old_group, int index)
@@ -171,22 +540,35 @@ namespace HapticGUI
                      * before the array data is passed, so we can create a loop around
                      * the array.
                      * 
-                     * Save/Load Order Format:
-                     * 
-                     * Int32 - Size of saved _group[] array (variable length)
-                     *  String - "name" of _group[i] array
-                     *  Int32 - Size of saved _group[i].rhythm[] array (should always be 5)
-                     *      String - "id" of _group[i].rhythm[j]
-                     *      String - "pattern" of _group[i].rhythm[j]
-                     *      Int16 - "time" of _group[i].rhythm[j]
-                     *  Int32 - Size of saved _group[i].magnitude[] array (should always be 4)
-                     *      String - "id" of _group[i].magnitude[j]
-                     *      Int16 - "period" of _group[i].magnitude[j]
-                     *      Int16 - "dutycycle" of _group[i].magnitude[j]
-                     *  Int32 - Size of saved _group[i].set[] array (variable length)
-                     *      String - "name" of _group[i].set[j]
-                     *      Int32 - Size of saved _group[i].set[j].motor[] array (should always be 16)
-                     *          String - "motor" of _group[i].set[j].motor[k] 
+                       Save/Load Order Format:
+                      
+                        String name;
+                        Int32 cycles;
+                        Motor[_maxmotors] motors
+                            Int32 endTime
+                            Activation[activations.Length] activations
+                                byte motor
+                                byte rhythm
+                                byte magnitude
+                                byte cycles
+                                Int32 delay
+                        Event[events.Length] events
+                            Int32 time
+                            Activation[activations.Length] activations
+                                byte motor
+                                byte rhythm
+                                byte magnitude
+                                byte cycles
+                                Int32 delay
+                        Rhythm[_maxrhythms] rhythm;
+                            String id
+                            String pattern
+                            UInt16 time
+                        Magnitude[_maxmagnitudes] magnitude;
+                            String id
+                            UInt16 period
+                            UInt16 dutycycle
+ 
                      */
 
                     _group = new Group[readBinary.ReadInt32()];
@@ -194,32 +576,53 @@ namespace HapticGUI
                     for (int i = 0; i < _group.Length; i++)
                     {
                         _group[i].name = readBinary.ReadString();
-                        _group[i].rhythm = new Rhythm[readBinary.ReadInt32()];
-                        //Populate Rhythm Array
-                        for (int j = 0; j < _group[i].rhythm.Length; j++)
+                        _group[i].cycles = readBinary.ReadInt32();
+                        //Initialize _group[i]'s arrays
+                        _group[i].motors = new Motor[_maxmotors]; //const of 16 motors unless changed
+                        _group[i].events = new Event[readBinary.ReadInt32()];
+                        _group[i].rhythm = new Rhythm[_maxrhythms]; //const of 5 rhythms (belt supports up to 8)
+                        _group[i].magnitude = new Magnitude[_maxmagnitudes]; //const of 4 rhythms (belt supports only 4)
+                        //Populate Motors array
+                        for (int j = 0; j < _maxmotors; j++)
                         {
-                            _group[i].rhythm[j].id = readBinary.ReadString();
+                            _group[i].motors[j].endTime = readBinary.ReadInt32();
+                            _group[i].motors[j].activations = new Activation[readBinary.ReadInt32()];
+                            for (int k = 0; k < _group[i].motors[j].activations.Length; k++)
+                            {
+                                _group[i].motors[j].activations[k].motor = readBinary.ReadByte();
+                                _group[i].motors[j].activations[k].rhythm = readBinary.ReadByte();
+                                _group[i].motors[j].activations[k].magnitude = readBinary.ReadByte();
+                                _group[i].motors[j].activations[k].cycles = readBinary.ReadByte();
+                                _group[i].motors[j].activations[k].delay = readBinary.ReadInt32();
+                            }
+                        }
+                        _group[i].events = new Event[readBinary.ReadInt32()];
+                        //Populate Events array
+                        for (int j = 0; j < _group[i].events.Length; j++)
+                        {
+                            _group[i].events[j].time = readBinary.ReadInt32();
+                            _group[i].events[j].activations = new Activation[readBinary.ReadInt32()];
+                            for (int k = 0; k < _group[i].motors[j].activations.Length; k++)
+                            {
+                                _group[i].events[j].activations[k].motor = readBinary.ReadByte();
+                                _group[i].events[j].activations[k].rhythm = readBinary.ReadByte();
+                                _group[i].events[j].activations[k].magnitude = readBinary.ReadByte();
+                                _group[i].events[j].activations[k].cycles = readBinary.ReadByte();
+                                _group[i].events[j].activations[k].delay = readBinary.ReadInt32();
+                            }
+                        }
+                        //Populate Rhythm Array
+                        for (int j = 0; j < _maxrhythms; j++)
+                        {
                             _group[i].rhythm[j].pattern = readBinary.ReadString();
                             _group[i].rhythm[j].time = readBinary.ReadInt16();
                         }
-                        _group[i].magnitude = new Magnitude[readBinary.ReadInt32()];
                         //Populate Magnitude Array
-                        for (int j = 0; j < _group[i].magnitude.Length; j++)
+                        for (int j = 0; j < _maxmagnitudes; j++)
                         {
-                            _group[i].magnitude[j].id = readBinary.ReadString();
                             _group[i].magnitude[j].period = readBinary.ReadUInt16();
                             _group[i].magnitude[j].dutycycle = readBinary.ReadUInt16();
-                        }
-                        _group[i].set = new Set[readBinary.ReadInt32()];
-                        //Populate Sets
-                        for (int j = 0; j < _group[i].set.Length; j++)
-                        {
-                            _group[i].set[j].name = readBinary.ReadString();
-                            _group[i].set[j].motor = new String[readBinary.ReadInt32()];
-                            //Populate Motors
-                            for (int k = 0; k < _group[i].set[j].motor.Length; k++)
-                                _group[i].set[j].motor[k] = readBinary.ReadString();
-                        }   
+                        } 
                     }
                     //Update the List Boxes to display the newly loaded data
                     Change_File();
@@ -257,22 +660,34 @@ namespace HapticGUI
                      * before the array data is written, so loader know the amount of the data
                      * to load.
                      * 
-                     * Save/Load Order Format:
-                     * 
-                     * Int32 - Size of saved _group[] array (variable length)
-                     *  String - "name" of _group[i] array
-                     *  Int32 - Size of saved _group[i].rhythm[] array (should always be 5)
-                     *      String - "id" of _group[i].rhythm[j]
-                     *      String - "pattern" of _group[i].rhythm[j]
-                     *      Int16 - "time" of _group[i].rhythm[j]
-                     *  Int32 - Size of saved _group[i].magnitude[] array (should always be 4)
-                     *      String - "id" of _group[i].magnitude[j]
-                     *      Int16 - "period" of _group[i].magnitude[j]
-                     *      Int16 - "dutycycle" of _group[i].magnitude[j]
-                     *  Int32 - Size of saved _group[i].set[] array (variable length)
-                     *      String - "name" of _group[i].set[j]
-                     *      Int32 - Size of saved _group[i].set[j].motor[] array (should always be 16)
-                     *          String - "motor" of _group[i].set[j].motor[k] 
+                       Save/Load Order Format:
+                      
+                        String name;
+                        Int32 cycles;
+                        Motor[_maxmotors] motors
+                            Int32 endTime
+                            Activation[activations.Length] activations
+                                byte motor
+                                byte rhythm
+                                byte magnitude
+                                byte cycles
+                                Int32 delay
+                        Event[events.Length] events
+                            Int32 time
+                            Activation[activations.Length] activations
+                                byte motor
+                                byte rhythm
+                                byte magnitude
+                                byte cycles
+                                Int32 delay
+                        Rhythm[_maxrhythms] rhythm;
+                            String id
+                            String pattern
+                            UInt16 time
+                        Magnitude[_maxmagnitudes] magnitude;
+                            String id
+                            UInt16 period
+                            UInt16 dutycycle
                      */
 
                     writeBinary.Write(_group.Length);
@@ -280,31 +695,54 @@ namespace HapticGUI
                     for (int i = 0; i < _group.Length; i++)
                     {
                         writeBinary.Write(_group[i].name);
-                        writeBinary.Write(_group[i].rhythm.Length);
-                        //Populate Rhythm Array
-                        for (int j = 0; j < _group[i].rhythm.Length; j++)
+                        writeBinary.Write(_group[i].cycles);
+                        //Initialize _group[i]'s arrays
+
+                        //motors[].Length const of 16 motors unless changed
+                        writeBinary.Write(_group[i].events.Length);
+                        //rhythm[].Length const of 5 rhythms (belt supports up to 8)
+                        //magnitude[].Length const of 4 rhythms (belt supports only 4)
+
+                        //Populate Motors array
+                        for (int j = 0; j < _maxmotors; j++)
                         {
-                            writeBinary.Write(_group[i].rhythm[j].id);
+                            writeBinary.Write(_group[i].motors[j].endTime);
+                            writeBinary.Write(_group[i].motors[j].activations.Length);
+                            for (int k = 0; k < _group[i].motors[j].activations.Length; k++)
+                            {
+                                writeBinary.Write(_group[i].motors[j].activations[k].motor);
+                                writeBinary.Write(_group[i].motors[j].activations[k].rhythm);
+                                writeBinary.Write(_group[i].motors[j].activations[k].magnitude);
+                                writeBinary.Write(_group[i].motors[j].activations[k].cycles);
+                                writeBinary.Write(_group[i].motors[j].activations[k].delay);
+                            }
+                        }
+                        writeBinary.Write(_group[i].events.Length);
+                        //Populate Events array                        
+                        for (int j = 0; j < _group[i].events.Length; j++)
+                        {
+                            writeBinary.Write(_group[i].events[j].time);
+                            writeBinary.Write(_group[i].events[j].activations.Length);
+                            for (int k = 0; k < _group[i].motors[j].activations.Length; k++)
+                            {
+                                writeBinary.Write(_group[i].events[j].activations[k].motor);
+                                writeBinary.Write(_group[i].events[j].activations[k].rhythm);
+                                writeBinary.Write(_group[i].events[j].activations[k].magnitude);
+                                writeBinary.Write(_group[i].events[j].activations[k].cycles);
+                                writeBinary.Write(_group[i].events[j].activations[k].delay);
+                            }
+                        }
+                        //Populate Rhythm Array
+                        for (int j = 0; j < _maxrhythms; j++)
+                        {
                             writeBinary.Write(_group[i].rhythm[j].pattern);
                             writeBinary.Write(_group[i].rhythm[j].time);
                         }
-                        writeBinary.Write(_group[i].magnitude.Length);
                         //Populate Magnitude Array
-                        for (int j = 0; j < _group[i].magnitude.Length; j++)
+                        for (int j = 0; j < _maxmagnitudes; j++)
                         {
-                            writeBinary.Write(_group[i].magnitude[j].id);
                             writeBinary.Write(_group[i].magnitude[j].period);
                             writeBinary.Write(_group[i].magnitude[j].dutycycle);
-                        }
-                        writeBinary.Write(_group[i].set.Length);
-                        //Populate Sets
-                        for (int j = 0; j < _group[i].set.Length; j++)
-                        {
-                            writeBinary.Write(_group[i].set[j].name);
-                            writeBinary.Write(_group[i].set[j].motor.Length);
-                            //Populate Motors
-                            for (int k = 0; k < _group[i].set[j].motor.Length; k++)
-                                writeBinary.Write(_group[i].set[j].motor[k]);
                         }
                     }
                 }

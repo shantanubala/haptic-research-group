@@ -1,10 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 using HapticDriver;
 
 namespace HapticGUI
@@ -34,10 +29,45 @@ namespace HapticGUI
             }
             else
             {
-                rhythmItems[pairs] = on.ToString() + "," + off.ToString();
-                total_duration += on + off;
-                RhythmPatternList.Items.Add(rhythmItems[pairs]);
-                pairs++;
+                if (pairs != 0)
+                {
+                    String[] breakUp = rhythmItems[pairs - 1].Split(',');
+                    int last_on = Convert.ToInt32(breakUp[0]);
+                    int last_off = Convert.ToInt32(breakUp[1]);
+
+                    if ((last_on == 0) && (on == 0))
+                    {
+                        off += last_off;
+                        rhythmItems[pairs - 1] = "0," + off.ToString();
+                        total_duration += (off - last_off);
+                        RhythmPatternList.Items.RemoveAt(pairs - 1);
+                        RhythmPatternList.Items.Add(rhythmItems[pairs - 1]);
+                        RhythmPatternList.SelectedIndex = pairs - 1;
+                    }
+                    else if (last_off == 0)
+                    {
+                        on += last_on;
+                        rhythmItems[pairs - 1] = on.ToString() + "," + off.ToString();
+                        total_duration += (on - last_on) + off;
+                        RhythmPatternList.Items.RemoveAt(pairs - 1);
+                        RhythmPatternList.Items.Add(rhythmItems[pairs - 1]);
+                        RhythmPatternList.SelectedIndex = pairs - 1;
+                    }
+                    else
+                    {
+                        rhythmItems[pairs] = on.ToString() + "," + off.ToString();
+                        total_duration += on + off;
+                        RhythmPatternList.Items.Add(rhythmItems[pairs]);
+                        pairs++;
+                    }
+                }
+                else
+                {
+                    rhythmItems[pairs] = on.ToString() + "," + off.ToString();
+                    total_duration += on + off;
+                    RhythmPatternList.Items.Add(rhythmItems[pairs]);
+                    pairs++;
+                } 
             }
         }
         /*This method inserts before the selected pair in the ListBox
@@ -60,16 +90,41 @@ namespace HapticGUI
                 }
                 else
                 {
-                    //Shifts elements one space to the right of the index
-                    for (int i = pairs; i > index ; i--)
+                    String[] breakUp = rhythmItems[index].Split(',');
+                    int last_on = Convert.ToInt32(breakUp[0]);
+                    int last_off = Convert.ToInt32(breakUp[1]);                        
+
+                    if ((last_on == 0) && (on == 0))
                     {
-                        rhythmItems[i] = rhythmItems[i-1];
+                        off += last_off;
+                        rhythmItems[index] = "0," + off.ToString();
+                        total_duration += (off - last_off);
+                        RhythmPatternList.Items.RemoveAt(index);
+                        RhythmPatternList.Items.Insert(index, rhythmItems[index]);
+                        RhythmPatternList.SelectedIndex = index;
                     }
-                    rhythmItems[index] = on.ToString() + "," + off.ToString();
-                    total_duration += on + off;
-                    pairs++;
-                    //Insert into ListBox RhythmPattern
-                    RhythmPatternList.Items.Insert(index, rhythmItems[index]);
+                    else if (last_off == 0)
+                    {
+                        on += last_on;
+                        rhythmItems[index] = on.ToString() + "," + off.ToString();
+                        total_duration += (on - last_on) + off;
+                        RhythmPatternList.Items.RemoveAt(index);
+                        RhythmPatternList.Items.Insert(index, rhythmItems[index]);
+                        RhythmPatternList.SelectedIndex = index;
+                    }
+                    else
+                    {
+                        //Shifts elements one space to the right of the index
+                        for (int i = pairs; i > index; i--)
+                        {
+                            rhythmItems[i] = rhythmItems[i - 1];
+                        }
+
+                        rhythmItems[index] = on.ToString() + "," + off.ToString();
+                        total_duration += on + off;
+                        RhythmPatternList.Items.Insert(index, rhythmItems[index]);
+                        pairs++;
+                    }
                 }
             }
         }
@@ -95,10 +150,14 @@ namespace HapticGUI
                 }
                 else
                 {
-                    rhythmItems[index] = on.ToString() + "," + off.ToString();
-                    RhythmPatternList.Items.RemoveAt(index);
-                    RhythmPatternList.Items.Insert(index, rhythmItems[index]);
-                    total_duration = total_duration - (Convert.ToInt32(splitPair[0]) + Convert.ToInt32(splitPair[1])) + on + off;
+                    Delete_Pair(index);
+                    
+                    if (pairs > index)
+                        Insert_Pair(index, on, off);
+                    else
+                        Add_Pair(on, off);
+
+                    RhythmPatternList.SelectedIndex = index;
                 }
             }
         }
@@ -198,6 +257,7 @@ namespace HapticGUI
          */
         private void Paint_Rythm()
         {
+            int i;
             //Create array for breaking up the pairs (on,off)
             String[] splitPair = new String[2];
             int right_x = 0;
@@ -210,8 +270,8 @@ namespace HapticGUI
             RhythmGraphics = RhythmPaint.CreateGraphics();
             //Start painting with a clean work area
             RhythmGraphics.Clear(BackColor);
-
-            for (int i = 0; i < pairs; i++)
+            
+            for (i = 0; i < pairs; i++)
             {
                 //splits into array on and off times
                 splitPair = rhythmItems[i].Split(',');
@@ -243,6 +303,13 @@ namespace HapticGUI
                     pen = new Pen(Color.Blue);
                     RhythmGraphics.DrawLine(pen, new Point(0, 40), new Point(0, 0));
                     RhythmGraphics.DrawLine(pen, new Point(256, 40), new Point(256, 0));
+                    
+                    if (i == RhythmPatternList.SelectedIndex)
+                    {
+                        pen = new Pen(Color.Red);
+                        RhythmGraphics.DrawLine(pen, new Point(left_x, 40), new Point(left_x, 0));
+                    }
+
                     pen = new Pen(Color.Black);
                 }
                 //Get off value (must be after off to on edge painting)
@@ -260,6 +327,11 @@ namespace HapticGUI
                 RhythmGraphics.DrawLine(pen, new Point(left_x, 36), new Point(right_x, 36));
                 //done painting off cycle, swap vars
                 left_x = right_x;
+            }
+            if (i == RhythmPatternList.SelectedIndex + 1)
+            {
+                pen = new Pen(Color.Red);
+                RhythmGraphics.DrawLine(pen, new Point(left_x, 40), new Point(left_x, 0));
             }
             //set rhythm time
             RhythmTime.Text = total_duration.ToString() + "ms";
