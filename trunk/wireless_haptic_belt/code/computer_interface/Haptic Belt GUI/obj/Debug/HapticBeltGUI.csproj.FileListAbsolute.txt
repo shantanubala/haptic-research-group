@@ -4,9 +4,10 @@ C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\
 C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Debug\ResolveAssemblyReference.cache
 C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Debug\HapticGUI.ErrorForm.resources
 C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Debug\HapticGUI.GUI.resources
-C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Debug\WindowsFormsApplication1.Properties.Resources.resources
 C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Debug\HapticBeltGUI.csproj.GenerateResource.Cache
 C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Debug\HapticBeltGUI.exe
 C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Debug\HapticBeltGUI.pdb
 C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Debug\HapticGUI.MagnitudeForm.resources
 C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Debug\HapticGUI.RhythmForm.resources
+C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Debug\HapticBeltGUI.Properties.Resources.resources
+C:\Users\Kris\Documents\Visual Studio 2008\Projects\HapticBeltGUI\HapticBeltGUI\obj\Debug\HapticBeltGUI.GraphicForm.resources

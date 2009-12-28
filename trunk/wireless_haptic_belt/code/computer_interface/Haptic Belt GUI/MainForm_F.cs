@@ -1,11 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using System.Threading;
 using HapticDriver;
 
 
@@ -13,10 +7,9 @@ namespace HapticGUI
 {
     partial class GUI
     {
-        int _current_set = 0;
+        int _current_activation = 0;
+        int _current_event = 0;
         int _current_group = 0;
-        bool _done_activating = true; // Used to make sure we are done activating motors before issuing a stop command
-        bool _stop = false; //Used to break activation loops, (_done_activating should be set to true after breaking out of these loops)
 
         //These two variables are similar in use however, seperate so that upon activating, we get no performance loss
         //Otherwise if we used the same variable would send activations to unattached motors.
@@ -24,28 +17,45 @@ namespace HapticGUI
         int _viewableMotors = 0;
 
         const int _maxmotors = 16; //Max amount of motors possible for this application
+        const int _maxrhythms = 5; //Max amount of rhythms possible for this application
+        const int _maxmagnitudes = 4; //Max amount of magnitudes possible for this applications
 
+      
         private void Set_Rhythms()
         {
-            RhythmForm rhythmForm = new RhythmForm(_group[_current_group].rhythm, belt, Port_Open);
-            rhythmForm.ShowDialog();
-            _group[_current_group].rhythm = rhythmForm.getRhythms();
+            if (EditBox.Text.Equals("Edit"))
+            {
+                RhythmForm rhythmForm = new RhythmForm(_group[_current_group].rhythm, belt, Port_Open);
+                rhythmForm.ShowDialog();
+                _group[_current_group].rhythm = rhythmForm.getRhythms();
+            }
+            else
+            {
+                _group[_current_group].rhythm = (Rhythm[])_group[EditBox.SelectedIndex].rhythm.Clone();
+            }
             
         }
 
         private void Set_Magnitudes()
         {
-            MagnitudeForm magnitudeForm = new MagnitudeForm(_group[_current_group].magnitude, belt, Port_Open);
-            magnitudeForm.ShowDialog();
-            _group[_current_group].magnitude = magnitudeForm.getMagnitudes();
+            if (EditBox.Text.Equals("Edit"))
+            {
+                MagnitudeForm magnitudeForm = new MagnitudeForm(_group[_current_group].magnitude, belt, Port_Open);
+                magnitudeForm.ShowDialog();
+                _group[_current_group].magnitude = magnitudeForm.getMagnitudes();
+            }
+            else
+            {
+                _group[_current_group].magnitude = (Magnitude[])_group[EditBox.SelectedIndex].magnitude.Clone();
+            }
         }
 
-        //Functions that manipulate Text Labels
+//Functions that manipulate Text Labels
         //Change File - called when a file is loaded
         private void Change_File()
         {
-            MotorList.Items.Clear();
-            SetList.Items.Clear();
+            EventList.Items.Clear();
+            ActivationList.Items.Clear();
             GroupList.Items.Clear();
             for (int i = 0; i < _group.Length; i++)
                 GroupList.Items.Add(_group[i].name);
@@ -53,123 +63,114 @@ namespace HapticGUI
 
 
         //Populates 3 lables based on selected motor in "AddedList"
-        private void Change_Motor()
+        private void Change_Activation()
         {
-            String[] breakUp;
-            int index = MotorList.SelectedIndex;
+            int activation_num = ActivationList.SelectedIndex;
+            int event_num = EventList.SelectedIndex;
+            byte motor;
+            Activation searched = new Activation();
 
-            if (index > -1)
+            if (activation_num > -1 && event_num > -1)
             {
-                breakUp = _group[_current_group].set[_current_set].motor[index].Split(',');
-
-                if (breakUp.Length == 4)
+                _current_activation = activation_num;
+                //Activations in an event are not ordered, so we must search the entire event for the activation of the motor
+                motor = (byte)(Convert.ToInt32(ActivationList.SelectedItem.ToString().Split(',')[0]) - 1);
+                
+                //Note there is only one activation per event
+                for (int i = 0; i < _group[_current_group].events[event_num].activations.Length; i++)
                 {
-                    //Change comboBoxes
-                    AddRhythmBox.SelectedIndex = (int)(Convert.ToChar(breakUp[0])) - 65;
-                    AddMagBox.SelectedIndex = (int)(Convert.ToChar(breakUp[1])) - 65;
-                    AddCyclesBox.SelectedIndex = Convert.ToInt32(breakUp[2]);
-                    AddDelayField.Value = Convert.ToInt32(breakUp[3]);
+                    if (_group[_current_group].events[event_num].activations[i].motor == motor) //return activation at index j
+                    {
+                        searched = _group[_current_group].events[event_num].activations[i];
+                        break;
+                    }
                 }
+                
+                //Change comboBoxes
+                AddMotorBox.SelectedIndex = searched.motor;
+                AddRhythmBox.SelectedIndex = searched.rhythm;
+                AddMagBox.SelectedIndex = searched.magnitude;
+                AddCyclesBox.SelectedIndex = searched.cycles;
+                DelayField.Value = searched.delay; //== _group[_current_group].events[event_num].time
             }
-
         }
-        //Re-populates AvailableList and AddedList. Called when a setList index change occurs
-        private void Change_Set()
+
+        private void Change_Event()
         {
-            if (SetList.SelectedIndex > -1)
+            Activation[] selected;
+
+            if (EventList.SelectedIndex > -1)
             {
-                _current_set = SetList.SelectedIndex;
-                MotorList.Items.Clear();
+                _current_event = EventList.SelectedIndex;
+
+                DelayField.Value = _group[_current_group].events[_current_event].time;
+                
+                selected = _group[_current_group].events[_current_event].activations; 
+
+                ActivationList.Items.Clear();
                 //Populate Availible Motor List for selected set
-                for (int i = 0; i < _viewableMotors; i++)
+                for (int i = 0; i < selected.Length; i++) // Motor,Rhythm,Magnitude,Cycles
                 {
-                    if (_group[_current_group].set[_current_set].motor[i].Equals("")) //Add to Off Position
-                        MotorList.Items.Add((i + 1).ToString());
-                    else //Add to On Position
-                        MotorList.Items.Add("        " + (i + 1).ToString());
+                    String label = "";
+                    if (selected[i].motor < _viewableMotors) //If we are able to view this motor display it
+                    {
+                        label = ((int)selected[i].motor + 1).ToString() + "," + ((char)((int)selected[i].rhythm + 65)).ToString() + "," + ((char)((int)selected[i].magnitude + 65)).ToString();
+                        if (selected[i].cycles == 0)
+                            label = label + ",Stop";
+                        else if (selected[i].cycles == 7)
+                            label = label + ",Inf";
+                        else
+                            label = label + "," + selected[i].cycles.ToString();
+                        ActivationList.Items.Add(label);
+                    }
                 }
             }
         }
 
-        //Re-populates SetList, AvailableList and AddedList from selected Group, also learns rhythms/mags onto belt if connected
+        //Re-populates ActivationList from selected Group, also learns rhythms/mags onto belt if connected
         private void Change_Group()
         {
             if (GroupList.SelectedIndex > -1)
             {
                 _current_group = GroupList.SelectedIndex;
-                SetList.Items.Clear();
-                MotorList.Items.Clear();
-                //Populate SetList based on newly selected group
-                for (int i = 0; i < _group[_current_group].set.Length; i++)
-                    SetList.Items.Add(_group[_current_group].set[i].name);
+
+                //Display the Cycles value in the RepitionsField for the selected group
+                RepetitionsField.Value = _group[_current_group].cycles;
+
+                EventList.Items.Clear();
+                ActivationList.Items.Clear();
+
+                for (int i = 0; i < _group[_current_group].events.Length; i++)
+                    EventList.Items.Add(_group[_current_group].events[i].time);
 
                 //Learn Magnitudes and Rhythms onto belt
                 LoadBelt();
-            }
-            
+            } 
         }
         //Swaps the two selected sets on all groups/sets if true, otherwise just the current set if false
-        private void Swap_Motors(bool swapAll)
+        private void Swap_Activations()
         {
             int swapA, swapB;
-            String storeMotor;
+            Activation store;
 
             //Store First Selected Index and deselect
-            swapA = MotorList.SelectedIndex;
-            MotorList.SelectedIndices.Remove(swapA);
+            swapA = ActivationList.SelectedIndex;
+            ActivationList.SelectedIndices.Remove(swapA);
 
             //Store Second Selected Index and deselect
-            swapB = MotorList.SelectedIndex;
-            MotorList.SelectedIndices.Remove(swapB);
+            swapB = ActivationList.SelectedIndex;
+            ActivationList.SelectedIndices.Remove(swapB);
 
-            //Swap on all sets
-            if (swapAll)
-            {
-                for (int j = 0; j < _group.Length; j++)
-                {
-                    for (int i = 0; i < _group[j].set.Length; i++)
-                    {
-                        //Use store to hold set[swapA]'s data. Then switch data.
-                        storeMotor = (String)_group[j].set[i].motor[swapA].Clone();
-                        //Set swapA
-                        _group[j].set[i].motor[swapA] = (String)_group[j].set[i].motor[swapB].Clone();
-                        //Set swapB
-                        _group[j].set[i].motor[swapB] = storeMotor;
-                    }
-                }
-            }
-            else //swap only on current set
-            {
-                //Use store to hold set[swapA]'s data. Then switch data.
-                storeMotor = (String)_group[_current_group].set[_current_set].motor[swapA].Clone();
-                //Set swapA
-                _group[_current_group].set[_current_set].motor[swapA] = (String)_group[_current_group].set[_current_set].motor[swapB].Clone();
-                //Set swapB
-                _group[_current_group].set[_current_set].motor[swapB] = storeMotor;
-            }
-
-            Change_Set();
-        }
-        //Swaps the two selected sets
-        private void Swap_Sets()
-        {
-            int swapA, swapB;
-            Set store;
-
-            //Store First Selected Index and deselect
-            swapA = SetList.SelectedIndex;
-            SetList.SelectedIndices.Remove(swapA);
-
-            //Store Second Selected Index and deselect
-            swapB = SetList.SelectedIndex;
-            SetList.SelectedIndices.Remove(swapB);
-
+            //Swap
             //Use store to hold set[swapA]'s data. Then switch data.
-            store = new Set(_group[_current_group].set[swapA]);
-            _group[_current_group].set[swapA] = new Set(_group[_current_group].set[swapB]);
-            _group[_current_group].set[swapB] = store;
+            store = new Activation(_group[_current_group].events[_current_event].activations[swapA]);
+            //Set swapA
+            _group[_current_group].events[_current_event].activations[swapA] = new Activation(_group[_current_group].events[_current_event].activations[swapB]);
+            //Set swapB
+            _group[_current_group].events[_current_event].activations[swapB] = store;
 
-            Change_Group();
+            //Reselect first index
+            ActivationList.SelectedIndex = swapA;
         }
         //Swaps the two selected groups
         private void Swap_Groups()
@@ -192,181 +193,114 @@ namespace HapticGUI
 
             //Refreshes GroupList
             GroupList.Items.Clear();
-            SetList.Items.Clear();
-            MotorList.Items.Clear();
+            EventList.Items.Clear();
+            ActivationList.Items.Clear();
             //Populate GroupList based on newly selected group
             for (int i = 0; i < _group.Length; i++)
                 GroupList.Items.Add(_group[i].name);
         }
 
-        //Functions on Activations
+//Functions on Activations
         //Adds an activation request to the selected set
-        private void Set_Activation(String rhythm, String mag, String cycles, int delay)
+        private void Set_Activation(int motor, int rhythm, int mag, int cycles)
         {
-            int index = MotorList.SelectedIndex;
+            int index;
+            String label;
+            Activation selected;
             //must have a selected index
-            if (index > -1)
+            if (EventList.SelectedIndex > -1)
             {
-                //User selected infinity, which is really code 7.
-                if (cycles.Equals("Inf"))
-                    cycles = "7";
-                //Add motor to the activation chain
-                _group[_current_group].set[_current_set].motor[index] = rhythm + "," + mag + "," + cycles + "," + delay.ToString();
+                //Set delay field to the current selected event time
+                DelayField.Value = _group[_current_group].events[_current_event].time;
+                
+                //Replace motor to the activation chain
+                _group[_current_group].addActivation(motor, rhythm, mag, cycles, _group[_current_group].events[_current_event].time);
 
-                //Set motor to ON position
-                MotorList.Items.RemoveAt(index);
-                MotorList.Items.Insert(index, "        " + (index + 1).ToString());
+                index = ActivationList.SelectedIndex;
+
+                ActivationList.Items.RemoveAt(index);
+
+                selected = _group[_current_group].events[_current_event].activations[index];
+
+                label = ((int)selected.motor + 1).ToString() + "," + ((char)((int)selected.rhythm + 65)).ToString() + "," + ((char)((int)selected.magnitude + 65)).ToString();
+                if (selected.cycles == 0)
+                    label = label + ",Stop";
+                else if (selected.cycles == 7)
+                    label = label + ",Inf";
+                else
+                    label = label + "," + selected.cycles.ToString();
+
+                ActivationList.Items.Insert(index, label);
 
                 //Reselects the index, and updates labels through MotorListSelectedIndexChanged Event
-                MotorList.SelectedIndex = index;
+                ActivationList.SelectedIndex = index;
             }
         }
         //Deletes selected activation request from selected set
         private void Delete_Activation()
         {
-            int index = MotorList.SelectedIndex;
             //must have a selected index
-            if (index > -1)
+            if (ActivationList.SelectedIndex > -1 && EventList.SelectedIndex > -1)
             {
-                //Delete motor from activation chain
-                _group[_current_group].set[_current_set].motor[index] = "";
+                //Delete motor from activation data
+                _group[_current_group].removeActivation(_current_event, _current_activation);
 
                 //Set motor to OFF position
-                MotorList.Items.RemoveAt(index);
-                MotorList.Items.Insert(index, (index + 1).ToString());
-
-                //Updates labels associated with the change
-                Change_Motor();
+                ActivationList.Items.RemoveAt(_current_activation);
             }
         }
-        // Removes all activation requests from the selected set
-        private void Clear_Activations()
+       
+//Functions on events
+        private void Add_Event(int motor, int rhythm, int mag, int cycles, int delay)
         {
-            //Clear MotorList
-            MotorList.Items.Clear();
-            //Set all motors to OFF position
-            for (int i = 0; i < _viewableMotors; i++)
+            //must have a selected index
+            if (GroupList.SelectedIndex > -1)
             {
-                MotorList.Items.Add((i + 1).ToString());
-                _group[_current_group].set[_current_set].motor[i] = "";
-            }
-        }
-        //Activates selected motor from AddedList
-        private void Activate_Motor()
-        {
-            //Make sure a motor is selected
-            if (MotorList.SelectedIndex > -1 && _done_activating)
-            {
-                String[] breakUp;
-                //We don't care about performance of a single motor so just use the String version of Vibrate_Motors()
-
-                breakUp = _group[_current_group].set[_current_set].motor[MotorList.SelectedIndex].Split(',');
-
-                //Vibrate Motor
-                if (hasError(belt.Vibrate_Motor(MotorList.SelectedIndex, breakUp[0], breakUp[1], Convert.ToInt16(breakUp[2])), "Vibrate_Motor()"))
+                //Add motor to the activation chain, adds event if needed automatically too
+                _group[_current_group].addActivation(motor, rhythm, mag, cycles, delay);
+                
+                //Searches through event list and inserts new event at proper spot
+                if (!EventList.Items.Contains(delay))
                 {
-                    //Handle Error
-                }
-            }
-        }
-        //Functions on sets
-        //Adds a set with the inputed name parameter from DirectRenameField
-        private void Add_Set()
-        {
-            if (!RenameField.Text.Equals("") && GroupList.SelectedIndex > -1)
-            {
-                _group[_current_group].set = increaseSet(_group[_current_group].set, RenameField.Text);
-                //Add item to SetList
-                SetList.Items.Add(RenameField.Text);
-
-                RenameField.Clear();
-            }
-            else
-            {
-                ErrorForm errorForm = new ErrorForm("Name field blank, you must have a name for each set", "Add_Set()", false);
-                errorForm.ShowDialog();
-            }
-        }
-        //Deletes the selected set
-        private void Delete_Set()
-        {
-            if (SetList.SelectedIndex > -1)
-            {
-                _group[_current_group].set = decreaseSet(_group[_current_group].set, SetList.SelectedIndex);
-                //Remove Selected Item to SetList
-                SetList.Items.RemoveAt(SetList.SelectedIndex);
-                //Clear out AddedList and AvailableList
-                MotorList.Items.Clear();
-            }
-        }
-        //Deletes all sets
-        private void Clear_Sets()
-        {
-            _group[_current_group].set = new Set[0];
-
-            //Clear out SetList, AddedList and AvailableList
-            MotorList.Items.Clear();
-            SetList.Items.Clear();
-        }
-        // Activates selected set from SetList, all motors in sed set are activated based
-        // on the parameters entered by the user upon adding that motor to the set.
-        private void Activate_Set()
-        {
-            //Make sure a set is selected
-            if (SetList.SelectedIndex > -1 && _done_activating)
-            {
-                int i, j;
-
-                byte[] motor = new byte[_motorcount];
-                byte[] rhythm = new byte[_motorcount];
-                byte[] magnitude = new byte[_motorcount];
-                byte[] cycles = new byte[_motorcount];
-                int[] delay = new int[_motorcount];
-                bool[] go = new bool[_motorcount]; //this array is used to singal a bypass for a particular motor activation
-
-                //Used for breaking up rhythm,magnitude,cycles with split(',')
-                String[] breakUp;
-
-                //Convert all activation records into bytes for quick activation.
-                for (i = 0; i < _motorcount; i++)
-                {
-                    breakUp = _group[_current_group].set[_current_set].motor[i].Split(',');
-
-                    if (!breakUp[0].Equals("")) //if(motor is available)
+                    for (int index = 0; index < _group[_current_group].events.Length; index++)
                     {
-                        //Convert all parameters to bytes
-                        motor[i] = (byte)i;
-                        rhythm[i] = VibStrToByte(breakUp[0]);
-                        magnitude[i] = VibStrToByte(breakUp[1]);
-                        cycles[i] = (byte)(Convert.ToInt16(breakUp[2]));
-                        delay[i] = Convert.ToInt16(breakUp[3]);
-                        go[i] = true;
-                    }
-                    else
-                        go[i] = false; //With go = false, we don't need to initialize the other arrays at index i, because this will bypass them
-                }
-//FIXME - Delay implementation
-                _done_activating = false;
-                //Activate Motors, note that _stop variable is used to break out of activation with the Stop Button
-                for (i = 0; (i < _motorcount) && !_stop; i++)
-                {
-                    if (go[i]) //if(motor is a go, meaning it has an activation record)
-                    {
-                        //Vibrate Motor
-                        if (hasError(belt.Vibrate_Motor(motor[i], rhythm[i], magnitude[i], cycles[i]), "Vibrate_Motor()"))
+                        int value = Convert.ToInt32(DelayField.Value);
+
+                        if (_group[_current_group].events[index].time == value)
                         {
-                            //Handle Error
+                            EventList.Items.Insert(index, value);
+                            break;
                         }
-                        //Each 1 delay = 50ms, we do this so we can break every 50ms when thread wakes
-                        for (j = 0; j < delay[i] / 50 && !_stop; j++)
-                            Thread.Sleep(50);
                     }
                 }
-                _done_activating = true;
+
+                Change_Event();
             }
         }
+        
+        //Deletes the selected event (aka clears all activations)
+        private void Delete_Event()
+        {
+            if (EventList.SelectedIndex > -1)
+            {
+                _group[_current_group].deleteEvent(_current_event);
+                //Remove Selected Item to SetList
+                EventList.Items.RemoveAt(_current_event);
+                //Clear out ActivationList
+                ActivationList.Items.Clear();
+            }
+        }
+        //Deletes all events
+        private void Clear_Events()
+        {
+            _group[_current_group].clearEvents();
 
-        //Functions on groups
+            //Clear out EventList, and ActivationList
+            EventList.Items.Clear();
+            ActivationList.Items.Clear();
+        }
+
+//Functions on groups
         //Adds a group with the inputed name parameter from DirectRenameField
         private void Add_Group()
         {
@@ -377,6 +311,16 @@ namespace HapticGUI
                 GroupList.Items.Add(RenameField.Text);
 
                 RenameField.Clear();
+
+                //Update EditComboBox
+                //Clear ComboBox
+                EditBox.Items.Clear();
+
+                //Populate ComboBox
+                for (int i = 0; i < _group.Length; i++)
+                    EditBox.Items.Add(_group[i].name);
+
+                EditBox.Items.Add("Edit");
             }
             else
             {
@@ -390,11 +334,11 @@ namespace HapticGUI
             if (GroupList.SelectedIndex > -1)
             {
                 _group = decreaseGroup(_group, GroupList.SelectedIndex);
-                //Remove Selected Item to SetList
+                //Remove Selected Item from GroupList
                 GroupList.Items.RemoveAt(GroupList.SelectedIndex);
-                //Clear out SetList, AddedList and AvailableList
-                SetList.Items.Clear();
-                MotorList.Items.Clear();
+                //Clear out EventList and ActivationList
+                EventList.Items.Clear();
+                ActivationList.Items.Clear();
             }
         }
         //Deletes all groups
@@ -404,112 +348,11 @@ namespace HapticGUI
             _group = new Group[0];
 
             //Clear all ListBoxes
-            MotorList.Items.Clear();
-            SetList.Items.Clear();
+            ActivationList.Items.Clear();
+            EventList.Items.Clear();
             GroupList.Items.Clear();
         }
-        //Activates all sets sequentially within the selected group
-        private void Activate_Group()
-        {
-            //Make sure a group is selected
-            if (GroupList.SelectedIndex > -1 && _group[_current_group].set.Length > 0 && _done_activating)
-            {
-                int i, j, k;
-                //Initialize byte arrays for quick accessing while sending time crucial vibrate commands
-                byte[,] motor = new byte[_motorcount, _group[_current_group].set.Length];
-                byte[,] rhythm = new byte[_motorcount, _group[_current_group].set.Length];
-                byte[,] magnitude = new byte[_motorcount, _group[_current_group].set.Length];
-                byte[,] cycles = new byte[_motorcount, _group[_current_group].set.Length];
-                int[,] delay = new int[_motorcount, _group[_current_group].set.Length];
-                bool[,] go = new bool[_motorcount, _group[_current_group].set.Length]; //this array is used to singal a bypass for a particular motor activation
-
-                //Used for breaking up rhythm,magnitude,cycles with split(',')
-                String[] breakUp;
-
-                //This variable is used for storing and calculating max running times of each set
-                int[] rhythm_times = new int[5];
-                //Used for queing sets and playing them, initialized through calculations with max_rhythm_time[]
-
-                int[] set_times = new int[_group[_current_group].set.Length - 1];
-
-                for (i = 0; i < 5; i++) //Get Rhythms Times for Rhythms: A,B,C,D,and E.
-                    rhythm_times[i] = (_group[_current_group].rhythm[i].time) * 50;
-
-                /* Calculate the running time of each set, to sequentially activate sets. Ignores motors with cycle = 7 (infinity).
-                 * Such a motor will only change its state if issued another vibrate command or by hitting the stop button.
-                 * Note that we don't calculate the last set, because we have no preceeding sets after that one to care about timing.
-                 * 
-                 * Also convert strings and integers to bytes before sending vibrate commands for quick on-the-fly sending.
-                 */
-                //This loop is not time crucial, so have it seperate from the activate motor loop section.
-                for (j = 0; j < _group[_current_group].set.Length; j++)
-                {
-                    int max_set_time = 0;
-                    //Due to the properties of the data structure motor i+1 == _group[_current_group].set[_current_set].motor[i]
-                    for (i = 0; i < _motorcount; i++)
-                    {
-                        breakUp = _group[_current_group].set[_current_set].motor[i].Split(',');
-
-                        if (!breakUp[0].Equals("")) //if(motor has an activation)
-                        {
-                            int calculated_time;
-                            //Convert all parameters to bytes
-                            motor[i, j] = (byte)i;
-                            rhythm[i, j] = VibStrToByte(breakUp[0]);
-                            magnitude[i, j] = VibStrToByte(breakUp[1]);
-                            cycles[i, j] = (byte)(Convert.ToInt16(breakUp[2]));
-                            delay[i, j] = Convert.ToInt16(breakUp[3]);
-                            go[i, j] = true;
-
-                            //Calculate Time  = Cycles * Rhythm Length + Delay, ignore Cycle = 7 (infinity)
-                            if (!breakUp[2].Equals("7"))
-                            {
-                                //Rhythm is converted to a Char, then casted to an int and subtracted by 65 to make it an index.
-                                //Eg: "A" = 0, "B" = 1, "C" = 2, "D" = 3, "E" = 4.
-                                calculated_time = Convert.ToInt16(breakUp[2]) * rhythm_times[(int)Convert.ToChar(breakUp[0]) - 65] + delay[i, j];
-                                //Update the max_set_time for this particular set, if this motor activation is the longest thus far.
-                                if (max_set_time < calculated_time)
-                                    max_set_time = calculated_time;
-                            }
-                        }
-                        else
-                            go[i, j] = false; //With go = false, we don't need to initialize the other arrays at index i, because this boolean will bypass them
-                    }
-                    set_times[j] = max_set_time;
-                }
-
-                _done_activating = false;
-                //Start activating motors! Note the _stop variable, that breaks the loops in case a the Stop Button is pressed.
-                for (j = 0; (j < _group[_current_group].set.Length) && !_stop; j++)
-                {
-                    //Wait Here Until last set finishes, ignore if first set through
-                    if (j != 0)
-                    {
-                        //When this breaks, the last activated set is done vibrating or stop has been issued.
-                        for (i = 0; i < (set_times[j - 1] / 50) && !_stop; i++) //Note we won't use the last index of set_time[], because we don't need to wait on the last set
-                            Thread.Sleep(50);
-                    }
-
-                    //Due to the properties of the belt a motor # <= _motorcount, thus our array is index 0 to _motorcount - 1.
-                    for (i = 0; (i < _motorcount) && !_stop; i++)
-                    {
-//FIXME - Delay Implementation
-                        if (go[i, j]) //if(motor is a go, meaning it has an activation record)
-                        {
-                            //Vibrate Motor
-                            if (hasError(belt.Vibrate_Motor(motor[i, j], rhythm[i, j], magnitude[i, j], cycles[i, j]), "Vibrate_Motor()"))
-                            {
-                                //Handle Error
-                            }
-                        }
-                        //Each 1 delay = 50ms, we do this so we can break every 50ms when thread wakes
-                        for (k = 0; k < (delay[i, j] / 50) && !_stop; k++)
-                            Thread.Sleep(50);
-                    }
-                }
-                _done_activating = true;
-            }
-        }
+        
         //Other Functions: Stop and Rename button functions
         //Issues a break to stop all activations, then waits for activations to stop
         //Note that if we don't wait till we are done activating we can issue a stop command
@@ -539,50 +382,19 @@ namespace HapticGUI
             {
                 Magnitude[] magnitude = _group[_current_group].magnitude;
                 Rhythm[] rhythm = _group[_current_group].rhythm;
-
+                String id;
                 for (int i = 0; i < 5; i++)
                 {
+                    id = ((char)(i + 65)).ToString();
                     //Last parameter true means "pattern" is in binary string format (0's and 1's only)
-                    belt.Learn_Rhythm(rhythm[i].id, rhythm[i].pattern, rhythm[i].time, true);
+                    belt.Learn_Rhythm(id, rhythm[i].pattern, rhythm[i].time, true);
                     if (i != 4)
-                        belt.Learn_Magnitude(magnitude[i].id, magnitude[i].period, magnitude[i].dutycycle);
+                        belt.Learn_Magnitude(id, magnitude[i].period, magnitude[i].dutycycle);
 
                 }
             }
         }
 
-        private void StopMotors()
-        {
-            _stop = true; //activate stop command
-            while (!_done_activating) { } //wait for activations to stop, may hang application up to 50ms
-            _stop = false; //resets stop
-            //Stop All Motors
-            if (hasError(belt.StopAll(), "StopAll()"))
-            {
-                //Handle Error
-            }
-        }
-        //Renames the selected set
-        private void Rename_Set()
-        {
-            if (SetList.SelectedIndex > -1 && !RenameField.Text.Equals(""))
-            {
-                int index;
-                //Record this change in the Data Structure
-                _group[_current_group].set[_current_set].name = RenameField.Text;
-
-                //Update GroupList Item's list
-                SetList.Items.Insert(SetList.SelectedIndex, RenameField.Text);
-                index = SetList.SelectedIndex - 1;
-                SetList.Items.RemoveAt(SetList.SelectedIndex);
-
-                //Clear the DirectRenameField.Text
-                RenameField.Clear();
-
-                //Reset the SelectedIndex
-                SetList.SelectedIndex = index;
-            }
-        }
         //Renames the selected group
         private void Rename_Group()
         {
@@ -603,43 +415,6 @@ namespace HapticGUI
                 //Reset the SelectedIndex
                 GroupList.SelectedIndex = index;
             }
-        }
-        //Private conversion function
-        //Same function as within HapticDriver to convert strings to bytes
-        private byte VibStrToByte(string alphaStr)
-        {
-            byte byteValue = 8;
-            switch (alphaStr)
-            {
-                case "A":
-                    byteValue = 0;
-                    break;
-                case "B":
-                    byteValue = 1;
-                    break;
-                case "C":
-                    byteValue = 2;
-                    break;
-                case "D":
-                    byteValue = 3;
-                    break;
-                case "E":
-                    byteValue = 4;
-                    break;
-                case "F":
-                    byteValue = 5;
-                    break;
-                case "G":
-                    byteValue = 6;
-                    break;
-                case "H":
-                    byteValue = 7;
-                    break;
-                default:
-                    byteValue = 8;
-                    break;
-            }
-            return byteValue;
         }
     }
 }

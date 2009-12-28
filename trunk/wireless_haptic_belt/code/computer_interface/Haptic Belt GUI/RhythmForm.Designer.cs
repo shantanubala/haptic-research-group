@@ -299,7 +299,6 @@
             this.MinimizeBox = false;
             this.Name = "RhythmForm";
             this.ShowIcon = false;
-            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Rhythm Mode";
             this.Shown += new System.EventHandler(this.RhythmForm_Shown);

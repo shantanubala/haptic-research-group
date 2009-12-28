@@ -1,9 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using HapticDriver;
 
@@ -18,47 +13,49 @@ namespace HapticGUI
 {
     partial class GUI
     {
- //Button Events: Motors: Add, Delete, Clear, Activate
+ //Button Events: Activations: Add, Delete, Clear, Activate
         //Adds a new activation to selected set, based on comboBox parameters
-        private void DirectSetMotor_Click(object sender, EventArgs e)
+        private void SetActivation_Click(object sender, EventArgs e)
         {
-            Set_Activation(AddRhythmBox.SelectedItem.ToString(), AddMagBox.SelectedItem.ToString(), AddCyclesBox.SelectedItem.ToString(), Convert.ToInt16(AddDelayField.Value));
+            if(AddMotorBox.SelectedIndex > -1 && ActivationList.SelectedIndex > -1)
+                Set_Activation(AddMotorBox.SelectedIndex, AddRhythmBox.SelectedIndex, AddMagBox.SelectedIndex, AddCyclesBox.SelectedIndex);
         }
         //Removes selected activation request from selected set
-        private void DirectDeleteMotor_Click(object sender, EventArgs e)
+        private void DeleteActivation_Click(object sender, EventArgs e)
         {
             Delete_Activation();
         }
-        //Removes all activation request from the selected set
-        private void DirectClearMotor_Click(object sender, EventArgs e)
+        //This event is deleted, since no activations are present it cannot exist
+        private void ClearActivation_Click(object sender, EventArgs e)
         {
-            Clear_Activations();
+            Delete_Event();
         }
-        //Activate a single motor from AddedList
-        private void DirectActivateMotor_Click(object sender, EventArgs e)
+        
+        //Activate a single motor from ActivationList
+        private void ActivateActivation_Click(object sender, EventArgs e)
         {
             Activate_Motor();
         }
-//Button Events: Sets: Add, Delete, Clear, Activate 
-        private void DirectAddSet_Click(object sender, EventArgs e)
+//Button Events: Events: Add, Delete, Clear, Activate 
+        private void AddEvent_Click(object sender, EventArgs e)
         {
-            Add_Set();
+            if(AddMotorBox.SelectedIndex > -1)
+                Add_Event(AddMotorBox.SelectedIndex ,AddRhythmBox.SelectedIndex, AddMagBox.SelectedIndex, AddCyclesBox.SelectedIndex, Convert.ToInt32(DelayField.Value));
         }
 
-        private void DirectDeleteSet_Click(object sender, EventArgs e)
+        private void DeleteEvent_Click(object sender, EventArgs e)
         {
-            Delete_Set();
+            Delete_Event();
         }
 
-        private void DirectClearSets_Click(object sender, EventArgs e)
+        private void ClearEvent_Click(object sender, EventArgs e)
         {
-            Clear_Sets();
+            Clear_Events();
         }
 
-        //Activates all motors in a set from a selected group
-        private void DirectActivateSet_Click(object sender, EventArgs e)
+        private void ActivateEvent_Click(object sender, EventArgs e)
         {
-            Activate_Set();
+            Activate_Event();
         }
 
 //Button Events: Groups: Add, Delete, Clear, Activate    
@@ -121,13 +118,9 @@ namespace HapticGUI
         {
             StopMotors();
         }
-        //Renames a set with any characters in the Text Field.
-        private void DirectRenameSet_Click(object sender, EventArgs e)
-        {
-            Rename_Set(); 
-        }
+
         //Renames a set with any characters in the DirectRenameField (text field).
-        private void DirectRenameGroup_Click(object sender, EventArgs e)
+        private void RenameGroup_Click(object sender, EventArgs e)
         {
             Rename_Group();
         }
@@ -141,21 +134,10 @@ namespace HapticGUI
                 Swap_Groups();
         }
 
-        //Refreshes AvailableList and AddedList with according to the selected set
-        private void SetList_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (SetList.SelectedIndices.Count == 1)
-                Change_Set();
-            else if (SetList.SelectedIndices.Count == 2)
-                Swap_Sets();
-        }
         //Changes the display labels on the GUI
-        private void MotorList_SelectedIndexChanged(object sender, EventArgs e)
+        private void EventList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (MotorList.SelectedIndices.Count == 1)
-                Change_Motor();
-            else if (MotorList.SelectedIndices.Count == 2)
-                Swap_Motors(motorSwapingOnAllGroupsSetsMenu.Checked);
+            Change_Event();
         }
         //Limits viewing to available motors only if checked
         private void showOnlyConnectedMotorsMenu_Click(object sender, EventArgs e)
@@ -165,13 +147,27 @@ namespace HapticGUI
             else
                 _viewableMotors = _maxmotors;
 
-            Change_Set();
+            //Refresh AddMotorBox items
+            AddMotorBox.Items.Clear();
+
+            for(int i = 0; i < _viewableMotors; i++)
+                AddMotorBox.Items.Add((i + 1).ToString());
+
+            Change_Event();
         }
         //Assures that the value is a multiple of 50
         private void DirectDelayField_ValueChanged(object sender, EventArgs e)
         {
-            if (AddDelayField.Value % 50 != 0)
-                AddDelayField.Value = Convert.ToInt32(AddDelayField.Value) / 50 * 50;
+            if (DelayField.Value % 50 != 0)
+                DelayField.Value = Convert.ToInt32(DelayField.Value) / 50 * 50;
         }
+
+        private void GroupRepeatField_ValueChanged(object sender, EventArgs e)
+        {
+            if (GroupList.SelectedIndex > -1)
+            {
+                _group[_current_group].cycles = Convert.ToInt32(RepetitionsField.Value);
+            }
+        }   
     }
 }
