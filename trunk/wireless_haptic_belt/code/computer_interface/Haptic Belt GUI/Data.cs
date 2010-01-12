@@ -41,7 +41,11 @@ namespace HapticGUI
             public UInt16 period;
             public UInt16 dutycycle;
         }
-        //Represents an Event, in time which may have multiple Activations
+        /*Represents an Event, in time which may have multiple Activations
+         *Maintains all activations in ascending motor number order
+         *The reason for this allow for sorted viewing in the GUI as well as allowing 
+         *swaps on activations in the GUI more simple.
+         */
         public struct Event
         {
             public Int32 time;
@@ -72,12 +76,26 @@ namespace HapticGUI
                 }
                 if (i == activations.Length) //no matched motor found, insert at end
                 {
-                    // Increase size of the Activation array that is held by current (jth) event
                     new_activations = new Activation[activations.Length + 1];
-                    for (i = 0; i < activations.Length; i++)
-                        new_activations[i] = activations[i];
 
-                    new_activations[i] = new Activation(add);
+                    for (i = 0; i < activations.Length; i++)
+                    {
+                        //Copy elements until we find inserting point
+                        if (activations[i].motor > add.motor)
+                            break;
+
+                        new_activations[i] = activations[i];
+                    }
+
+                    //Insert at spot i in the new array - must be outside of last for loop
+                    new_activations[i] = add;
+
+                    //Continue copying the rest of the array
+                    while (i < activations.Length)
+                    {
+                        new_activations[i + 1] = activations[i];
+                        i++;
+                    }
 
                     activations = new_activations;
                 }
@@ -112,7 +130,12 @@ namespace HapticGUI
             }
         }
         
-        //Represents all activations on a single motor
+        /*Represents all activations on a single motor
+         *Activations are inserted in ascending delay order and maintained this way.
+         *The advantage of this is so we can determine the endTime of the specific motor.
+         *Due to the properties of the haptic belt, a new activation on the same motor will
+         *replace the old one, thus the last motor determines the final end running time.
+         */
         public struct Motor
         {
             public Int32 endTime;
@@ -125,12 +148,14 @@ namespace HapticGUI
             }
 
             //Replaces previous matching Activation with the same delay time
-            //If one doesn't exist we make room for it
-            //Return: index of where motor was replaced, or -1 if it wasnt
-            public void addActivation(Activation add)
+            //If one doesn't exist we make room for it, and insert in order
+            //Return: true if the inserted activation was inserted at the end, false otherwise
+            //The return value will signal the caller to update endTime, since at this level it cannot be calculated
+            public Boolean addActivation(Activation add)
             {
                 //Insert activation into motor list
                 int i;
+                Boolean result = false;
                 Activation[] new_activations;
 
                 //Search for delay in the activations
@@ -138,28 +163,49 @@ namespace HapticGUI
                 {
                     if (activations[i].delay == add.delay)
                     {
+                        //Motor with matching delay found, replace motor
                         activations[i] = new Activation(add);
                         break; 
                     }
                 }
-                if (i == activations.Length) //no matched delay found, insert at end
+                if (i == activations.Length) //no matched delay found, insert in ascending order
                 {
                     new_activations = new Activation[activations.Length + 1];
 
                     for (i = 0; i < activations.Length; i++)
-                        new_activations[i] = activations[i];
+                    {
+                        //Copy elements until we find inserting point
+                        if (activations[i].delay > add.delay)
+                            break;
 
-                    new_activations[i] = new Activation(add);
+                        new_activations[i] = activations[i];
+                    }
+
+                    //Insert at spot i in the new array - must be outside of last for loop
+                    new_activations[i] = add;
+
+                    //Inserted at the end, caller will know to update endTime
+                    if (i == activations.Length)
+                        result = true;
+
+                    //Continue copying the rest of the array
+                    while (i < activations.Length)
+                    {
+                        new_activations[i + 1] = activations[i];
+                        i++;
+                    }
 
                     activations = new_activations;
                 }
+                return result;
             }
 
             //Matches specified Activation's delay with one currently in the activations array
             //If a match is found it is removed, otherwise this does nothing
-            public void removeActivation(int delay)
+            public Boolean removeActivation(int delay)
             {
                 int i,index;
+                Boolean result = false;
 
                 Activation[] new_activations; 
 
@@ -178,9 +224,14 @@ namespace HapticGUI
 
                         activations = new_activations;
 
+                        //True when removing the last element of the array, note that we already updated activations at this point.
+                        if (index == activations.Length)
+                            result = true;
+
                         break; // Item removed, break
                     }
                 }
+                return result;
             }
         }
        
@@ -219,16 +270,15 @@ namespace HapticGUI
                 insert.cycles = (byte)cycles;
                 insert.delay = delay;
 
-                //set the new endTime for the specified motor
-                if (cycles != 7)
-                {
-                    j = this.rhythm[rhythm].time * 50 * cycles + delay;
-                    if (motors[motor_num].endTime < j)
-                        motors[motor_num].endTime = j;
-                }
-
                 //Pass a new copy of the activation insert, so the system does a deep copy.
-                motors[motor_num].addActivation(new Activation(insert));
+                //If this statement is true, update endTime
+                if (motors[motor_num].addActivation(new Activation(insert)))
+                {
+                    if (cycles != 7)
+                        motors[motor_num].endTime = this.rhythm[rhythm].time * 50 * cycles + delay;
+                    else
+                        motors[motor_num].endTime = -1; //-1 stands for infinity
+                }
 
                 //Try to find a pre-existing event time that matches this request and insert it
                 //If a time event is found, and an activation already exists for this specific motor, replace it
@@ -271,47 +321,11 @@ namespace HapticGUI
                     events = new_events;
                 }
             }
-            /* 
-            //Remove activation from motors, and events arrays
-            public void removeActivation(int motor_num, int delay)
-            {
-                int i, j;
 
-                //Remove from motors array
-                motors[motor_num].removeActivation(delay);
-
-                //Reset endTime for specified motor activations
-                motors[motor_num].endTime = 0;
-
-                //Recalculate motor activations endtime
-                for (i = 0; i < motors[motor_num].activations.Length; i++)
-                {
-                    if(motors[motor_num].activations[i].cycles != 7)
-                    {
-                        //j = rhythm.time * 50 * cycles + delay
-                        j = this.rhythm[motors[motor_num].activations[i].rhythm].time * 50 * motors[motor_num].activations[i].cycles + motors[motor_num].activations[i].delay;
-                        if(motors[motor_num].endTime < j)
-                            motors[motor_num].endTime = j;
-                    }
-                }
-                
-                //Search through all events matching time paramteter
-                for (i = 0; i < events.Length; i++)
-                {
-                    if (events[i].time == delay) //matched time
-                    {
-                        // remove the motor
-                        events[i].removeActivation(motor_num);
-                        // Item removed, break
-                        break;
-                    }
-                }
-            }
-             */
             //Remove activation from motors, and events arrays much quicker than previous method
             public void removeActivation(int event_num, int activation_num)
             {
-                int i, j, motor_num, delay;
+                int i, motor_num, delay, cycles, rhythm;
                 Activation[] new_activations;
 
                 //Check to see if the numbers are valid parameters
@@ -319,30 +333,25 @@ namespace HapticGUI
                 {
                     if (events[event_num].activations.Length > activation_num)
                     {
-                        //find motor number of this event's activation
-                        motor_num = events[event_num].activations[activation_num].motor;
-
-                        //find the delay of this event's activation
+                        //allocate the selected activation's parameters to local variables for easy readibility
+                        motor_num = events[event_num].activations[activation_num].motor; 
                         delay = events[event_num].activations[activation_num].delay;
-
-                        //Remove from motors array using the two fields we just got
-                        motors[motor_num].removeActivation(delay);
-
-                        //Reset endTime for specified motor activations
-                        motors[motor_num].endTime = 0;
-
-                        //Recalculate motor activations endtime
-                        for (i = 0; i < motors[motor_num].activations.Length; i++)
+                        
+                        //Remove from motors array using the two fields we just got, if we removed the last element: recalculate endTime
+                        if (motors[motor_num].removeActivation(delay))
                         {
-                            if (motors[motor_num].activations[i].cycles != 7)
-                            {
-                                //j = rhythm.time * 50 * cycles + delay
-                                j = this.rhythm[motors[motor_num].activations[i].rhythm].time * 50 * motors[motor_num].activations[i].cycles + motors[motor_num].activations[i].delay;
-                                if (motors[motor_num].endTime < j)
-                                    motors[motor_num].endTime = j;
-                            }
+                            //allocate the last motors[] activation's parameters to local variables for easy readibility
+                            delay = motors[motor_num].activations[motors[motor_num].activations.Length - 1].delay;
+                            cycles = motors[motor_num].activations[motors[motor_num].activations.Length - 1].cycles;
+                            rhythm = motors[motor_num].activations[motors[motor_num].activations.Length - 1].rhythm;
+
+                            if (cycles != 7)
+                                motors[motor_num].endTime = this.rhythm[rhythm].time * 50 * cycles + delay;
+                            else
+                                motors[motor_num].endTime = -1; //-1 stands for infinity
                         }
 
+                        //Remove from events array
                         new_activations = new Activation[events[event_num].activations.Length - 1];
 
                         for (i = 0; i < activation_num; i++)
@@ -390,7 +399,7 @@ namespace HapticGUI
 
                 events = new Event[0];
             }
-            //Calls refreshActivation for each independent activation in this.motors dat,a renewing this.events data.
+            //Calls refreshActivation for each independent activation in this.motors[] data,a renewing this.events[] data.
             //Should be only called after the user reconfigures the motor order.
             public void refreshEvents()
             {
@@ -401,12 +410,12 @@ namespace HapticGUI
                 {
                     for (j = 0; j < motors[i].activations.Length; j++ )
                     {
-                        refreshActivation(i, motors[i].activations[j].rhythm, motors[i].activations[j].magnitude, motors[i].activations[j].cycles, motors[i].activations[j].delay);
+                        addEventActivation(i, motors[i].activations[j].rhythm, motors[i].activations[j].magnitude, motors[i].activations[j].cycles, motors[i].activations[j].delay);
                     }
                 }
             }
 
-            private void refreshActivation(int motor_num, int rhythm, int magnitude, int cycles ,int delay)
+            private void addEventActivation(int motor_num, int rhythm, int magnitude, int cycles ,int delay)
             {
                 int j, k;
                 Activation insert;
@@ -438,9 +447,9 @@ namespace HapticGUI
                     for (k = 0; k < j; k++)
                     {
                         //Copy elements until we find inserting point
-                        if (events[k].time > delay) 
+                        if (events[k].time > delay)
                             break;
-                        
+
                         new_events[k] = events[k];
                     }
 

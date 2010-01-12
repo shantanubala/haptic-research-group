@@ -20,7 +20,16 @@ namespace HapticGUI
         const int _maxrhythms = 5; //Max amount of rhythms possible for this application
         const int _maxmagnitudes = 4; //Max amount of magnitudes possible for this applications
 
-      
+        private void Configure_Motors()
+        {
+            ConfigForm configForm = new ConfigForm(_group[_current_group].motors);
+            configForm.ShowDialog();
+            _group[_current_group].motors = configForm.getMotors();
+            //Now we need to match the motors[] activations with the events[] activations
+            _group[_current_group].refreshEvents();
+        }
+
+
         private void Set_Rhythms()
         {
             if (EditBox.Text.Equals("Edit"))
@@ -50,7 +59,7 @@ namespace HapticGUI
             }
         }
 
-//Functions that manipulate Text Labels
+//Functions that are called from selections in ListBoxes
         //Change File - called when a file is loaded
         private void Change_File()
         {
@@ -65,33 +74,16 @@ namespace HapticGUI
         //Populates 3 lables based on selected motor in "AddedList"
         private void Change_Activation()
         {
-            int activation_num = ActivationList.SelectedIndex;
-            int event_num = EventList.SelectedIndex;
-            byte motor;
-            Activation searched = new Activation();
-
-            if (activation_num > -1 && event_num > -1)
+            if (ActivationList.SelectedIndex > -1)
             {
-                _current_activation = activation_num;
-                //Activations in an event are not ordered, so we must search the entire event for the activation of the motor
-                motor = (byte)(Convert.ToInt32(ActivationList.SelectedItem.ToString().Split(',')[0]) - 1);
-                
-                //Note there is only one activation per event
-                for (int i = 0; i < _group[_current_group].events[event_num].activations.Length; i++)
-                {
-                    if (_group[_current_group].events[event_num].activations[i].motor == motor) //return activation at index j
-                    {
-                        searched = _group[_current_group].events[event_num].activations[i];
-                        break;
-                    }
-                }
-                
+                _current_activation = ActivationList.SelectedIndex;
+
                 //Change comboBoxes
-                AddMotorBox.SelectedIndex = searched.motor;
-                AddRhythmBox.SelectedIndex = searched.rhythm;
-                AddMagBox.SelectedIndex = searched.magnitude;
-                AddCyclesBox.SelectedIndex = searched.cycles;
-                DelayField.Value = searched.delay; //== _group[_current_group].events[event_num].time
+                AddMotorBox.SelectedIndex = _group[_current_group].events[_current_event].activations[_current_activation].motor;
+                AddRhythmBox.SelectedIndex = _group[_current_group].events[_current_event].activations[_current_activation].rhythm;
+                AddMagBox.SelectedIndex = _group[_current_group].events[_current_event].activations[_current_activation].magnitude;
+                AddCyclesBox.SelectedIndex = _group[_current_group].events[_current_event].activations[_current_activation].cycles;
+                DelayField.Value = _group[_current_group].events[_current_event].activations[_current_activation].delay; //== _group[_current_group].events[_current_event].time
             }
         }
 
@@ -147,12 +139,13 @@ namespace HapticGUI
                 LoadBelt();
             } 
         }
-        //Swaps the two selected sets on all groups/sets if true, otherwise just the current set if false
+
+        //Swaps the two selected Activations primarily just for organization
         private void Swap_Activations()
         {
             int swapA, swapB;
             Activation store;
-
+          
             //Store First Selected Index and deselect
             swapA = ActivationList.SelectedIndex;
             ActivationList.SelectedIndices.Remove(swapA);
@@ -161,17 +154,73 @@ namespace HapticGUI
             swapB = ActivationList.SelectedIndex;
             ActivationList.SelectedIndices.Remove(swapB);
 
-            //Swap
+            //Swap rhythm's, magnitude's, and cycle's in events[] array manually because it is simple the way the data structure is set up. 
             //Use store to hold set[swapA]'s data. Then switch data.
             store = new Activation(_group[_current_group].events[_current_event].activations[swapA]);
             //Set swapA
-            _group[_current_group].events[_current_event].activations[swapA] = new Activation(_group[_current_group].events[_current_event].activations[swapB]);
+            _group[_current_group].events[_current_event].activations[swapA].rhythm = _group[_current_group].events[_current_event].activations[swapB].rhythm;
+            _group[_current_group].events[_current_event].activations[swapA].magnitude = _group[_current_group].events[_current_event].activations[swapB].magnitude;
+            _group[_current_group].events[_current_event].activations[swapA].cycles = _group[_current_group].events[_current_event].activations[swapB].cycles;
             //Set swapB
-            _group[_current_group].events[_current_event].activations[swapB] = store;
+            _group[_current_group].events[_current_event].activations[swapB].rhythm = store.rhythm;
+            _group[_current_group].events[_current_event].activations[swapB].magnitude = store.magnitude;
+            _group[_current_group].events[_current_event].activations[swapB].cycles = store.cycles;
+            
+            //Swap in motors[] activation list, note the use of the already set Activation in the events[] array, to update the motors[] array.
+            //Note when adding an activation in a motors[] array with the same delay attribute it replaces the old activation.
+            _group[_current_group].motors[(_group[_current_group].events[_current_event].activations[swapA].motor)].addActivation(new Activation(_group[_current_group].events[_current_event].activations[swapA]));
+            _group[_current_group].motors[(_group[_current_group].events[_current_event].activations[swapB].motor)].addActivation(new Activation(_group[_current_group].events[_current_event].activations[swapB]));
 
-            //Reselect first index
-            ActivationList.SelectedIndex = swapA;
+            //Change Event to update the ActivationList changes from the newly updated datastructure
+            Change_Event();
         }
+
+        private void Swap_Events()
+        {
+            int swapA, swapB;
+            Activation[] store;
+
+            //Store First Selected Index and deselect
+            swapA = EventList.SelectedIndex;
+            EventList.SelectedIndices.Remove(swapA);
+
+            //Store Second Selected Index and deselect
+            swapB = EventList.SelectedIndex;
+            EventList.SelectedIndices.Remove(swapB);
+
+            //Store A's activations into Store, a temp variable
+            store = (Activation[])_group[_current_group].events[swapA].activations.Clone();
+            //Change A's activations over to B's
+            _group[_current_group].events[swapA].activations = (Activation[])_group[_current_group].events[swapB].activations.Clone();
+            //Match each newly swapped activation to its event time, and delete the correspoing old event from motors[]
+            for (int i = 0; i < _group[_current_group].events[swapA].activations.Length; i++)
+            {
+                //Remove from motors array
+                _group[_current_group].motors[(_group[_current_group].events[swapA].activations[i].motor)].removeActivation(_group[_current_group].events[swapA].time);
+                //Match delay to the newly swapped event
+                _group[_current_group].events[swapA].activations[i].delay = _group[_current_group].events[swapA].time;
+                //Add to motors array after updating delay
+                _group[_current_group].motors[(_group[_current_group].events[swapA].activations[i].motor)].addActivation(new Activation(_group[_current_group].events[swapA].activations[i]));
+
+            }
+
+            //Change B's activations over to A's (via Store)
+            _group[_current_group].events[swapB].activations = store;
+            //Match each newly swapped activation to its event time, and delete the correspoing old event from motors[]
+            for (int i = 0; i < _group[_current_group].events[swapB].activations.Length; i++)
+            {
+                //Remove from motors array
+                _group[_current_group].motors[(_group[_current_group].events[swapB].activations[i].motor)].removeActivation(_group[_current_group].events[swapB].time);
+                //Match delay to the newly swapped event
+                _group[_current_group].events[swapB].activations[i].delay = _group[_current_group].events[swapB].time;
+                //Add to motors array after updating delay
+                _group[_current_group].motors[(_group[_current_group].events[swapB].activations[i].motor)].addActivation(new Activation(_group[_current_group].events[swapB].activations[i]));
+            }
+
+            //Change Group to update the EventList changes from the newly updated datastructure
+            Change_Group();
+        }
+
         //Swaps the two selected groups
         private void Swap_Groups()
         {
@@ -202,9 +251,8 @@ namespace HapticGUI
 
 //Functions on Activations
         //Adds an activation request to the selected set
-        private void Set_Activation(int motor, int rhythm, int mag, int cycles)
+        private void Set_Activation(int rhythm, int mag, int cycles)
         {
-            int index;
             String label;
             Activation selected;
             //must have a selected index
@@ -214,13 +262,11 @@ namespace HapticGUI
                 DelayField.Value = _group[_current_group].events[_current_event].time;
                 
                 //Replace motor to the activation chain
-                _group[_current_group].addActivation(motor, rhythm, mag, cycles, _group[_current_group].events[_current_event].time);
+                _group[_current_group].addActivation(_group[_current_group].events[_current_event].activations[_current_activation].motor, rhythm, mag, cycles, _group[_current_group].events[_current_event].time);
 
-                index = ActivationList.SelectedIndex;
+                ActivationList.Items.RemoveAt(_current_activation);
 
-                ActivationList.Items.RemoveAt(index);
-
-                selected = _group[_current_group].events[_current_event].activations[index];
+                selected = _group[_current_group].events[_current_event].activations[_current_activation];
 
                 label = ((int)selected.motor + 1).ToString() + "," + ((char)((int)selected.rhythm + 65)).ToString() + "," + ((char)((int)selected.magnitude + 65)).ToString();
                 if (selected.cycles == 0)
@@ -230,10 +276,10 @@ namespace HapticGUI
                 else
                     label = label + "," + selected.cycles.ToString();
 
-                ActivationList.Items.Insert(index, label);
+                ActivationList.Items.Insert(_current_activation, label);
 
                 //Reselects the index, and updates labels through MotorListSelectedIndexChanged Event
-                ActivationList.SelectedIndex = index;
+                ActivationList.SelectedIndex = _current_activation;
             }
         }
         //Deletes selected activation request from selected set

@@ -29,6 +29,7 @@ namespace HapticGUI
         private void InitializeComponent()
         {
             this.MainPanel = new System.Windows.Forms.Panel();
+            this.Configure = new System.Windows.Forms.Button();
             this.AddEvent = new System.Windows.Forms.Button();
             this.AddMotorBox = new System.Windows.Forms.ComboBox();
             this.RepetitionsLabel = new System.Windows.Forms.Label();
@@ -41,7 +42,6 @@ namespace HapticGUI
             this.EventList = new System.Windows.Forms.ListBox();
             this.HeaderLabel = new System.Windows.Forms.Label();
             this.ActivationList = new System.Windows.Forms.ListBox();
-            this.Initialize = new System.Windows.Forms.Button();
             this.MagnitudeEditOK = new System.Windows.Forms.Button();
             this.RhythmEditOK = new System.Windows.Forms.Button();
             this.EditBox = new System.Windows.Forms.ComboBox();
@@ -76,9 +76,9 @@ namespace HapticGUI
             this.save = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.showOnlyConnectedMotorsMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.motorSwapingOnAllGroupsSetsMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.realTimeDelayMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.realTimeDelayValueMenu = new System.Windows.Forms.ToolStripTextBox();
+            this.reinitializeBeltMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.versionMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.guiVersionMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.firmwareVersionMenu = new System.Windows.Forms.ToolStripMenuItem();
@@ -90,6 +90,7 @@ namespace HapticGUI
             // 
             // MainPanel
             // 
+            this.MainPanel.Controls.Add(this.Configure);
             this.MainPanel.Controls.Add(this.AddEvent);
             this.MainPanel.Controls.Add(this.AddMotorBox);
             this.MainPanel.Controls.Add(this.RepetitionsLabel);
@@ -102,7 +103,6 @@ namespace HapticGUI
             this.MainPanel.Controls.Add(this.EventList);
             this.MainPanel.Controls.Add(this.HeaderLabel);
             this.MainPanel.Controls.Add(this.ActivationList);
-            this.MainPanel.Controls.Add(this.Initialize);
             this.MainPanel.Controls.Add(this.MagnitudeEditOK);
             this.MainPanel.Controls.Add(this.RhythmEditOK);
             this.MainPanel.Controls.Add(this.EditBox);
@@ -124,8 +124,18 @@ namespace HapticGUI
             this.MainPanel.Controls.Add(this.AddRhythmBox);
             this.MainPanel.Location = new System.Drawing.Point(12, 27);
             this.MainPanel.Name = "MainPanel";
-            this.MainPanel.Size = new System.Drawing.Size(607, 263);
+            this.MainPanel.Size = new System.Drawing.Size(602, 263);
             this.MainPanel.TabIndex = 27;
+            // 
+            // Configure
+            // 
+            this.Configure.Location = new System.Drawing.Point(20, 238);
+            this.Configure.Name = "Configure";
+            this.Configure.Size = new System.Drawing.Size(80, 20);
+            this.Configure.TabIndex = 62;
+            this.Configure.Text = "Configure";
+            this.Configure.UseVisualStyleBackColor = true;
+            this.Configure.Click += new System.EventHandler(this.Configure_Click);
             // 
             // AddEvent
             // 
@@ -249,21 +259,11 @@ namespace HapticGUI
             this.ActivationList.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.ActivationList.Size = new System.Drawing.Size(88, 212);
             this.ActivationList.TabIndex = 49;
-            // 
-            // Initialize
-            // 
-            this.Initialize.Enabled = false;
-            this.Initialize.Location = new System.Drawing.Point(20, 235);
-            this.Initialize.Name = "Initialize";
-            this.Initialize.Size = new System.Drawing.Size(75, 23);
-            this.Initialize.TabIndex = 48;
-            this.Initialize.Text = "Initialize";
-            this.Initialize.UseVisualStyleBackColor = true;
-            this.Initialize.Click += new System.EventHandler(this.Initialize_Click);
+            this.ActivationList.SelectedIndexChanged += new System.EventHandler(this.ActivationList_SelectedIndexChanged);
             // 
             // MagnitudeEditOK
             // 
-            this.MagnitudeEditOK.Location = new System.Drawing.Point(510, 149);
+            this.MagnitudeEditOK.Location = new System.Drawing.Point(501, 108);
             this.MagnitudeEditOK.Name = "MagnitudeEditOK";
             this.MagnitudeEditOK.Size = new System.Drawing.Size(80, 20);
             this.MagnitudeEditOK.TabIndex = 47;
@@ -273,7 +273,7 @@ namespace HapticGUI
             // 
             // RhythmEditOK
             // 
-            this.RhythmEditOK.Location = new System.Drawing.Point(510, 123);
+            this.RhythmEditOK.Location = new System.Drawing.Point(501, 82);
             this.RhythmEditOK.Name = "RhythmEditOK";
             this.RhythmEditOK.Size = new System.Drawing.Size(80, 20);
             this.RhythmEditOK.TabIndex = 46;
@@ -286,7 +286,7 @@ namespace HapticGUI
             this.EditBox.FormattingEnabled = true;
             this.EditBox.Items.AddRange(new object[] {
             "Edit"});
-            this.EditBox.Location = new System.Drawing.Point(490, 83);
+            this.EditBox.Location = new System.Drawing.Point(490, 56);
             this.EditBox.Name = "EditBox";
             this.EditBox.Size = new System.Drawing.Size(100, 21);
             this.EditBox.TabIndex = 44;
@@ -310,7 +310,7 @@ namespace HapticGUI
             this.DelayField.TabIndex = 40;
             this.DelayField.Tag = "";
             this.DelayField.ThousandsSeparator = true;
-            this.DelayField.ValueChanged += new System.EventHandler(this.DirectDelayField_ValueChanged);
+            this.DelayField.ValueChanged += new System.EventHandler(this.DelayField_ValueChanged);
             // 
             // ActivateActivation
             // 
@@ -331,7 +331,7 @@ namespace HapticGUI
             this.ActivateGroup.TabIndex = 36;
             this.ActivateGroup.Text = "Activate";
             this.ActivateGroup.UseVisualStyleBackColor = true;
-            this.ActivateGroup.Click += new System.EventHandler(this.DirectActivateGroup_Click);
+            this.ActivateGroup.Click += new System.EventHandler(this.ActivateGroup_Click);
             // 
             // GroupLabel
             // 
@@ -350,7 +350,7 @@ namespace HapticGUI
             this.AddGroup.TabIndex = 34;
             this.AddGroup.Text = "Add";
             this.AddGroup.UseVisualStyleBackColor = true;
-            this.AddGroup.Click += new System.EventHandler(this.DirectAddGroup_Click);
+            this.AddGroup.Click += new System.EventHandler(this.AddGroup_Click);
             // 
             // DeleteGroup
             // 
@@ -360,7 +360,7 @@ namespace HapticGUI
             this.DeleteGroup.TabIndex = 33;
             this.DeleteGroup.Text = "Delete";
             this.DeleteGroup.UseVisualStyleBackColor = true;
-            this.DeleteGroup.Click += new System.EventHandler(this.DirectDeleteGroup_Click);
+            this.DeleteGroup.Click += new System.EventHandler(this.DeleteGroup_Click);
             // 
             // ClearGroup
             // 
@@ -370,7 +370,7 @@ namespace HapticGUI
             this.ClearGroup.TabIndex = 32;
             this.ClearGroup.Text = "Clear";
             this.ClearGroup.UseVisualStyleBackColor = true;
-            this.ClearGroup.Click += new System.EventHandler(this.DirectClearGroups_Click);
+            this.ClearGroup.Click += new System.EventHandler(this.ClearGroups_Click);
             // 
             // GroupList
             // 
@@ -393,13 +393,13 @@ namespace HapticGUI
             // Stop
             // 
             this.Stop.Enabled = false;
-            this.Stop.Location = new System.Drawing.Point(515, 237);
+            this.Stop.Location = new System.Drawing.Point(506, 237);
             this.Stop.Name = "Stop";
             this.Stop.Size = new System.Drawing.Size(75, 23);
             this.Stop.TabIndex = 23;
             this.Stop.Text = "Stop";
             this.Stop.UseVisualStyleBackColor = true;
-            this.Stop.Click += new System.EventHandler(this.DirectStop_Click);
+            this.Stop.Click += new System.EventHandler(this.Stop_Click);
             // 
             // ClearActivation
             // 
@@ -498,7 +498,7 @@ namespace HapticGUI
             this.versionMenu});
             this.MenuStrip.Location = new System.Drawing.Point(0, 0);
             this.MenuStrip.Name = "MenuStrip";
-            this.MenuStrip.Size = new System.Drawing.Size(641, 24);
+            this.MenuStrip.Size = new System.Drawing.Size(626, 24);
             this.MenuStrip.TabIndex = 30;
             this.MenuStrip.Text = "menuStrip1";
             // 
@@ -593,8 +593,8 @@ namespace HapticGUI
             // 
             this.optionsMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.showOnlyConnectedMotorsMenu,
-            this.motorSwapingOnAllGroupsSetsMenu,
-            this.realTimeDelayMenu});
+            this.realTimeDelayMenu,
+            this.reinitializeBeltMenu});
             this.optionsMenu.Name = "optionsMenu";
             this.optionsMenu.Size = new System.Drawing.Size(61, 20);
             this.optionsMenu.Text = "Options";
@@ -605,28 +605,17 @@ namespace HapticGUI
             this.showOnlyConnectedMotorsMenu.CheckOnClick = true;
             this.showOnlyConnectedMotorsMenu.CheckState = System.Windows.Forms.CheckState.Checked;
             this.showOnlyConnectedMotorsMenu.Name = "showOnlyConnectedMotorsMenu";
-            this.showOnlyConnectedMotorsMenu.Size = new System.Drawing.Size(258, 22);
+            this.showOnlyConnectedMotorsMenu.Size = new System.Drawing.Size(233, 22);
             this.showOnlyConnectedMotorsMenu.Text = "Show Only Connected Motors";
-            this.showOnlyConnectedMotorsMenu.ToolTipText = "If checked, only motors that have connection to the Haptic Belt can be seen";
+            this.showOnlyConnectedMotorsMenu.ToolTipText = "If checked, only motors that have connection to the haptic belt can be seen";
             this.showOnlyConnectedMotorsMenu.Click += new System.EventHandler(this.showOnlyConnectedMotorsMenu_Click);
-            // 
-            // motorSwapingOnAllGroupsSetsMenu
-            // 
-            this.motorSwapingOnAllGroupsSetsMenu.Checked = true;
-            this.motorSwapingOnAllGroupsSetsMenu.CheckOnClick = true;
-            this.motorSwapingOnAllGroupsSetsMenu.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.motorSwapingOnAllGroupsSetsMenu.Name = "motorSwapingOnAllGroupsSetsMenu";
-            this.motorSwapingOnAllGroupsSetsMenu.Size = new System.Drawing.Size(258, 22);
-            this.motorSwapingOnAllGroupsSetsMenu.Text = "Motor Swaping On All Groups/Sets";
-            this.motorSwapingOnAllGroupsSetsMenu.ToolTipText = "If checked, when a swap is performed on a motor it will be performed on all group" +
-                "s and sets";
             // 
             // realTimeDelayMenu
             // 
             this.realTimeDelayMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.realTimeDelayValueMenu});
             this.realTimeDelayMenu.Name = "realTimeDelayMenu";
-            this.realTimeDelayMenu.Size = new System.Drawing.Size(258, 22);
+            this.realTimeDelayMenu.Size = new System.Drawing.Size(233, 22);
             this.realTimeDelayMenu.Text = "Realtime Delay";
             this.realTimeDelayMenu.ToolTipText = "Adjusts thread sleeping period while waiting for an event to occur.";
             // 
@@ -635,9 +624,18 @@ namespace HapticGUI
             this.realTimeDelayValueMenu.MaxLength = 2;
             this.realTimeDelayValueMenu.Name = "realTimeDelayValueMenu";
             this.realTimeDelayValueMenu.Size = new System.Drawing.Size(100, 23);
-            this.realTimeDelayValueMenu.Text = "1";
+            this.realTimeDelayValueMenu.Text = "5";
             this.realTimeDelayValueMenu.ToolTipText = "Recommended; value < 25 \r\nValues displayed in ms";
             this.realTimeDelayValueMenu.TextChanged += new System.EventHandler(this.realTimeDelayValueMenu_TextChanged);
+            // 
+            // reinitializeBeltMenu
+            // 
+            this.reinitializeBeltMenu.Name = "reinitializeBeltMenu";
+            this.reinitializeBeltMenu.Size = new System.Drawing.Size(233, 22);
+            this.reinitializeBeltMenu.Text = "Reinitialize Belt";
+            this.reinitializeBeltMenu.ToolTipText = "Resets the haptic belt to a known state, checks for attached motors, and belt ver" +
+                "sion.";
+            this.reinitializeBeltMenu.Click += new System.EventHandler(this.reinitializeBeltMenu_Click);
             // 
             // versionMenu
             // 
@@ -651,14 +649,16 @@ namespace HapticGUI
             // guiVersionMenu
             // 
             this.guiVersionMenu.Name = "guiVersionMenu";
-            this.guiVersionMenu.Size = new System.Drawing.Size(151, 22);
-            this.guiVersionMenu.Text = "GUI: 1.0";
+            this.guiVersionMenu.Size = new System.Drawing.Size(152, 22);
+            this.guiVersionMenu.Text = "GUI: 1.2b";
+            this.guiVersionMenu.ToolTipText = "Current version of this user interface";
             // 
             // firmwareVersionMenu
             // 
             this.firmwareVersionMenu.Name = "firmwareVersionMenu";
-            this.firmwareVersionMenu.Size = new System.Drawing.Size(151, 22);
+            this.firmwareVersionMenu.Size = new System.Drawing.Size(152, 22);
             this.firmwareVersionMenu.Text = "Firmware: N/A";
+            this.firmwareVersionMenu.ToolTipText = "Firmware version of connected haptic belt ";
             // 
             // GUI
             // 
@@ -666,7 +666,7 @@ namespace HapticGUI
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(641, 293);
+            this.ClientSize = new System.Drawing.Size(626, 293);
             this.Controls.Add(this.MainPanel);
             this.Controls.Add(this.MenuStrip);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
@@ -723,11 +723,9 @@ namespace HapticGUI
         private System.Windows.Forms.Button MagnitudeEditOK;
         private System.Windows.Forms.ToolStripComboBox incomingCOMComboBox;
         private System.Windows.Forms.ToolStripMenuItem connect;
-        private System.Windows.Forms.Button Initialize;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem optionsMenu;
         private System.Windows.Forms.ToolStripMenuItem showOnlyConnectedMotorsMenu;
-        private System.Windows.Forms.ToolStripMenuItem motorSwapingOnAllGroupsSetsMenu;
         private System.Windows.Forms.ToolStripMenuItem realTimeDelayMenu;
         private System.Windows.Forms.ToolStripTextBox realTimeDelayValueMenu;
         private System.Windows.Forms.ListBox ActivationList;
@@ -743,6 +741,8 @@ namespace HapticGUI
         private System.Windows.Forms.ComboBox AddMotorBox;
         private System.Windows.Forms.Button ClearActivation;
         private System.Windows.Forms.Button AddEvent;
+        private System.Windows.Forms.Button Configure;
+        private System.Windows.Forms.ToolStripMenuItem reinitializeBeltMenu;
 
     }
 }

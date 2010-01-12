@@ -1,24 +1,20 @@
 using System;
+using System.Threading;
 using System.Windows.Forms;
 using HapticDriver;
 
-/* Handle's both Direct Program Mode and Direct Operation Mode.
- * The reason for this is because of the similarities of the two modes.
- * The only difference between these two modes is the ability to interact
- * with the belt via the COM port, which Program Mode lacks. The reason
- * for this mode is to allow the GUI user to program motors and without
- * having to have the belt connected to the GUI.
+/* 
  */
 namespace HapticGUI
 {
     partial class GUI
     {
- //Button Events: Activations: Add, Delete, Clear, Activate
+ //Button Events: Activations: Add, Delete, Clear
         //Adds a new activation to selected set, based on comboBox parameters
         private void SetActivation_Click(object sender, EventArgs e)
         {
-            if(AddMotorBox.SelectedIndex > -1 && ActivationList.SelectedIndex > -1)
-                Set_Activation(AddMotorBox.SelectedIndex, AddRhythmBox.SelectedIndex, AddMagBox.SelectedIndex, AddCyclesBox.SelectedIndex);
+            if(ActivationList.SelectedIndex > -1)
+                Set_Activation(AddRhythmBox.SelectedIndex, AddMagBox.SelectedIndex, AddCyclesBox.SelectedIndex);
         }
         //Removes selected activation request from selected set
         private void DeleteActivation_Click(object sender, EventArgs e)
@@ -29,14 +25,8 @@ namespace HapticGUI
         private void ClearActivation_Click(object sender, EventArgs e)
         {
             Delete_Event();
-        }
-        
-        //Activate a single motor from ActivationList
-        private void ActivateActivation_Click(object sender, EventArgs e)
-        {
-            Activate_Motor();
-        }
-//Button Events: Events: Add, Delete, Clear, Activate 
+        }            
+//Button Events: Events: Add, Delete, Clear 
         private void AddEvent_Click(object sender, EventArgs e)
         {
             if(AddMotorBox.SelectedIndex > -1)
@@ -52,33 +42,31 @@ namespace HapticGUI
         {
             Clear_Events();
         }
-
-        private void ActivateEvent_Click(object sender, EventArgs e)
-        {
-            Activate_Event();
-        }
-
-//Button Events: Groups: Add, Delete, Clear, Activate    
-        private void DirectAddGroup_Click(object sender, EventArgs e)
+//Button Events: Groups: Add, Delete, Clear   
+        private void AddGroup_Click(object sender, EventArgs e)
         {
             Add_Group();
         }
 
-        private void DirectDeleteGroup_Click(object sender, EventArgs e)
+        private void DeleteGroup_Click(object sender, EventArgs e)
         {
             Delete_Group();
         }
 
-        private void DirectClearGroups_Click(object sender, EventArgs e)
+        private void ClearGroups_Click(object sender, EventArgs e)
         {
             Clear_Groups();
-        }
-        //Activates the selected group
-        private void DirectActivateGroup_Click(object sender, EventArgs e)
-        {
-            Activate_Group();
-        }      
+        } 
 //Other Button Events: OK's, Rename's, Stop
+        private void Configure_Click(object sender, EventArgs e)
+        {
+            if (GroupList.SelectedIndex > -1)
+            {
+                Configure_Motors();
+                ActivationList.Items.Clear();
+            }
+        }
+        
         private void RhythmEditOK_Click(object sender, EventArgs e)
         {
             if (GroupList.SelectedIndex > -1)
@@ -104,41 +92,86 @@ namespace HapticGUI
                 errorForm.ShowDialog();
             } 
         }
-        //Updates _motorCount, loads rhythms and magnitudes, and updates the version of the belt
-        private void Initialize_Click(object sender, EventArgs e)
+        
+//Activations and Stop functions on threads
+        //Create a new thread to activate a single motor from ActivationList
+        private void ActivateActivation_Click(object sender, EventArgs e)
         {
-            GetMotors();
-            GetVersion();
-
-            if(GroupList.SelectedIndex > -1)
-                LoadBelt();
+            if (!activate_trd.IsAlive && ActivationList.SelectedIndex > -1) //Prevents multiple activation commands being issued
+            {
+                activate_trd = new Thread(new ThreadStart(this.Activate_Activation));
+                activate_trd.Start();
+            }
         }
+
+        private void ActivateEvent_Click(object sender, EventArgs e)
+        {
+            if (!activate_trd.IsAlive && EventList.SelectedIndex > -1) //Prevents multiple activation commands being issued
+            {
+                activate_trd = new Thread(new ThreadStart(this.Activate_Event));
+                activate_trd.Start();
+            }
+        }
+
+        //Create a new thread to activate the selected group from GroupList
+        private void ActivateGroup_Click(object sender, EventArgs e)
+        {
+            if (!activate_trd.IsAlive && GroupList.SelectedIndex > -1) //Prevents multiple activation commands being issued
+            {
+                activate_trd = new Thread(new ThreadStart(this.Activate_Group));
+                activate_trd.Start();
+            }
+        }
+
         //Stops all motors from vibrating
-        private void DirectStop_Click(object sender, EventArgs e)
+        private void Stop_Click(object sender, EventArgs e)
         {
-            StopMotors();
+            if (!stop_trd.IsAlive && activate_trd.IsAlive) //Prevents multiple stop commands being issued
+            {
+                stop_trd = new Thread(new ThreadStart(this.Stop_Activations));
+                stop_trd.Start();
+            }
         }
 
-        //Renames a set with any characters in the DirectRenameField (text field).
+        //Renames a group with any characters in the RenameField (text field).
         private void RenameGroup_Click(object sender, EventArgs e)
         {
             Rename_Group();
         }
 //Selected Index Changed Events
-        //Refreshes SetList, Available List and Added List according to the selected group
+        private void ActivationList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (ActivationList.SelectedIndices.Count == 1)
+                Change_Activation();
+            else if (ActivationList.SelectedIndices.Count == 2)
+                Swap_Activations();
+        }
+
+        private void EventList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (EventList.SelectedIndices.Count == 0)
+                ActivationList.Items.Clear();
+            else if (EventList.SelectedIndices.Count == 1)
+                Change_Event();
+            else if (EventList.SelectedIndices.Count == 2)
+                Swap_Events();
+        }
+        
+        //Refreshes EventList and ActiavtionList according to the selected group
         private void GroupList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (GroupList.SelectedIndices.Count == 1)
+            if (GroupList.SelectedIndices.Count == 0)
+            {
+                ActivationList.Items.Clear();
+                EventList.Items.Clear();
+            }
+            else if (GroupList.SelectedIndices.Count == 1)
                 Change_Group();
             else if (GroupList.SelectedIndices.Count == 2)
                 Swap_Groups();
         }
 
-        //Changes the display labels on the GUI
-        private void EventList_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            Change_Event();
-        }
+        
         //Limits viewing to available motors only if checked
         private void showOnlyConnectedMotorsMenu_Click(object sender, EventArgs e)
         {
@@ -156,7 +189,7 @@ namespace HapticGUI
             Change_Event();
         }
         //Assures that the value is a multiple of 50
-        private void DirectDelayField_ValueChanged(object sender, EventArgs e)
+        private void DelayField_ValueChanged(object sender, EventArgs e)
         {
             if (DelayField.Value % 50 != 0)
                 DelayField.Value = Convert.ToInt32(DelayField.Value) / 50 * 50;
