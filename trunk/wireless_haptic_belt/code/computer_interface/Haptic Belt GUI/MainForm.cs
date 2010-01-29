@@ -3,7 +3,7 @@ using System.Threading;
 using System.Windows.Forms;
 using HapticDriver;
 
-/* 
+/* MainForm - Handles all the user actions by calling the appropriate functions in MainForm_A or MainForm_F.
  */
 namespace HapticGUI
 {

@@ -53,66 +53,11 @@ namespace HapticGUI
         //Note that we must use TimeSpan, so that we can replace the original Magnitude upon completion
         private void MagTest_Click(object sender, EventArgs e)
         {
-            //Hide Rhythm Buttons so no interference will occur
-            MagTest.Hide();
-            ControlBox = false;
-            MagDone.Enabled = false;
-
-            //Set pattern to full on, 64 1's in binary, or 16 F's in hex
-            String pattern = "FFFFFFFFFFFFFFFF";
-
-            //Learn Rhythm to temp spot "H"
-            if (hasError(belt.Learn_Rhythm("H", pattern, 64, false), "Learn_Rhythm()"))
-            {
-                //Handle Error
-            }
-            //Store the current Magnitude
-            hold_magnitude = belt.getMagnitude("A", true, QueryType.SINGLE);
-            if (hasError(belt.getStatus(), "getMagnitude()"))
-            {
-                //Handle Error
-            }
-            //Learn a the test Magnitude setting
-            if (hasError(belt.Learn_Magnitude(MagComboBox.SelectedItem.ToString(), Convert.ToUInt16(Period.Value), Convert.ToUInt16(DutyCycle.Value)), "Learn Magnitude()"))
-            {
-                //Handle Error
-            }
-            //Get motor count
-            _motorcount = belt.getMotors(QueryType.SINGLE);
-            if (hasError(belt.getStatus(), "getMotors()"))
-            {
-                //Handle Error
-            }
-            //Vibrate all available motors on belt with test Rhythm and 100% Magnitude indefinately
-            for (int i = 0; i < _motorcount; i++)
-            {
-                if (hasError(belt.Vibrate_Motor(i, "H", "A", 7), "Vibrate_Motor()"))
-                {
-                    //Handle Error
-                }
-            }
-            //Wait for motors to finish vibrating or user to click "Stop" on MagTestStop Button
-            MagTestStop.Show();
+            Test_Magnitude();
         }
         private void MagTestStop_Click(object sender, EventArgs e)
         {
-            String[] split_magnitude = new String[2];
-            //Issue a stop command to all motors on the belt
-            if (hasError(belt.StopAll(), "belt.StopAll()"))
-            {
-                //Handle Error
-            }
-            //Reset original state of magnitude "A"
-            split_magnitude = hold_magnitude.Split(',');
-            if (hasError(belt.Learn_Magnitude("A", Convert.ToUInt16(split_magnitude[0]), Convert.ToUInt16(split_magnitude[1])), "Learn_Magnitude()"))
-            {
-                //Handle Error
-            }
-            //Reset button visability to original states
-            ControlBox = true;
-            MagDone.Enabled = true;
-            MagTest.Show();
-            MagTestStop.Hide();
+            Stop_Magnitude_Test();
         }
         //Calls Library function to learn Magnitude based on user values
         private void MagSet_Click(object sender, EventArgs e)

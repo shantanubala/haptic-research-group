@@ -2,7 +2,9 @@ using System;
 using System.Data;
 using HapticDriver;
 
-
+/* MainForm_F - Handles all functions that do not have to do with directly with physically activating the belt.
+ * Primarily changes on the internal datastructure, and GUI elements (listBoxes, labels, comboBoxes, etc.).
+ */
 namespace HapticGUI
 {
     partial class GUI
@@ -28,7 +30,6 @@ namespace HapticGUI
             //Now we need to match the motors[] activations with the events[] activations
             _group[_current_group].refreshEvents();
         }
-
 
         private void Set_Rhythms()
         {

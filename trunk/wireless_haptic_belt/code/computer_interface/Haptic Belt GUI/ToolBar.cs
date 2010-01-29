@@ -3,20 +3,8 @@ using System.Windows.Forms;
 using HapticDriver;
 using System.Threading;
 
-/* Description: This class, along with all its partial classes provides a
- * front end to the Haptic_Belt_Library to program the Haptic Belt. A user
- * may define multiple Magnitudes, Rhythms, and activate motors in group
- * configurations.
- * 
- * Style: There are multiple Partial Classes for the GUI Class. There are two
- * partial classes per panel (with the exception of the main panel having one).
- * 
- * User Interaction(UI): action events, listeners, call learning functions (DLL).
- * Functionality(F): parsing, maintain visuals, call querry functions (DLL).
- * 
- * The purpose of this style is so somone can view the (UI) extension and
- * obtain a good idea of how the class works without understanding the
- * implementation (F).
+/* ToolBar - Entry point of the GUI interface.
+ * Description: This class contains the tool bar menu functions, closing functions, and some GUI wide functions for error handling.
  */
 namespace HapticGUI
 {        
@@ -53,21 +41,7 @@ namespace HapticGUI
         //Populates COM comboBox upon GUI load
         private void GUI_Load(object sender, EventArgs e)
         {
-            //Clear ComboBox
-            outgoingCOMComboBox.Items.Clear();
-            incomingCOMComboBox.Items.Clear();
-            //Populate ComboBox w/ COM port list
-            
-            String[] ports = belt.GetSerialPortNames();
-            if (ports.Length > 0)
-            {
-                for (int i = 0; i < ports.Length; i++)
-                {
-                    outgoingCOMComboBox.Items.Add(ports[i]);
-                    incomingCOMComboBox.Items.Add(ports[i]);
-                }
-                COM_Available = true;
-            }
+            Populate_ComboBox();
         }
         //Called as the form is closing, ensures all threads are closed properly and belt is no longer vibrating
         private void GUI_FormClosing(object sender, EventArgs e)
@@ -93,7 +67,7 @@ namespace HapticGUI
 
         private void refreshPortsMenu_Click(object sender, EventArgs e)
         {
-            GUI_Load(sender, e);
+            Populate_ComboBox();
         }
 
         private void disconnectMenu_Click(object sender, EventArgs e)
@@ -104,6 +78,7 @@ namespace HapticGUI
                 Port_Open = false;
                 
                 //Enable/Disable Corresponding options to having no port open
+                reinitializeBeltMenu.Enabled = false;
                 connect.Enabled = true;
                 disconnect.Enabled = false;
                 refreshPorts.Enabled = true;
@@ -147,6 +122,7 @@ namespace HapticGUI
                         Port_Open = true;
 
                         //Enable/Disable  Corresponding options to an open port
+                        reinitializeBeltMenu.Enabled = true;
                         connect.Enabled = false;
                         disconnect.Enabled = true;
                         refreshPorts.Enabled = false;
@@ -174,13 +150,35 @@ namespace HapticGUI
         //Updates _motorCount, loads rhythms and magnitudes, and updates the version of the belt
         private void reinitializeBeltMenu_Click(object sender, EventArgs e)
         {
-            belt.ResetHapticBelt();
-            
-            GetMotors();
-            GetVersion();
+            if(Port_Open)
+            {
+                belt.ResetHapticBelt();
+                
+                GetMotors();
+                GetVersion();
 
-            if (GroupList.SelectedIndex > -1)
-                LoadBelt();
+                if (GroupList.SelectedIndex > -1)
+                    LoadBelt();
+            }
+        }
+
+        private void Populate_ComboBox()
+        {
+            //Clear ComboBox
+            outgoingCOMComboBox.Items.Clear();
+            incomingCOMComboBox.Items.Clear();
+            //Populate ComboBox w/ COM port list
+
+            String[] ports = belt.GetSerialPortNames();
+            if (ports.Length > 0)
+            {
+                for (int i = 0; i < ports.Length; i++)
+                {
+                    outgoingCOMComboBox.Items.Add(ports[i]);
+                    incomingCOMComboBox.Items.Add(ports[i]);
+                }
+                COM_Available = true;
+            }
         }
     }
 }
