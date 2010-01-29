@@ -522,7 +522,7 @@ namespace HapticGUI
             this.outgoingCOMComboBox,
             this.incomingCOMComboBox});
             this.connectMenu.Name = "connectMenu";
-            this.connectMenu.Size = new System.Drawing.Size(140, 22);
+            this.connectMenu.Size = new System.Drawing.Size(152, 22);
             this.connectMenu.Text = "Connect";
             this.connectMenu.ToolTipText = "Display connection options";
             // 
@@ -575,7 +575,7 @@ namespace HapticGUI
             // 
             this.load.Name = "load";
             this.load.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.L)));
-            this.load.Size = new System.Drawing.Size(140, 22);
+            this.load.Size = new System.Drawing.Size(152, 22);
             this.load.Text = "Load";
             this.load.ToolTipText = "Loads selected file into GUI memory";
             this.load.Click += new System.EventHandler(this.loadMenu_Click);
@@ -584,7 +584,7 @@ namespace HapticGUI
             // 
             this.save.Name = "save";
             this.save.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.save.Size = new System.Drawing.Size(140, 22);
+            this.save.Size = new System.Drawing.Size(152, 22);
             this.save.Text = "Save";
             this.save.ToolTipText = "Saves current GUI memory into specified file";
             this.save.Click += new System.EventHandler(this.saveMenu_Click);
@@ -630,6 +630,7 @@ namespace HapticGUI
             // 
             // reinitializeBeltMenu
             // 
+            this.reinitializeBeltMenu.Enabled = false;
             this.reinitializeBeltMenu.Name = "reinitializeBeltMenu";
             this.reinitializeBeltMenu.Size = new System.Drawing.Size(233, 22);
             this.reinitializeBeltMenu.Text = "Reinitialize Belt";

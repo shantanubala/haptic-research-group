@@ -372,6 +372,72 @@ namespace HapticGUI
             }
             pattern += "," + length.ToString();
             return pattern;
-        }        
+        }
+
+        private void Test_Rhythm()
+        {
+            //Hide Rhythm Buttons so no interference will occur
+            RhythmTest.Hide();
+            ControlBox = false;
+            RhythmDone.Enabled = false;
+
+            //Get the User Inputed Pattern
+            String[] pattern = Get_Pattern().Split(',');
+
+            //Learn the test Rhythm to temp spot "H"
+            if (hasError(belt.Learn_Rhythm("H", pattern[0], Convert.ToInt16(pattern[1]), true), "Learn_Rhythm()"))
+            {
+                //Handle Error
+            }
+
+            //Store the current Magnitude
+            hold_magnitude = belt.getMagnitude("A", true, QueryType.SINGLE);
+            if (hasError(belt.getStatus(), "getMagnitude()"))
+            {
+                //Handle Error
+            }
+            //Learn a 100% Magnitude setting
+            if (hasError(belt.Learn_Magnitude("A", 100), "Learn_Magnitude()"))
+            {
+                //Handle Error
+            }
+            //Get motor count
+            _motorcount = belt.getMotors(QueryType.SINGLE);
+            if (hasError(belt.getStatus(), "getMotors()"))
+            {
+                //Handle Error
+            }
+            //Vibrate all available motors on belt with test Rhythm and 100% Magnitude indefinately
+            for (int i = 0; i < _motorcount; i++)
+            {
+                if (hasError(belt.Vibrate_Motor(i, "H", "A", 7), "Vibrate_Motor()"))
+                {
+                    //Handle Error
+                }
+            }
+            //Wait for motors to finish vibrating or user to click "Stop" on RhythmTestStop Button
+            RhythmTestStop.Show();
+        }
+
+        private void Stop_Rhythm_Test()
+        {
+            String[] split_magnitude = new String[2];
+            //Issue a stop command to all motors on the belt
+            if (hasError(belt.StopAll(), "belt.StopAll()"))
+            {
+                //Handle Error
+            }
+            //Reset original state of magnitude "A"
+            split_magnitude = hold_magnitude.Split(',');
+            if (hasError(belt.Learn_Magnitude("A", Convert.ToUInt16(split_magnitude[0]), Convert.ToUInt16(split_magnitude[1])), "Learn_Magnitude()"))
+            {
+                //Handle Error
+            }
+            //Reset button visability to original states
+            ControlBox = true;
+            RhythmDone.Enabled = true;
+            RhythmTest.Show();
+            RhythmTestStop.Hide();
+        }
     }
 }

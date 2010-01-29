@@ -3,7 +3,9 @@ using System.Data;
 using System.Threading;
 using HapticDriver;
 
-/* MainForm_A - Main Form Activation functions */
+/* MainForm_A - Main Form Activation functions 
+ * Description: Handles all operations that deal directly with the belt by activating and stopping vibrate commands.
+ */
 
 namespace HapticGUI
 {

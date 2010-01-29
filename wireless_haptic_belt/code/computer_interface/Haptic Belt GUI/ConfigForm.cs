@@ -2,6 +2,10 @@
 using System.IO;
 using System.Windows.Forms;
 
+/* ConfigForm - Used to switch motors in the GUI internal memory to try new configurations or to match up a previously intended 
+ * order that may have been changed by physically moving the motors on the belt.
+ */ 
+
 namespace HapticGUI
 {
     public partial class ConfigForm : Form
