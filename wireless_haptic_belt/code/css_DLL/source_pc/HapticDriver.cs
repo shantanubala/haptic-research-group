@@ -761,6 +761,7 @@ namespace HapticDriver
         /// </summary>
         public byte getMotors(QueryType query_type) {
             byte return_values = 0;
+
             error_t return_error = error_t.NOTFOUND;
 
             // Query configuration data from belt
@@ -778,7 +779,7 @@ namespace HapticDriver
                             //put the values from the response into the return array
                             if (split[1].Equals("MTR")) {
                                 string motor_count = split[2]; // gets motor number string
-                                return_values = HexToByte(motor_count)[0]; // count of motors 1st byte
+                                return_values = (byte)Convert.ToByte(motor_count);
                                 return_error = error_t.ESUCCESS;
                                 break; // exit loop
                             }
