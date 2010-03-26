@@ -1,5 +1,5 @@
 /*****************************************************************************
- * FILE:   ConversionUtility.cs
+ * FILE:   Utilities.cs
  * AUTHOR: Daniel Moberly (Daniel.Moberly@gmail.com)
  *         Kris Blair (Kristopher.Blair@asu.edu)
  *         Nathan J. Edwards (nathan.edwards@asu.edu)
@@ -14,6 +14,8 @@
  *                    from prototype GUI application.
  *         20091201 - Added our own implementation of a blocking wait,
  *                    System.Threading.Thread.Sleep() is not desirable.
+ *         20100215 - Added our own implementation of a ReadLine(),
+ *                    SerialPort.ReadLine() causes latency and deadlock issues.         
  ****************************************************************************/
 
 using System;
@@ -590,6 +592,19 @@ namespace HapticDriver
             int time = Environment.TickCount;
             while (true)
                 if (Environment.TickCount - time >= ms) break;
+        }
+        #endregion
+
+        #region Readlines Function
+        /// <summary>
+        /// This function scans a byte array and returns a string array of ASCII 
+        /// converted bytes, delineated by the NewLine character "\n" (0x0A or ASCII 10 dec) 
+        /// </summary>
+        /// <param name="comByte">byte array databuffer </param>
+        public static string[] Readlines(byte[] comByte) {
+
+            char[] delimiters = new char[] { '\n' };
+            return ByteToAscii(comByte).Split(delimiters);
         }
         #endregion
     }
