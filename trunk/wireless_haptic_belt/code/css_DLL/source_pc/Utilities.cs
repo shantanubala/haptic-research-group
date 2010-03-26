@@ -505,6 +505,7 @@ namespace HapticDriver
             return strValue;
         }
 
+
         #region HexToByte
         /// <summary>
         /// method to convert hex string into a byte array
@@ -517,10 +518,13 @@ namespace HapticDriver
 
             //create a byte array the length divided by 2 (Hex is 2 characters in length)
             byte[] comBuffer = new byte[msg.Length / 2];
-            //loop through the length of the provided string
+            //loop through the length of the provided string  //FIXME does not work right for more than 1 byte
             for (int i = 0; i < msg.Length; i += 2)
                 //convert each set of 2 characters to a byte and add to the array
-                comBuffer[i / 2] = (byte)Convert.ToByte(msg.Substring(i, 2), 16);
+                if (i > 0)
+                    comBuffer[i / 2] = (byte)Convert.ToByte(msg.Substring(i, 2), 16);
+                else
+                    comBuffer[i] = (byte)Convert.ToByte(msg.Substring(i, 2), 16);
 
             //return the array
             return comBuffer;
