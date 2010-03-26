@@ -777,8 +777,8 @@ namespace HapticDriver
 
                             //put the values from the response into the return array
                             if (split[1].Equals("MTR")) {
-                                char motor_count = split[2]; // gets motor number string
-                                return_values = HexToByte(motor_count); // count of motors
+                                string motor_count = split[2]; // gets motor number string
+                                return_values = HexToByte(motor_count)[0]; // count of motors 1st byte
                                 return_error = error_t.ESUCCESS;
                                 break; // exit loop
                             }
