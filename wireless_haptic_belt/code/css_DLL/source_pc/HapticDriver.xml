@@ -584,6 +584,13 @@
             </summary>
             <param name="ms">Time in milliseconds</param>
         </member>
+        <member name="M:HapticDriver.HapticBelt.Readlines(System.Byte[])">
+            <summary>
+            This function scans a byte array and returns a string array of ASCII 
+            converted bytes, delineated by the NewLine character "\n" (0x0A or ASCII 10 dec) 
+            </summary>
+            <param name="comByte">byte array databuffer </param>
+        </member>
         <member name="T:HapticDriver.HapticBelt.DataRecievedHandler">
             <summary>
             Delegate handler used for a Data Recieved event
