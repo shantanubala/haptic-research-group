@@ -1,0 +1,1 @@
+Dedicated to the research and development of haptic technology to assist the visually impaired.  This group is associated with Arizona State University's Center for Cognitive Ubiquitous Computing (CUbiC)   http://cubic.asu.edu/index.php
